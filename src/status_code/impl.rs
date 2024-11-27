@@ -1,3 +1,5 @@
+use std::fmt::{self, Display};
+
 use super::r#type::HttpStatusCode;
 
 impl HttpStatusCode {
@@ -15,9 +17,11 @@ impl HttpStatusCode {
             HttpStatusCode::BadGateway => 502,
         }
     }
+}
 
-    pub fn reason_phrase(&self) -> &str {
-        match self {
+impl Display for HttpStatusCode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let res: &str = match self {
             HttpStatusCode::Ok => "OK",
             HttpStatusCode::Created => "Created",
             HttpStatusCode::NoContent => "No Content",
@@ -28,6 +32,7 @@ impl HttpStatusCode {
             HttpStatusCode::InternalServerError => "Internal Server Error",
             HttpStatusCode::NotImplemented => "Not Implemented",
             HttpStatusCode::BadGateway => "Bad Gateway",
-        }
+        };
+        write!(f, "{}", res)
     }
 }

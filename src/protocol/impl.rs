@@ -12,19 +12,12 @@ impl Protocol {
         Protocol::default()
     }
 
-    pub fn value(&self) -> &str {
-        match self {
-            Protocol::HTTP => "http",
-            Protocol::HTTPS => "https",
-        }
-    }
-
     pub fn is_http(&self) -> bool {
-        self.value() == Protocol::HTTP.value()
+        self.to_owned() == Protocol::HTTP.to_owned()
     }
 
     pub fn is_https(&self) -> bool {
-        self.value() == Protocol::HTTPS.value()
+        self.to_owned() == Protocol::HTTPS.to_owned()
     }
 
     pub fn get_port(&self) -> u16 {
@@ -37,6 +30,10 @@ impl Protocol {
 
 impl Display for Protocol {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.value())
+        let res: &str = match self {
+            Protocol::HTTP => "http",
+            Protocol::HTTPS => "https",
+        };
+        write!(f, "{}", res)
     }
 }

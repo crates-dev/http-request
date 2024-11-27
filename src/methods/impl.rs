@@ -1,3 +1,5 @@
+use std::fmt::{self, Display};
+
 use super::r#type::Methods;
 
 impl Default for Methods {
@@ -11,18 +13,21 @@ impl Methods {
         Methods::default()
     }
 
-    pub fn value(&self) -> &str {
-        match self {
-            Methods::GET => "GET",
-            Methods::POST => "POST",
-        }
-    }
-
     pub fn is_get(&self) -> bool {
-        self.value() == Methods::GET.value()
+        self.to_owned() == Methods::GET.to_owned()
     }
 
     pub fn is_post(&self) -> bool {
-        self.value() == Methods::POST.value()
+        self.to_owned() == Methods::POST.to_owned()
+    }
+}
+
+impl Display for Methods {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let res: &str = match self {
+            Methods::GET => "GET",
+            Methods::POST => "POST",
+        };
+        write!(f, "{}", res)
     }
 }
