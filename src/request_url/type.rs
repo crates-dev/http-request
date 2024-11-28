@@ -1,5 +1,5 @@
 #[derive(Debug, Clone, PartialEq)]
-pub struct Url {
+pub struct RequestUrl {
     pub scheme: Option<String>,
     pub username: Option<String>,
     pub password: Option<String>,

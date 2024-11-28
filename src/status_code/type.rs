@@ -1,6 +1,6 @@
 #[allow(dead_code)]
 /// HTTP状态码枚举
-pub enum HttpStatusCode {
+pub enum StatusCode {
     // 200 OK
     Ok,
     // 201 Created
@@ -21,4 +21,6 @@ pub enum HttpStatusCode {
     NotImplemented,
     // 502 Bad Gateway
     BadGateway,
+    // Unknown
+    Unknown,
 }

@@ -1,10 +1,10 @@
 use super::error::Error;
-use super::r#type::Url;
+use super::r#type::RequestUrl;
 use url::Url as UrlParser;
 
-impl Default for Url {
+impl Default for RequestUrl {
     fn default() -> Self {
-        Url {
+        RequestUrl {
             scheme: None,
             username: None,
             password: None,
@@ -17,10 +17,10 @@ impl Default for Url {
     }
 }
 
-impl Url {
+impl RequestUrl {
     pub fn parse(url_str: &str) -> Result<Self, Error> {
         if let Ok(parsed_url) = UrlParser::parse(url_str) {
-            let res: Url = Url {
+            let res: RequestUrl = RequestUrl {
                 scheme: Some(parsed_url.scheme().to_string()),
                 username: if parsed_url.username().is_empty() {
                     None
