@@ -2,11 +2,31 @@ use super::r#type::HttpResponse;
 use crate::{
     constant::http::{CONTENT_LENGTH, DEFAULT_HTTP_VERSION, HTTP_BR},
     status_code::r#type::StatusCode,
-    *,
 };
+use std::collections::HashMap;
 use std::str::Lines;
 
+/// Provides functionality for parsing and working with HTTP responses.
+///
+/// This implementation contains methods for extracting specific information from HTTP response
+/// strings, such as content length, and parsing the entire response into an `HttpResponse` object.
+///
+/// # Methods
+/// - `get_content_length`: Extracts the `Content-Length` value from the HTTP response string.
+/// - `from`: Parses a raw HTTP response string into an `HttpResponse` struct, including the
+///   status line, headers, and body.
 impl HttpResponse {
+    /// Extracts the `Content-Length` from the response string.
+    ///
+    /// This method scans the HTTP response string for the `Content-Length` header and parses
+    /// its value into a `usize`. If the header is not present or its value is invalid, the method
+    /// returns `0` as a default.
+    ///
+    /// # Arguments
+    /// - `response_string`: A string representing the HTTP response.
+    ///
+    /// # Returns
+    /// Returns the `Content-Length` value extracted from the response, or `0` if not found.
     pub fn get_content_length(response_string: &str) -> usize {
         let content_length_sign_key: String = format!("{}:", CONTENT_LENGTH.to_lowercase());
         response_string
@@ -29,6 +49,17 @@ impl HttpResponse {
             .unwrap_or_default()
     }
 
+    /// Parses a raw HTTP response string into an `HttpResponse` object.
+    ///
+    /// This method takes a raw HTTP response string and splits it into different components,
+    /// such as the HTTP version, status code, status text, headers, and body.
+    ///
+    /// # Arguments
+    /// - `response`: A string representing the raw HTTP response.
+    ///
+    /// # Returns
+    /// Returns an `HttpResponse` struct containing the parsed HTTP version, status code, status
+    /// text, headers, and body.
     pub fn from(response: &str) -> Self {
         let mut lines: Lines<'_> = response.lines();
         let status_line: &str = lines.next().unwrap_or("");
@@ -66,6 +97,11 @@ impl HttpResponse {
     }
 }
 
+/// Default implementation for `HttpResponse`.
+///
+/// This implementation provides default values for an `HttpResponse` instance, setting the HTTP
+/// version to the default version, the status code to `StatusCode::Unknown`, and initializing the
+/// headers and body to empty collections.
 impl Default for HttpResponse {
     fn default() -> Self {
         HttpResponse {

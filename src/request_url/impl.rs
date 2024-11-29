@@ -1,7 +1,14 @@
-use super::error::Error;
 use super::r#type::RequestUrl;
+use crate::request::error::Error;
 use url::Url as UrlParser;
 
+/// Default implementation for `RequestUrl`.
+///
+/// This implementation provides the default values for a `RequestUrl` instance. All fields
+/// are initialized to `None` to indicate that no URL components are set by default.
+///
+/// # Returns
+/// Returns a new `RequestUrl` instance with all fields set to `None`.
 impl Default for RequestUrl {
     fn default() -> Self {
         RequestUrl {
@@ -18,6 +25,18 @@ impl Default for RequestUrl {
 }
 
 impl RequestUrl {
+    /// Parses a URL string into a `RequestUrl` instance.
+    ///
+    /// This method attempts to parse a given URL string into its components such as
+    /// scheme, username, password, host, port, path, query, and fragment. If the URL
+    /// is invalid, it returns an `Error::InvalidUrl` error.
+    ///
+    /// # Arguments
+    /// - `url_str`: A string slice representing the URL to be parsed.
+    ///
+    /// # Returns
+    /// Returns a `Result` containing either a `RequestUrl` instance populated with the
+    /// parsed components or an `Error::InvalidUrl` if the parsing fails.
     pub fn parse(url_str: &str) -> Result<Self, Error> {
         if let Ok(parsed_url) = UrlParser::parse(url_str) {
             let res: RequestUrl = RequestUrl {

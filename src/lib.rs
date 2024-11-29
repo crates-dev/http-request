@@ -10,6 +10,7 @@ pub(crate) mod status_code;
 pub use methods::r#type::Methods;
 pub use protocol::r#type::Protocol;
 pub use request::{
-    http_request::r#type::HttpRequest, http_request_builder::r#type::HttpRequestBuilder,
+    error::Error, http_request::r#type::HttpRequest,
+    http_request_builder::r#type::HttpRequestBuilder,
 };
-pub use std_macro_extensions::*;
+pub use response::r#type::HttpResponse;

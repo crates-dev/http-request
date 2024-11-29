@@ -1,3 +1,4 @@
+#[cfg(test)]
 mod cfg;
 pub mod error;
 pub mod http_request;

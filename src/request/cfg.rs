@@ -1,4 +1,6 @@
+use crate::*;
 use ltpp_output::*;
+use std_macro_extensions::*;
 
 #[allow(dead_code)]
 fn output(title: &str, msg: &str, color: Color) {
@@ -19,7 +21,6 @@ fn output(title: &str, msg: &str, color: Color) {
 
 #[test]
 fn test_post_request() {
-    use crate::*;
     let mut header: HashMap<String, String> = HashMap::new();
     header.insert("header-key".to_string(), "header-value".to_string());
     let mut body: HashMap<String, String> = HashMap::new();
@@ -41,7 +42,6 @@ fn test_post_request() {
 
 #[test]
 fn test_get_request() {
-    use crate::*;
     let mut header: HashMap<String, String> = HashMap::new();
     header.insert("header-key".to_string(), "header-value".to_string());
     let mut body: HashMap<String, String> = HashMap::new();

@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 authors = ["ltpp-universe <root@ltpp.vip>"] 
 license = "MIT"
@@ -9,6 +9,8 @@ keywords = ["http", "request", "response", "tcp", "send"]
 repository = "https://github.com/ltpp-universe/http-request.git"
 
 [dependencies]
-std-macro-extensions = "0.16.0"
 url = "2.5.4"
+
+[dev-dependencies]
 ltpp-output = "3.0.0"
+std-macro-extensions = "0.16.0"
