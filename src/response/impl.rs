@@ -40,10 +40,10 @@ impl HttpResponse {
             .get(1)
             .unwrap_or(&StatusCode::Ok.to_string().as_str())
             .parse()
-            .unwrap_or(StatusCode::Ok.code());
+            .unwrap_or(StatusCode::Unknown.code());
         let status_text: String = status_parts.get(2..).unwrap_or(&[]).join(" ");
         let mut headers: HashMap<String, String> = HashMap::new();
-        for line in lines.clone() {
+        while let Some(line) = lines.next() {
             if line.is_empty() {
                 break;
             }
@@ -68,9 +68,9 @@ impl HttpResponse {
 impl Default for HttpResponse {
     fn default() -> Self {
         HttpResponse {
-            http_version: "HTTP/1.1".to_string(),
-            status_code: StatusCode::Ok.code(),
-            status_text: "OK".to_string(),
+            http_version: DEFAULT_HTTP_VERSION.to_string(),
+            status_code: StatusCode::Unknown.code(),
+            status_text: StatusCode::Unknown.to_string(),
             headers: HashMap::new(),
             body: String::new(),
         }

@@ -118,7 +118,7 @@ impl HttpRequest {
     }
 
     fn read_response(&mut self, stream: &mut TcpStream) -> HttpResponse {
-        let mut buffer: [u8; 10240] = [0; 10240];
+        let mut buffer: [u8; 1024] = [0; 1024];
         let mut response_string: String = String::new();
         let mut headers_done: bool = false;
         let mut content_length: usize = 0;
@@ -130,11 +130,11 @@ impl HttpRequest {
             }
             response_string.push_str(&String::from_utf8_lossy(&buffer[..n]));
             if !headers_done {
-                response_string
-                    .find(HTTP_DOUBLE_BR)
-                    .and_then(|pos| {
-                        headers_done = true;
-                        if let Some(status_pos) = response_string.find(DEFAULT_HTTP_VERSION) {
+                if response_string.contains(HTTP_DOUBLE_BR) {
+                    headers_done = true;
+                    response_string
+                        .find(DEFAULT_HTTP_VERSION)
+                        .and_then(|status_pos| {
                             let status_code = response_string[status_pos + 9..status_pos + 12]
                                 .trim()
                                 .parse::<usize>()
@@ -142,30 +142,31 @@ impl HttpRequest {
                             if (300..=399).contains(&status_code) {
                                 let location_sign_key: String =
                                     format!("{}:", LOCATION.to_lowercase());
-                                if let Some(location_pos) =
-                                    response_string.to_lowercase().find(&location_sign_key)
-                                {
-                                    let start: usize = location_pos + location_sign_key.len();
-                                    if let Some(end) = response_string[start..].find(HTTP_BR) {
-                                        redirect_url = Some(
-                                            response_string[start..start + end].trim().to_string(),
-                                        );
+                                response_string
+                                    .to_lowercase()
+                                    .find(&location_sign_key)
+                                    .and_then(|location_pos| {
+                                        let start: usize = location_pos + location_sign_key.len();
+                                        response_string[start..].find(HTTP_BR).and_then(|end| {
+                                            redirect_url = Some(
+                                                response_string[start..start + end]
+                                                    .trim()
+                                                    .to_string(),
+                                            );
+                                            return Some(());
+                                        });
                                         return Some(());
-                                    }
-                                }
+                                    });
                             }
-                        }
-                        content_length = HttpResponse::get_content_length(&response_string);
-                        response_string = response_string.split_off(pos + 4);
-                        Some(())
-                    })
-                    .unwrap_or_default()
+                            return Some(());
+                        });
+                    content_length = HttpResponse::get_content_length(&response_string);
+                }
             }
             if headers_done && response_string.len() >= content_length {
                 break 'first_loop;
             }
         }
-
         let response: HttpResponse = HttpResponse::from(&response_string);
         let res: HttpResponse = redirect_url
             .and_then(|url| {
