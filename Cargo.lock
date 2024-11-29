@@ -24,8 +24,9 @@ dependencies = [
 
 [[package]]
 name = "http-request"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
+ "ltpp-output",
  "std-macro-extensions",
  "url",
 ]
@@ -174,6 +175,12 @@ name = "litemap"
 version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4ee93343901ab17bd981295f2cf0026d4ad018c7c31ba84549a4ddbb47a45104"
+
+[[package]]
+name = "ltpp-output"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ea18b378c994a417adaa9c9f61bc4577c43b3bdf9d1dfe3efe66eaf2c0bd214"
 
 [[package]]
 name = "percent-encoding"

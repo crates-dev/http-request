@@ -2,9 +2,8 @@ use super::r#type::HttpRequestBuilder;
 use crate::{
     global_type::r#type::{Body, Header},
     request::http_request::r#type::HttpRequest,
-    Methods,
+    Methods, *,
 };
-use std::sync::Arc;
 
 impl Default for HttpRequestBuilder {
     fn default() -> HttpRequestBuilder {

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use crate::*;
 
 #[derive(Debug, Clone)]
 /// 表示HTTP响应的结构体

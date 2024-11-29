@@ -1,8 +1,6 @@
-use std::sync::Arc;
-
 use crate::{
     global_type::r#type::{Body, Header},
-    Methods, Protocol,
+    Methods, Protocol, *,
 };
 
 #[derive(Debug, Clone, PartialEq)]

@@ -5,3 +5,4 @@ pub static CONTENT_LENGTH: &str = "Content-Length";
 pub static HOST: &str = "Host";
 pub static DEFAULT_HTTP_VERSION: &str = "HTTP/1.1";
 pub static DEFAULT_HTTP_PATH: &str = "/";
+pub static CONNECTION: &str = "Connection";

@@ -1,3 +1,22 @@
+use ltpp_output::*;
+
+#[allow(dead_code)]
+fn output(title: &str, msg: &str, color: Color) {
+    OutputBuilder::new()
+        .set_show_time(true)
+        .set_time_bg_color(ColorType::Use(Color::Cyan))
+        .set_time_text_blod(true)
+        .set_split_text(title)
+        .set_split_text_blod(true)
+        .set_split_bg_color(ColorType::Use(Color::Yellow))
+        .set_text(msg)
+        .set_text_bg_color(ColorType::Use(color))
+        .set_text_blod(true)
+        .set_endl(true)
+        .build()
+        .output();
+}
+
 #[test]
 fn test_post_request() {
     use crate::*;
@@ -14,10 +33,10 @@ fn test_post_request() {
     _request_builder
         .send()
         .and_then(|response| {
-            println!("{:?}", response);
+            output("response => ", &format!("{:?}", response), Color::Green);
             Ok(())
         })
-        .unwrap_or_else(|e| println!("error => {}", e));
+        .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));
 }
 
 #[test]
@@ -35,8 +54,8 @@ fn test_get_request() {
     _request_builder
         .send()
         .and_then(|response| {
-            println!("{:?}", response);
+            output("response => ", &format!("{:?}", response), Color::Green);
             Ok(())
         })
-        .unwrap_or_else(|e| println!("error => {}", e));
+        .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));
 }

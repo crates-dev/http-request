@@ -6,6 +6,7 @@ pub enum Error {
     TcpStreamConnectError,
     RequestError,
     MethodsNotSupport,
+    ReadConnectionError,
 }
 
 impl StdError for Error {}
@@ -17,6 +18,7 @@ impl fmt::Display for Error {
             Error::TcpStreamConnectError => write!(f, "Tcp Stream Connect Error"),
             Error::RequestError => write!(f, "Request Error"),
             Error::MethodsNotSupport => write!(f, "Methods Not Support"),
+            Error::ReadConnectionError => write!(f, "Read Connection Error"),
         }
     }
 }

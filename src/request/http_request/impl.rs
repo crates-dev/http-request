@@ -1,9 +1,11 @@
 use super::r#type::HttpRequest;
 use crate::{
-    constant::http::{CONTENT_LENGTH, DEFAULT_HTTP_PATH, DEFAULT_HTTP_VERSION, HOST, LOCATION},
+    constant::http::{
+        CONNECTION, CONTENT_LENGTH, DEFAULT_HTTP_PATH, DEFAULT_HTTP_VERSION, HOST, LOCATION,
+    },
     global_type::r#type::{Body, Header},
     response::r#type::HttpResponse,
-    Methods, Protocol,
+    Methods, Protocol, *,
 };
 use crate::{
     constant::http::{HTTP_BR, HTTP_DOUBLE_BR},
@@ -11,10 +13,8 @@ use crate::{
     request_url::r#type::RequestUrl,
 };
 use std::{
-    collections::HashMap,
     io::{Read, Write},
     net::TcpStream,
-    sync::Arc,
 };
 
 impl HttpRequest {
@@ -73,9 +73,16 @@ impl HttpRequest {
 
     fn send_get_request(&mut self, stream: &mut TcpStream, url_obj: &RequestUrl) -> HttpResponse {
         let path: String = url_obj.path.clone().unwrap_or("/".to_string());
-        let mut request: String = format!("GET {} HTTP/1.1{}", path, HTTP_BR);
+        let mut request: String = format!(
+            "{} {} {}{}",
+            Methods::GET,
+            path,
+            DEFAULT_HTTP_VERSION,
+            HTTP_BR
+        );
         request.push_str(&format!(
-            "Host: {}{}",
+            "{}: {}{}",
+            HOST,
             url_obj.host.as_ref().unwrap_or(&"".to_string()),
             HTTP_BR
         ));
@@ -191,8 +198,16 @@ impl HttpRequest {
                 let port: u16 = self.get_port(url_obj.port.clone().unwrap_or_default());
                 let path: String = url_obj.path.unwrap_or_default();
                 let request: String = format!(
-                    "GET {} HTTP/1.1\r\nHost: {}\r\nConnection: close{}",
-                    path, host, HTTP_DOUBLE_BR
+                    "{} {} {}{}{}: {}{}{}: close{}",
+                    Methods::GET,
+                    path,
+                    DEFAULT_HTTP_VERSION,
+                    HTTP_DOUBLE_BR,
+                    HOST,
+                    host,
+                    HTTP_DOUBLE_BR,
+                    CONNECTION,
+                    HTTP_DOUBLE_BR
                 );
                 let address: String = format!("{}:{}", host, port);
                 TcpStream::connect(&address)

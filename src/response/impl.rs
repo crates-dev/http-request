@@ -2,8 +2,9 @@ use super::r#type::HttpResponse;
 use crate::{
     constant::http::{CONTENT_LENGTH, DEFAULT_HTTP_VERSION, HTTP_BR},
     status_code::r#type::StatusCode,
+    *,
 };
-use std::{collections::HashMap, str::Lines};
+use std::str::Lines;
 
 impl HttpResponse {
     pub fn get_content_length(response_string: &str) -> usize {
