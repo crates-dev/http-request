@@ -24,7 +24,7 @@ dependencies = [
 
 [[package]]
 name = "http-request"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "std-macro-extensions",
  "url",
