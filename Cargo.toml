@@ -5,7 +5,7 @@ edition = "2021"
 authors = ["ltpp-universe <root@ltpp.vip>"] 
 license = "MIT"
 description = "Http request is a lightweight, efficient library for building, sending, and handling HTTP requests in Rust applications."
-keywords = ["http", "request", "response", "tcp", "send"]
+keywords = ["http", "request", "response", "tcp", "redirect"]
 repository = "https://github.com/ltpp-universe/http-request.git"
 
 [dependencies]
