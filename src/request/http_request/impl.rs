@@ -1,22 +1,30 @@
+use native_tls::{TlsConnector, TlsStream};
+
 use super::r#type::HttpRequest;
 use crate::{
-    constant::http::{
-        CONNECTION, CONTENT_LENGTH, DEFAULT_HTTP_PATH, DEFAULT_HTTP_VERSION, HOST, LOCATION,
+    constant::http::{CONTENT_TYPE, HTTP_BR, HTTP_DOUBLE_BR},
+    content_type::r#type::ContentType,
+    request::error::Error,
+    request_url::r#type::RequestUrl,
+};
+use crate::{
+    constant::{
+        http::{
+            CONNECTION, CONTENT_LENGTH, DEFAULT_HTTP_PATH, DEFAULT_HTTP_VERSION, HOST, LOCATION,
+        },
+        request::DEFAULT_TIMEOUT,
     },
+    global_trait::r#trait::ReadWrite,
     global_type::r#type::{Body, Header},
     response::r#type::HttpResponse,
     Methods, Protocol,
-};
-use crate::{
-    constant::http::{HTTP_BR, HTTP_DOUBLE_BR},
-    request::error::Error,
-    request_url::r#type::RequestUrl,
 };
 use std::{
     collections::HashMap,
     io::{Read, Write},
     net::TcpStream,
     sync::Arc,
+    time::Duration,
 };
 
 /// Implements methods for the `HttpRequest` struct.
@@ -88,25 +96,51 @@ impl HttpRequest {
     ///
     /// Returns a string in the format `key1=value1&key2=value2`.
     fn get_body_str(&self) -> String {
+        let content_type_key: String = CONTENT_TYPE.to_lowercase();
+        let header: HashMap<String, String> = self.get_header();
         let body: HashMap<String, String> = self.get_body();
-        body.iter()
-            .filter(|(key, value)| !key.is_empty() && !value.is_empty())
-            .map(|(key, value)| format!("{}={}&", key, value))
-            .collect::<Vec<String>>()
-            .join("&")
+        let mut res: String = String::new();
+        for (key, value) in header {
+            if key.to_lowercase() == content_type_key {
+                res = value
+                    .to_lowercase()
+                    .parse::<ContentType>()
+                    .unwrap_or_default()
+                    .get_body_string(&body);
+                break;
+            }
+        }
+        res
     }
 
-    /// Sends an HTTP GET request.
+    /// Sends an HTTP GET request to the specified URL through the given stream.
     ///
-    /// Constructs the GET request, writes it to the TCP stream, and reads the response.
+    /// This method constructs an HTTP GET request based on the provided `RequestUrl` object,
+    /// including necessary headers, and sends it through the provided stream. It then reads
+    /// the HTTP response from the stream and returns it.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
-    /// - `stream`: The TCP stream for the request.
-    /// - `url_obj`: The parsed `RequestUrl` object containing the request details.
+    /// - `stream`: A mutable reference to a stream that implements the `ReadWrite` trait.
+    ///   This stream is used to send the HTTP request and receive the HTTP response.
+    /// - `url_obj`: A reference to a `RequestUrl` object that contains the URL information
+    ///   (such as the host and path) to be used in the GET request.
     ///
-    /// Returns an `HttpResponse` object.
-    fn send_get_request(&mut self, stream: &mut TcpStream, url_obj: &RequestUrl) -> HttpResponse {
+    /// # Returns
+    ///
+    /// - `HttpResponse`: The HTTP response that was received after sending the GET request.
+    ///   This contains the status code, headers, and body of the response.
+    ///
+    /// # Errors
+    ///
+    /// This function may panic if the request construction or writing to the stream fails,
+    /// or if reading the response encounters an issue. It is recommended to handle potential
+    /// errors more gracefully in production code.
+    fn send_get_request(
+        &mut self,
+        stream: &mut Box<dyn ReadWrite>,
+        url_obj: &RequestUrl,
+    ) -> HttpResponse {
         let path: String = url_obj.path.clone().unwrap_or("/".to_string());
         let mut request: String = format!(
             "{} {} {}{}",
@@ -127,17 +161,34 @@ impl HttpRequest {
         self.read_response(stream)
     }
 
-    /// Sends an HTTP POST request.
+    /// Sends an HTTP POST request to the specified URL through the given stream.
     ///
-    /// Constructs the POST request, writes it to the TCP stream, and reads the response.
+    /// This method constructs an HTTP POST request, including the body, headers, and other
+    /// necessary details, and sends it through the provided stream. After sending the request,
+    /// it reads the HTTP response from the stream and returns it.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
-    /// - `stream`: The TCP stream for the request.
-    /// - `url_obj`: The parsed `RequestUrl` object containing the request details.
+    /// - `stream`: A mutable reference to a stream that implements the `ReadWrite` trait.
+    ///   This stream is used to send the HTTP request and receive the HTTP response.
+    /// - `url_obj`: A reference to a `RequestUrl` object that contains the URL information
+    ///   (such as the host and path) to be used in the POST request.
     ///
-    /// Returns an `HttpResponse` object.
-    fn send_post_request(&mut self, stream: &mut TcpStream, url_obj: &RequestUrl) -> HttpResponse {
+    /// # Returns
+    ///
+    /// - `HttpResponse`: The HTTP response that was received after sending the POST request.
+    ///   This contains the status code, headers, and body of the response.
+    ///
+    /// # Errors
+    ///
+    /// This function may panic if the request construction or writing to the stream fails,
+    /// or if reading the response encounters an issue. It is recommended to handle potential
+    /// errors more gracefully in production code.
+    fn send_post_request(
+        &mut self,
+        stream: &mut Box<dyn ReadWrite>,
+        url_obj: &RequestUrl,
+    ) -> HttpResponse {
         let path: String = url_obj
             .path
             .clone()
@@ -169,60 +220,67 @@ impl HttpRequest {
         self.read_response(stream)
     }
 
-    /// Reads the response from the TCP stream and constructs an `HttpResponse` object.
+    /// Reads the HTTP response from the given stream and handles potential redirects.
     ///
-    /// Handles redirects if necessary.
+    /// This method reads data from the provided stream and processes the response. It handles
+    /// the response headers, including checking for redirects (HTTP status codes 3xx), and
+    /// collects the response body once the headers are fully received. If a redirect is detected,
+    /// it follows the redirect URL and retrieves the new response.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
-    /// - `stream`: The TCP stream for the response.
+    /// - `stream`: A mutable reference to a stream that implements the `ReadWrite` trait.
+    ///   This stream is used to read the HTTP response from the server.
     ///
-    /// Returns an `HttpResponse` object.
-    fn read_response(&mut self, stream: &mut TcpStream) -> HttpResponse {
+    /// # Returns
+    ///
+    /// - `HttpResponse`: The final HTTP response after reading from the stream, including the
+    ///   status code, headers, and body. If a redirect is encountered, the response from the
+    ///   redirected URL is returned.
+    ///
+    /// # Errors
+    ///
+    /// This function may panic if unexpected issues occur during reading or processing the
+    /// response. In production code, error handling should be implemented to manage any failures
+    /// during the reading or redirect process.
+    fn read_response(&mut self, stream: &mut Box<dyn ReadWrite>) -> HttpResponse {
         let mut buffer: [u8; 1024] = [0; 1024];
         let mut response_string: String = String::new();
         let mut headers_done: bool = false;
         let mut content_length: usize = 0;
         let mut redirect_url: Option<String> = None;
-
         'first_loop: while let Ok(n) = stream.read(&mut buffer) {
             if n == 0 {
                 break;
             }
             response_string.push_str(&String::from_utf8_lossy(&buffer[..n]));
-            if !headers_done {
-                if response_string.contains(HTTP_DOUBLE_BR) {
-                    headers_done = true;
-                    response_string
-                        .find(DEFAULT_HTTP_VERSION)
-                        .and_then(|status_pos| {
-                            let status_code = response_string[status_pos + 9..status_pos + 12]
-                                .trim()
-                                .parse::<usize>()
-                                .unwrap_or_default();
-                            if (300..=399).contains(&status_code) {
-                                let location_sign_key: String =
-                                    format!("{}:", LOCATION.to_lowercase());
-                                response_string
-                                    .to_lowercase()
-                                    .find(&location_sign_key)
-                                    .and_then(|location_pos| {
-                                        let start: usize = location_pos + location_sign_key.len();
-                                        response_string[start..].find(HTTP_BR).and_then(|end| {
-                                            redirect_url = Some(
-                                                response_string[start..start + end]
-                                                    .trim()
-                                                    .to_string(),
-                                            );
-                                            Some(())
-                                        });
-                                        Some(())
-                                    });
-                            }
-                            Some(())
-                        });
-                    content_length = HttpResponse::get_content_length(&response_string);
+            if !headers_done && response_string.contains(HTTP_DOUBLE_BR) {
+                headers_done = true;
+                let status_pos_res: Option<usize> = response_string.find(DEFAULT_HTTP_VERSION);
+                if status_pos_res.is_none() {
+                    continue;
                 }
+                let status_pos: usize = status_pos_res.unwrap_or_default();
+                let status_code: usize = response_string[status_pos + 9..status_pos + 12]
+                    .trim()
+                    .parse::<usize>()
+                    .unwrap_or_default();
+                if (300..=399).contains(&status_code) {
+                    let location_sign_key: String = format!("{}:", LOCATION.to_lowercase());
+                    let location_pos_res = response_string.to_lowercase().find(&location_sign_key);
+                    if location_pos_res.is_none() {
+                        continue;
+                    }
+                    let location_pos: usize = location_pos_res.unwrap_or_default();
+                    let start: usize = location_pos + location_sign_key.len();
+                    let end_pos_res = response_string[start..].find(HTTP_BR);
+                    if end_pos_res.is_none() {
+                        continue;
+                    }
+                    let end_pos: usize = end_pos_res.unwrap_or_default();
+                    redirect_url = Some(response_string[start..start + end_pos].trim().to_string());
+                }
+                content_length = HttpResponse::get_content_length(&response_string);
             }
             if headers_done && response_string.len() >= content_length {
                 break 'first_loop;
@@ -252,32 +310,27 @@ impl HttpRequest {
     /// Returns `Ok(HttpResponse)` if the redirection is successful, or `Err(Error)` otherwise.
     fn handle_redirect(&mut self, url: String) -> Result<HttpResponse, Error> {
         self.set_url(url.clone());
-        self.parse_url()
-            .map_err(|_| Error::InvalidUrl)
-            .and_then(|url_obj| {
-                let host: String = url_obj.host.unwrap_or_default();
-                let port: u16 = self.get_port(url_obj.port.clone().unwrap_or_default());
-                let path: String = url_obj.path.unwrap_or_default();
-                let request: String = format!(
-                    "{} {} {}{}{}: {}{}{}: close{}",
-                    Methods::GET,
-                    path,
-                    DEFAULT_HTTP_VERSION,
-                    HTTP_DOUBLE_BR,
-                    HOST,
-                    host,
-                    HTTP_DOUBLE_BR,
-                    CONNECTION,
-                    HTTP_DOUBLE_BR
-                );
-                let address: String = format!("{}:{}", host, port);
-                TcpStream::connect(&address)
-                    .map_err(|_| Error::TcpStreamConnectError)
-                    .and_then(|mut stream| {
-                        stream.write_all(request.as_bytes()).unwrap();
-                        Ok(self.read_response(&mut stream))
-                    })
-            })
+        let url_obj: RequestUrl = self.parse_url().map_err(|_| Error::InvalidUrl)?;
+        let host: String = url_obj.host.unwrap_or_default();
+        let port: u16 = self.get_port(url_obj.port.clone().unwrap_or_default());
+        let path: String = url_obj.path.unwrap_or_default();
+        let request: String = format!(
+            "{} {} {}{}{}: {}{}{}: close{}",
+            Methods::GET,
+            path,
+            DEFAULT_HTTP_VERSION,
+            HTTP_DOUBLE_BR,
+            HOST,
+            host,
+            HTTP_DOUBLE_BR,
+            CONNECTION,
+            HTTP_DOUBLE_BR
+        );
+        let mut stream = self
+            .get_connection_stream(host, port)
+            .map_err(|_| Error::TcpStreamConnectError)?;
+        stream.write_all(request.as_bytes()).unwrap();
+        Ok(self.read_response(&mut stream))
     }
 
     /// Determines the appropriate port for the HTTP request.
@@ -295,29 +348,76 @@ impl HttpRequest {
         protocol.get_port()
     }
 
+    /// Establishes a connection stream to the specified host and port.
+    ///
+    /// This method attempts to create a connection stream based on the protocol type
+    /// (HTTP or HTTPS) defined by the current configuration. It supports both plain
+    /// TCP connections and TLS-secured connections. If the protocol is HTTPS, it will
+    /// use the `TlsConnector` to establish a secure TLS connection. For both cases,
+    /// it ensures a read timeout is set on the stream.
+    ///
+    /// # Parameters
+    ///
+    /// - `host`: The hostname or IP address to connect to.
+    /// - `port`: The port number to connect to.
+    ///
+    /// # Returns
+    ///
+    /// - `Ok(Box<dyn ReadWrite>)`: A boxed stream that implements the `ReadWrite` trait,
+    ///   representing the established connection.
+    /// - `Err(Error)`: An error indicating what went wrong during the connection process.
+    ///
+    /// # Errors
+    ///
+    /// - `Error::TlsConnectorBuildError`: If the TLS connector could not be built.
+    /// - `Error::TcpStreamConnectError`: If the TCP connection could not be established.
+    /// - `Error::SetReadTimeoutError`: If setting the read timeout failed.
+    /// - `Error::TlsStreamConnectError`: If the TLS stream could not be established.
+    fn get_connection_stream(&self, host: String, port: u16) -> Result<Box<dyn ReadWrite>, Error> {
+        let host_port: (String, u16) = (host.clone(), port);
+        let stream: Result<Box<dyn ReadWrite>, Error> = if self.get_protocol().is_https() {
+            let tls_connector: TlsConnector = TlsConnector::builder()
+                .build()
+                .map_err(|_| Error::TlsConnectorBuildError)?;
+            let tcp_stream: TcpStream =
+                TcpStream::connect(host_port.clone()).map_err(|_| Error::TcpStreamConnectError)?;
+            tcp_stream
+                .set_read_timeout(Some(Duration::from_secs(*self.timeout)))
+                .map_err(|_| Error::SetReadTimeoutError)?;
+            let tls_stream: TlsStream<TcpStream> = tls_connector
+                .connect(&host.clone(), tcp_stream)
+                .map_err(|_| Error::TlsStreamConnectError)?;
+            Ok(Box::new(tls_stream))
+        } else {
+            let tcp_stream: TcpStream =
+                TcpStream::connect(host_port.clone()).map_err(|_| Error::TcpStreamConnectError)?;
+            tcp_stream
+                .set_read_timeout(Some(Duration::from_millis(*self.timeout)))
+                .map_err(|_| Error::SetReadTimeoutError)?;
+            Ok(Box::new(tcp_stream))
+        };
+        stream
+    }
+
     /// Sends the HTTP request.
     ///
     /// Determines the HTTP method and constructs the appropriate request (GET or POST).
     ///
     /// Returns `Ok(HttpResponse)` if the request is successful, or `Err(Error)` otherwise.
     pub fn send(&mut self) -> Result<HttpResponse, Error> {
-        self.parse_url()
-            .map_err(|_| Error::InvalidUrl)
-            .and_then(|url_obj| {
-                let methods: Methods = self.get_methods();
-                let host: String = url_obj.host.clone().unwrap_or_default();
-                let port: u16 = self.get_port(url_obj.port.clone().unwrap_or_default());
-                TcpStream::connect((host, port))
-                    .map_err(|_| Error::TcpStreamConnectError)
-                    .and_then(|mut stream| {
-                        let res: Result<HttpResponse, Error> = match methods {
-                            m if m.is_get() => Ok(self.send_get_request(&mut stream, &url_obj)),
-                            m if m.is_post() => Ok(self.send_post_request(&mut stream, &url_obj)),
-                            _ => Err(Error::RequestError),
-                        };
-                        res
-                    })
-            })
+        let url_obj: RequestUrl = self.parse_url().map_err(|_| Error::InvalidUrl)?;
+        let methods: Methods = self.get_methods();
+        let host: String = url_obj.host.clone().unwrap_or_default();
+        let port: u16 = self.get_port(url_obj.port.clone().unwrap_or_default());
+        let mut stream: Box<dyn ReadWrite> = self
+            .get_connection_stream(host, port)
+            .map_err(|_| Error::TcpStreamConnectError)?;
+        let res: Result<HttpResponse, Error> = match methods {
+            m if m.is_get() => Ok(self.send_get_request(&mut stream, &url_obj)),
+            m if m.is_post() => Ok(self.send_post_request(&mut stream, &url_obj)),
+            _ => Err(Error::RequestError),
+        };
+        res
     }
 }
 
@@ -330,6 +430,7 @@ impl Default for HttpRequest {
             protocol: Arc::new(Protocol::new()),
             header: Arc::new(HashMap::new()),
             body: Arc::new(HashMap::new()),
+            timeout: Arc::new(DEFAULT_TIMEOUT),
         }
     }
 }

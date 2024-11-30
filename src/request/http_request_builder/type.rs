@@ -7,7 +7,7 @@ use crate::request::http_request::r#type::HttpRequest;
 /// an HTTP request's components such as method, URL, headers, and body.
 ///
 /// # Fields
-/// - `tmp`: A temporary `HttpRequest` instance used to accumulate changes during
+/// - `http_request`: A temporary `HttpRequest` instance used to accumulate changes during
 ///   the construction process. It holds the current state of the builder.
 /// - `builder`: A finalized `HttpRequest` instance that holds the result after the
 ///   builder process has been completed. It is returned when the builder is finalized.
@@ -22,6 +22,6 @@ use crate::request::http_request::r#type::HttpRequest;
 /// HTTP requests with various configurations.
 #[derive(Debug, Clone, PartialEq)]
 pub struct HttpRequestBuilder {
-    pub(crate) tmp: HttpRequest,
+    pub(crate) http_request: HttpRequest,
     pub(crate) builder: HttpRequest,
 }

@@ -1,4 +1,6 @@
 pub(crate) mod constant;
+pub(crate) mod content_type;
+pub(crate) mod global_trait;
 pub(crate) mod global_type;
 pub(crate) mod methods;
 pub(crate) mod protocol;

@@ -33,7 +33,7 @@ use crate::{
 impl Default for HttpRequestBuilder {
     fn default() -> HttpRequestBuilder {
         HttpRequestBuilder {
-            tmp: HttpRequest::default(),
+            http_request: HttpRequest::default(),
             builder: HttpRequest::default(),
         }
     }
@@ -62,7 +62,7 @@ impl HttpRequestBuilder {
     /// # Returns
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
     pub fn set_methods(&mut self, methods: Methods) -> &mut Self {
-        self.tmp.methods = Arc::new(methods);
+        self.http_request.methods = Arc::new(methods);
         self
     }
 
@@ -76,7 +76,7 @@ impl HttpRequestBuilder {
     /// # Returns
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
     pub fn set_url(&mut self, url: &str) -> &mut Self {
-        self.tmp.url = Arc::new(url.to_owned());
+        self.http_request.url = Arc::new(url.to_owned());
         self
     }
 
@@ -91,7 +91,7 @@ impl HttpRequestBuilder {
     /// # Returns
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
     pub fn set_header(&mut self, header: &Header) -> &mut Self {
-        if let Some(tmp_header) = Arc::get_mut(&mut self.tmp.header) {
+        if let Some(tmp_header) = Arc::get_mut(&mut self.http_request.header) {
             for (key, value) in header {
                 tmp_header.insert(key.clone(), value.clone());
             }
@@ -110,7 +110,7 @@ impl HttpRequestBuilder {
     /// # Returns
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
     pub fn set_body(&mut self, body: &Body) -> &mut Self {
-        if let Some(tmp_body) = Arc::get_mut(&mut self.tmp.body) {
+        if let Some(tmp_body) = Arc::get_mut(&mut self.http_request.body) {
             for (key, value) in body {
                 tmp_body.insert(key.clone(), value.clone());
             }
@@ -118,17 +118,36 @@ impl HttpRequestBuilder {
         self
     }
 
+    /// Sets the timeout value for the current connection.
+    ///
+    /// This method sets the timeout duration for the connection, which is used to determine
+    /// how long the system should wait for a response before considering the connection attempt
+    /// as failed. The timeout value is stored in an `Arc` to allow it to be shared safely across
+    /// multiple threads if needed.
+    ///
+    /// # Parameters
+    ///
+    /// - `timeout`: The timeout duration in seconds. This value will be used to configure the
+    ///   connection timeout.
+    ///
+    /// # Returns
+    /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
+    pub fn set_timeout(&mut self, timeout: u64) -> &mut Self {
+        self.http_request.timeout = Arc::new(timeout);
+        self
+    }
+
     /// Finalizes the builder and returns a fully constructed `HttpRequest` instance.
     ///
-    /// This method takes the current configuration stored in `tmp`, creates a new
+    /// This method takes the current configuration stored in `http_request`, creates a new
     /// `HttpRequest` instance with the configuration, and resets the builder's temporary
     /// state for further use.
     ///
     /// # Returns
     /// Returns a fully constructed `HttpRequest` instance based on the current builder state.
     pub fn builder(&mut self) -> HttpRequest {
-        self.builder = self.tmp.clone();
-        self.tmp = HttpRequest::default();
+        self.builder = self.http_request.clone();
+        self.http_request = HttpRequest::default();
         self.builder.clone()
     }
 }

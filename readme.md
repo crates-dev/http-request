@@ -36,6 +36,7 @@ let mut _request_builder = HttpRequestBuilder::new()
     .set_url("http://localhost:80")
     .set_body(&body)
     .set_header(&header)
+    .set_timeout(6000)
     .builder();
 _request_builder
     .send()
@@ -59,6 +60,7 @@ let mut _request_builder = HttpRequestBuilder::new()
     .set_methods(Methods::GET)
     .set_url("http://localhost:80")
     .set_header(&header)
+    .set_timeout(6000)
     .builder();
 _request_builder
     .send()
