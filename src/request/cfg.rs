@@ -26,7 +26,7 @@ fn test_http_post_request() {
     header.insert(":authority", "code.ltpp.vip");
     header.insert(":method", "POST");
     header.insert(":path", "/");
-    header.insert(":scheme", "https");
+    header.insert(":scheme", "http");
     header.insert("Accept", "*/*");
     header.insert("Content-Type", "application/json");
     let mut body: HashMap<&str, &str> = HashMap::new();
@@ -120,7 +120,7 @@ fn test_http_post_text_request() {
     header.insert(":authority", "code.ltpp.vip");
     header.insert(":method", "POST");
     header.insert(":path", "/");
-    header.insert(":scheme", "https");
+    header.insert(":scheme", "http");
     header.insert("Accept", "*/*");
     header.insert("Content-Type", "application/json");
     let mut _request_builder = HttpRequestBuilder::new()
