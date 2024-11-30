@@ -1,36 +1,22 @@
-use std::str::FromStr;
-
-use crate::constant::http::{
-    APPLICATION_JSON, APPLICATION_XML, FORM_URLENCODED, TEXT_HTML, TEXT_PLAIN,
-};
-
+/// Represents different types of HTTP content types, such as JSON, XML, plain text, HTML,
+/// form URL encoded, and an unknown type.
 #[derive(Debug, PartialEq)]
 pub enum ContentType {
+    /// Represents the `application/json` content type.
     ApplicationJson,
+
+    /// Represents the `application/xml` content type.
     ApplicationXml,
+
+    /// Represents the `text/plain` content type.
     TextPlain,
+
+    /// Represents the `text/html` content type.
     TextHtml,
+
+    /// Represents the `application/x-www-form-urlencoded` content type.
     FormUrlEncoded,
+
+    /// Represents an unknown or unrecognized content type.
     Unknown,
-}
-
-impl FromStr for ContentType {
-    type Err = ();
-
-    fn from_str(data: &str) -> Result<Self, Self::Err> {
-        match data.to_lowercase().as_str() {
-            _data if _data == APPLICATION_JSON => Ok(ContentType::ApplicationJson),
-            _data if _data == APPLICATION_XML => Ok(ContentType::ApplicationXml),
-            _data if _data == TEXT_PLAIN => Ok(ContentType::TextPlain),
-            _data if _data == TEXT_HTML => Ok(ContentType::TextHtml),
-            _data if _data == FORM_URLENCODED => Ok(ContentType::FormUrlEncoded),
-            _ => Ok(ContentType::Unknown),
-        }
-    }
-}
-
-impl Default for ContentType {
-    fn default() -> Self {
-        Self::Unknown
-    }
 }

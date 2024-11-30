@@ -21,20 +21,20 @@ fn output(title: &str, msg: &str, color: Color) {
 
 #[test]
 fn test_http_post_request() {
-    let mut header: HashMap<String, String> = HashMap::new();
-    header.insert("header-key".to_string(), "header-value".to_string());
-    header.insert(":authority".to_string(), "code.ltpp.vip".to_string());
-    header.insert(":method".to_string(), "POST".to_string());
-    header.insert(":path".to_string(), "/".to_string());
-    header.insert(":scheme".to_string(), "https".to_string());
-    header.insert("Accept".to_string(), "*/*".to_string());
-    header.insert("Content-Type".to_string(), "application/json".to_string());
-    let mut body: HashMap<String, String> = HashMap::new();
-    body.insert("body-key".to_string(), "body-value".to_string());
+    let mut header: HashMap<&str, &str> = HashMap::new();
+    header.insert("header-key", "header-value");
+    header.insert(":authority", "code.ltpp.vip");
+    header.insert(":method", "POST");
+    header.insert(":path", "/");
+    header.insert(":scheme", "https");
+    header.insert("Accept", "*/*");
+    header.insert("Content-Type", "application/json");
+    let mut body: HashMap<&str, &str> = HashMap::new();
+    body.insert("body-key", "body-value");
     let mut _request_builder = HttpRequestBuilder::new()
         .post("http://localhost:80")
-        .body(&body)
-        .headers(&header)
+        .json(body)
+        .headers(header)
         .timeout(6000)
         .builder();
     _request_builder
@@ -48,13 +48,13 @@ fn test_http_post_request() {
 
 #[test]
 fn test_http_get_request() {
-    let mut header: HashMap<String, String> = HashMap::new();
-    header.insert("header-key".to_string(), "header-value".to_string());
-    let mut body: HashMap<String, String> = HashMap::new();
-    body.insert("body-key".to_string(), "body-value".to_string());
+    let mut header: HashMap<&str, &str> = HashMap::new();
+    header.insert("header-key", "header-value");
+    let mut body: HashMap<&str, &str> = HashMap::new();
+    body.insert("body-key", "body-value");
     let mut _request_builder = HttpRequestBuilder::new()
         .get("http://localhost:80")
-        .headers(&header)
+        .headers(header)
         .timeout(6000)
         .builder();
     _request_builder
@@ -68,24 +68,21 @@ fn test_http_get_request() {
 
 #[test]
 fn test_https_post_request() {
-    let mut header: HashMap<String, String> = HashMap::new();
-    header.insert(":authority".to_string(), "code.ltpp.vip".to_string());
-    header.insert(":method".to_string(), "POST".to_string());
-    header.insert(":path".to_string(), "/".to_string());
-    header.insert(":scheme".to_string(), "https".to_string());
-    header.insert("Accept".to_string(), "*/*".to_string());
-    header.insert("Content-Type".to_string(), "application/json".to_string());
-    let mut body: HashMap<String, String> = HashMap::new();
-    body.insert(
-        "code".to_string(),
-        "fn main() {\r\n    println!(\"hello world\");\r\n}".to_string(),
-    );
-    body.insert("language".to_string(), "rust".to_string());
-    body.insert("testin".to_string(), "".to_string());
+    let mut header: HashMap<&str, &str> = HashMap::new();
+    header.insert(":authority", "code.ltpp.vip");
+    header.insert(":method", "POST");
+    header.insert(":path", "/");
+    header.insert(":scheme", "https");
+    header.insert("Accept", "*/*");
+    header.insert("Content-Type", "application/json");
+    let mut body: HashMap<&str, &str> = HashMap::new();
+    body.insert("code", "fn main() {\r\n    println!(\"hello world\");\r\n}");
+    body.insert("language", "rust");
+    body.insert("testin", "");
     let mut _request_builder = HttpRequestBuilder::new()
         .post("https://code.ltpp.vip/")
-        .body(&body)
-        .headers(&header)
+        .json(body)
+        .headers(header)
         .timeout(6000)
         .builder();
     _request_builder
@@ -99,13 +96,37 @@ fn test_https_post_request() {
 
 #[test]
 fn test_https_get_request() {
-    let mut header: HashMap<String, String> = HashMap::new();
-    header.insert("header-key".to_string(), "header-value".to_string());
-    let mut body: HashMap<String, String> = HashMap::new();
-    body.insert("body-key".to_string(), "body-value".to_string());
+    let mut header: HashMap<&str, &str> = HashMap::new();
+    header.insert("header-key", "header-value");
+    let mut body: HashMap<&str, &str> = HashMap::new();
+    body.insert("body-key", "body-value");
     let mut _request_builder = HttpRequestBuilder::new()
         .get("https://git.ltpp.vip/root")
-        .headers(&header)
+        .headers(header)
+        .timeout(6000)
+        .builder();
+    _request_builder
+        .send()
+        .and_then(|response| {
+            output("response => ", &format!("{:?}", response), Color::Green);
+            Ok(())
+        })
+        .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));
+}
+
+#[test]
+fn test_http_post_text_request() {
+    let mut header: HashMap<&str, &str> = HashMap::new();
+    header.insert(":authority", "code.ltpp.vip");
+    header.insert(":method", "POST");
+    header.insert(":path", "/");
+    header.insert(":scheme", "https");
+    header.insert("Accept", "*/*");
+    header.insert("Content-Type", "application/json");
+    let mut _request_builder = HttpRequestBuilder::new()
+        .post("http://localhost:80")
+        .text("hello")
+        .headers(header)
         .timeout(6000)
         .builder();
     _request_builder

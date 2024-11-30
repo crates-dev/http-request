@@ -2,7 +2,8 @@ use std::sync::Arc;
 
 use super::r#type::HttpRequestBuilder;
 use crate::{
-    global_type::r#type::{Body, Header},
+    body::r#type::{Body, BodyJson, BodyText},
+    header::r#type::Header,
     methods::r#type::Methods,
     request::http_request::r#type::HttpRequest,
 };
@@ -107,31 +108,42 @@ impl HttpRequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
-    pub fn headers(&mut self, header: &Header) -> &mut Self {
+    pub fn headers(&mut self, header: Header) -> &mut Self {
         if let Some(tmp_header) = Arc::get_mut(&mut self.http_request.header) {
             for (key, value) in header {
-                tmp_header.insert(key.clone(), value.clone());
+                tmp_header.insert(key, value);
             }
         }
         self
     }
 
-    /// Sets the body of the request.
+    /// Sets the JSON body of the request.
     ///
-    /// This method allows you to specify the body content of the request being built.
-    /// Existing body data may be merged with the provided data.
+    /// This method allows you to set the body of the request as JSON data. If there is existing
+    /// body data, it will be replaced with the provided JSON data.
     ///
     /// # Arguments
-    /// - `body`: The body data to be set for the request.
+    /// - `body`: The JSON body data to be set for the request.
     ///
     /// # Returns
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
-    pub fn body(&mut self, body: &Body) -> &mut Self {
-        if let Some(tmp_body) = Arc::get_mut(&mut self.http_request.body) {
-            for (key, value) in body {
-                tmp_body.insert(key.clone(), value.clone());
-            }
-        }
+    pub fn json(&mut self, body: BodyJson) -> &mut Self {
+        self.http_request.body = Arc::new(Body::Json(body));
+        self
+    }
+
+    /// Sets the text body of the request.
+    ///
+    /// This method allows you to set the body of the request as plain text. If there is existing
+    /// body data, it will be replaced with the provided text data.
+    ///
+    /// # Arguments
+    /// - `body`: The text body data to be set for the request.
+    ///
+    /// # Returns
+    /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
+    pub fn text(&mut self, body: BodyText) -> &mut Self {
+        self.http_request.body = Arc::new(Body::Text(body));
         self
     }
 

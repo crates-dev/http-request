@@ -1,33 +1,27 @@
-use std::sync::Arc;
-
 use crate::{
-    global_type::r#type::{Body, Header},
-    methods::r#type::Methods,
+    body::r#type::Body, header::r#type::Header, methods::r#type::Methods,
     protocol::r#type::Protocol,
 };
-
-/// Represents an HTTP request with methods, URL, protocol, headers, body, and timeout settings.
-///
-/// The `HttpRequest` struct is designed to encapsulate all the necessary information for
-/// making an HTTP request. This includes the HTTP method, the target URL, the protocol,
-/// the request headers, the request body, and the timeout setting. All fields are wrapped
-/// in `Arc` to allow for safe sharing across threads, ensuring that the data remains
-/// immutable and efficiently shared.
-///
-/// # Fields
-///
-/// - `methods`: The HTTP method to be used for the request, such as GET, POST, etc.
-/// - `url`: The target URL for the request.
-/// - `protocol`: The protocol to be used (e.g., HTTP/1.1, HTTP/2, etc.).
-/// - `header`: The headers associated with the HTTP request.
-/// - `body`: The body content of the HTTP request.
-/// - `timeout`: The timeout duration (in milliseconds) for the HTTP request.
+use std::sync::Arc;
+/// Represents an HTTP request, encapsulating various components such as the method, URL, protocol,
+/// headers, body, and additional metadata.
 #[derive(Debug, Clone, PartialEq)]
 pub struct HttpRequest {
+    /// The HTTP method of the request (e.g., GET, POST, etc.).
     pub methods: Arc<Methods>,
+
+    /// The target URL of the request.
     pub url: Arc<String>,
+
+    /// The protocol version used in the request (e.g., HTTP/1.1, HTTP/2.0).
     pub protocol: Arc<Protocol>,
+
+    /// The headers included in the request.
     pub header: Arc<Header>,
+
+    /// The type of the body, specifying whether it is text or JSON.
     pub body: Arc<Body>,
+
+    /// The timeout duration for the request in milliseconds.
     pub timeout: Arc<u64>,
 }

@@ -1,13 +1,11 @@
-use native_tls::{TlsConnector, TlsStream};
-
 use super::r#type::HttpRequest;
 use crate::{
+    body::r#type::Body,
     constant::http::{CONTENT_TYPE, HTTP_BR, HTTP_DOUBLE_BR},
     content_type::r#type::ContentType,
     methods::r#type::Methods,
     protocol::r#type::Protocol,
-    request::error::Error,
-    request_url::r#type::RequestUrl,
+    request::{error::Error, request_url::r#type::RequestUrl},
 };
 use crate::{
     constant::{
@@ -17,9 +15,10 @@ use crate::{
         request::DEFAULT_TIMEOUT,
     },
     global_trait::r#trait::ReadWrite,
-    global_type::r#type::{Body, Header},
+    header::r#type::Header,
     response::r#type::HttpResponse,
 };
+use native_tls::{TlsConnector, TlsStream};
 use std::{
     collections::HashMap,
     io::{Read, Write},
@@ -84,7 +83,7 @@ impl HttpRequest {
     ///
     /// Returns a string where each header is formatted as `key: value`.
     fn get_header_str(&self) -> String {
-        let header: HashMap<String, String> = self.get_header();
+        let header: HashMap<&str, &str> = self.get_header();
         let mut header_string: String = String::new();
         for (key, value) in header {
             let line: String = format!("{}: {}{}", key, value, HTTP_BR);
@@ -98,8 +97,8 @@ impl HttpRequest {
     /// Returns a string in the format `key1=value1&key2=value2`.
     fn get_body_str(&self) -> String {
         let content_type_key: String = CONTENT_TYPE.to_lowercase();
-        let header: HashMap<String, String> = self.get_header();
-        let body: HashMap<String, String> = self.get_body();
+        let header: HashMap<&str, &str> = self.get_header();
+        let body: Body = self.get_body();
         let mut res: String = String::new();
         for (key, value) in header {
             if key.to_lowercase() == content_type_key {
@@ -430,8 +429,8 @@ impl Default for HttpRequest {
             url: Arc::new(String::new()),
             protocol: Arc::new(Protocol::new()),
             header: Arc::new(HashMap::new()),
-            body: Arc::new(HashMap::new()),
             timeout: Arc::new(DEFAULT_TIMEOUT),
+            body: Arc::new(Body::default()),
         }
     }
 }

@@ -22,19 +22,16 @@ cargo add http-request
 
 ## Use
 
-### Send post request
+### Send get request
 
 ```rs
 use http_request::*;
 use std::collections::HashMap;
 let mut header: HashMap<String, String> = HashMap::new();
-header.insert("header-key".to_string(), "header-value".to_string());
-let mut body: HashMap<String, String> = HashMap::new();
-body.insert("body-key".to_string(), "body-value".to_string());
+header.insert("header-key"., "header-value".);
 let mut _request_builder = HttpRequestBuilder::new()
-    .post("http://localhost:80")
-    .body(&body)
-    .headers(&header)
+    .get("http://localhost:80")
+    .headers(header)
     .timeout(6000)
     .builder();
 _request_builder
@@ -46,18 +43,43 @@ _request_builder
     .unwrap_or_else(|e| println!("error => {}", e));
 ```
 
-### Send get request
+### Send post request
+
+#### Send Body Json
 
 ```rs
 use http_request::*;
 use std::collections::HashMap;
 let mut header: HashMap<String, String> = HashMap::new();
-header.insert("header-key".to_string(), "header-value".to_string());
+header.insert("header-key"., "header-value".);
 let mut body: HashMap<String, String> = HashMap::new();
-body.insert("body-key".to_string(), "body-value".to_string());
+body.insert("body-key"., "body-value".);
 let mut _request_builder = HttpRequestBuilder::new()
-    .get("http://localhost:80")
-    .headers(&header)
+    .post("http://localhost:80")
+    .json(body)
+    .headers(header)
+    .timeout(6000)
+    .builder();
+_request_builder
+    .send()
+    .and_then(|response| {
+        println!("{:?}", response);
+        Ok(())
+    })
+    .unwrap_or_else(|e| println!("error => {}", e));
+```
+
+#### Send Body Text
+
+```rs
+use http_request::*;
+use std::collections::HashMap;
+let mut header: HashMap<String, String> = HashMap::new();
+header.insert("header-key"., "header-value".);
+let mut _request_builder = HttpRequestBuilder::new()
+    .post("http://localhost:80")
+    .text("hello")
+    .headers(header)
     .timeout(6000)
     .builder();
 _request_builder

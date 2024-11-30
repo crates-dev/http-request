@@ -1,11 +1,11 @@
+pub(crate) mod body;
 pub(crate) mod constant;
 pub(crate) mod content_type;
 pub(crate) mod global_trait;
-pub(crate) mod global_type;
+pub(crate) mod header;
 pub(crate) mod methods;
 pub(crate) mod protocol;
 pub(crate) mod request;
-pub(crate) mod request_url;
 pub(crate) mod response;
 pub(crate) mod status_code;
 
