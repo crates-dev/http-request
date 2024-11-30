@@ -1,5 +1,5 @@
 use crate::*;
-use ltpp_output::*;
+use color_output::*;
 use std_macro_extensions::*;
 
 #[allow(dead_code)]
