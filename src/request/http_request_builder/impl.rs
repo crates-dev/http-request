@@ -175,6 +175,15 @@ impl HttpRequestBuilder {
         self
     }
 
+    /// Unenables HTTP redirection for the request.
+    ///
+    /// This method sets the `redirect` property of the `http_request` to `false`.
+    /// It returns a mutable reference to the current instance, allowing method chaining.
+    pub fn unredirect(&mut self) -> &mut Self {
+        self.http_request.config.redirect = false;
+        self
+    }
+
     /// Sets the maximum number of allowed redirections for the HTTP request.
     ///
     /// This method updates the `max_redirect_times` field in the configuration and returns a mutable
