@@ -1,5 +1,10 @@
 ## http request
 
+[![](https://img.shields.io/crates/v/http-request.svg)](https://crates.io/crates/http-request)
+[![](https://docs.rs/http-request/badge.svg)](https://docs.rs/http-request)
+[![](https://img.shields.io/crates/l/http-request.svg)](./LICENSE)
+[![](https://github.com/ltpp-universe/http-request/workflows/Rust/badge.svg)](https://github.com/ltpp-universe/http-request/actions?query=workflow:Rust)
+
 > Http request is a lightweight, efficient library for building, sending, and handling HTTP requests in Rust applications.
 
 ## Features
