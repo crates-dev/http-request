@@ -5,6 +5,8 @@
 [![](https://img.shields.io/crates/l/http-request.svg)](./LICENSE)
 [![](https://github.com/ltpp-universe/http-request/workflows/Rust/badge.svg)](https://github.com/ltpp-universe/http-request/actions?query=workflow:Rust)
 
+[Official Documentation](https://docs.ltpp.vip/HTTP-REQUEST/)
+
 > Http request is a lightweight, efficient library for building, sending, and handling HTTP requests in Rust applications.
 
 ## Features
@@ -16,6 +18,7 @@
 - **Custom Headers and Body**: Easily add custom headers and request bodies to the HTTP request.
 - **Response Handling**: Provides a simple wrapper around HTTP responses, allowing you to easily access and process the response data.
 - **Optimized Memory Management**: Implements efficient memory handling, minimizing unnecessary memory allocations and improving performance.
+- **Redirect**: Support setting redirection and maximum redirection times.
 
 ## Installation
 
