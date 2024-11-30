@@ -5,14 +5,11 @@ use crate::{
     content_type::r#type::ContentType,
     methods::r#type::Methods,
     protocol::r#type::Protocol,
-    request::{error::Error, request_url::r#type::RequestUrl},
+    request::{config::r#type::Config, error::Error, request_url::r#type::RequestUrl},
 };
 use crate::{
-    constant::{
-        http::{
-            CONNECTION, CONTENT_LENGTH, DEFAULT_HTTP_PATH, DEFAULT_HTTP_VERSION, HOST, LOCATION,
-        },
-        request::DEFAULT_TIMEOUT,
+    constant::http::{
+        CONNECTION, CONTENT_LENGTH, DEFAULT_HTTP_PATH, DEFAULT_HTTP_VERSION, HOST, LOCATION,
     },
     global_trait::r#trait::ReadWrite,
     header::r#type::Header,
@@ -136,12 +133,13 @@ impl HttpRequest {
     /// This function may panic if the request construction or writing to the stream fails,
     /// or if reading the response encounters an issue. It is recommended to handle potential
     /// errors more gracefully in production code.
-    fn send_get_request(
-        &mut self,
-        stream: &mut Box<dyn ReadWrite>,
-        url_obj: &RequestUrl,
-    ) -> HttpResponse {
-        let path: String = url_obj.path.clone().unwrap_or("/".to_string());
+    fn send_get_request(&mut self, stream: &mut Box<dyn ReadWrite>) -> HttpResponse {
+        let path: String = self
+            .config
+            .url_obj
+            .path
+            .clone()
+            .unwrap_or(DEFAULT_HTTP_PATH.to_string());
         let mut request: String = format!(
             "{} {} {}{}",
             Methods::GET,
@@ -152,7 +150,7 @@ impl HttpRequest {
         request.push_str(&format!(
             "{}: {}{}",
             HOST,
-            url_obj.host.as_ref().unwrap_or(&"".to_string()),
+            self.config.url_obj.host.as_ref().unwrap_or(&"".to_string()),
             HTTP_BR
         ));
         request.push_str(&self.get_header_str());
@@ -184,12 +182,10 @@ impl HttpRequest {
     /// This function may panic if the request construction or writing to the stream fails,
     /// or if reading the response encounters an issue. It is recommended to handle potential
     /// errors more gracefully in production code.
-    fn send_post_request(
-        &mut self,
-        stream: &mut Box<dyn ReadWrite>,
-        url_obj: &RequestUrl,
-    ) -> HttpResponse {
-        let path: String = url_obj
+    fn send_post_request(&mut self, stream: &mut Box<dyn ReadWrite>) -> HttpResponse {
+        let path: String = self
+            .config
+            .url_obj
             .path
             .clone()
             .unwrap_or(DEFAULT_HTTP_PATH.to_string());
@@ -203,7 +199,7 @@ impl HttpRequest {
         request.push_str(&format!(
             "{}: {}{}",
             HOST,
-            url_obj.host.as_ref().unwrap_or(&"".to_string()),
+            self.config.url_obj.host.as_ref().unwrap_or(&"".to_string()),
             HTTP_BR
         ));
         request.push_str(&self.get_header_str());
@@ -309,11 +305,15 @@ impl HttpRequest {
     ///
     /// Returns `Ok(HttpResponse)` if the redirection is successful, or `Err(Error)` otherwise.
     fn handle_redirect(&mut self, url: String) -> Result<HttpResponse, Error> {
+        if self.config.redirect && self.config.redirect_times >= self.config.max_redirect_times {
+            return Err(Error::MaxRedirectTimes);
+        }
+        self.config.redirect_times = self.config.redirect_times + 1;
         self.url(url.clone());
-        let url_obj: RequestUrl = self.parse_url().map_err(|_| Error::InvalidUrl)?;
-        let host: String = url_obj.host.unwrap_or_default();
-        let port: u16 = self.get_port(url_obj.port.clone().unwrap_or_default());
-        let path: String = url_obj.path.unwrap_or_default();
+        self.config.url_obj = self.parse_url().map_err(|_| Error::InvalidUrl)?;
+        let host: String = self.config.url_obj.host.clone().unwrap_or_default();
+        let port: u16 = self.get_port(self.config.url_obj.port.clone().unwrap_or_default());
+        let path: String = self.config.url_obj.path.clone().unwrap_or_default();
         let request: String = format!(
             "{} {} {}{}{}: {}{}{}: close{}",
             Methods::GET,
@@ -382,7 +382,7 @@ impl HttpRequest {
             let tcp_stream: TcpStream =
                 TcpStream::connect(host_port.clone()).map_err(|_| Error::TcpStreamConnectError)?;
             tcp_stream
-                .set_read_timeout(Some(Duration::from_secs(*self.timeout)))
+                .set_read_timeout(Some(Duration::from_secs(self.config.timeout)))
                 .map_err(|_| Error::SetReadTimeoutError)?;
             let tls_stream: TlsStream<TcpStream> = tls_connector
                 .connect(&host.clone(), tcp_stream)
@@ -392,7 +392,7 @@ impl HttpRequest {
             let tcp_stream: TcpStream =
                 TcpStream::connect(host_port.clone()).map_err(|_| Error::TcpStreamConnectError)?;
             tcp_stream
-                .set_read_timeout(Some(Duration::from_millis(*self.timeout)))
+                .set_read_timeout(Some(Duration::from_millis(self.config.timeout)))
                 .map_err(|_| Error::SetReadTimeoutError)?;
             Ok(Box::new(tcp_stream))
         };
@@ -405,16 +405,16 @@ impl HttpRequest {
     ///
     /// Returns `Ok(HttpResponse)` if the request is successful, or `Err(Error)` otherwise.
     pub fn send(&mut self) -> Result<HttpResponse, Error> {
-        let url_obj: RequestUrl = self.parse_url().map_err(|_| Error::InvalidUrl)?;
+        self.config.url_obj = self.parse_url().map_err(|_| Error::InvalidUrl)?;
         let methods: Methods = self.get_methods();
-        let host: String = url_obj.host.clone().unwrap_or_default();
-        let port: u16 = self.get_port(url_obj.port.clone().unwrap_or_default());
+        let host: String = self.config.url_obj.host.clone().unwrap_or_default();
+        let port: u16 = self.get_port(self.config.url_obj.port.clone().unwrap_or_default());
         let mut stream: Box<dyn ReadWrite> = self
             .get_connection_stream(host, port)
             .map_err(|_| Error::TcpStreamConnectError)?;
         let res: Result<HttpResponse, Error> = match methods {
-            m if m.is_get() => Ok(self.send_get_request(&mut stream, &url_obj)),
-            m if m.is_post() => Ok(self.send_post_request(&mut stream, &url_obj)),
+            m if m.is_get() => Ok(self.send_get_request(&mut stream)),
+            m if m.is_post() => Ok(self.send_post_request(&mut stream)),
             _ => Err(Error::RequestError),
         };
         res
@@ -429,8 +429,8 @@ impl Default for HttpRequest {
             url: Arc::new(String::new()),
             protocol: Arc::new(Protocol::new()),
             header: Arc::new(HashMap::new()),
-            timeout: Arc::new(DEFAULT_TIMEOUT),
             body: Arc::new(Body::default()),
+            config: Config::default(),
         }
     }
 }

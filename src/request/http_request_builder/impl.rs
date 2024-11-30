@@ -162,7 +162,39 @@ impl HttpRequestBuilder {
     /// # Returns
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
     pub fn timeout(&mut self, timeout: u64) -> &mut Self {
-        self.http_request.timeout = Arc::new(timeout);
+        self.http_request.config.timeout = timeout;
+        self
+    }
+
+    /// Enables HTTP redirection for the request.
+    ///
+    /// This method sets the `redirect` property of the `http_request` to `true`.
+    /// It returns a mutable reference to the current instance, allowing method chaining.
+    pub fn redirect(&mut self) -> &mut Self {
+        self.http_request.config.redirect = true;
+        self
+    }
+
+    /// Sets the maximum number of allowed redirections for the HTTP request.
+    ///
+    /// This method updates the `max_redirect_times` field in the configuration and returns a mutable
+    /// reference to `self` to enable method chaining.
+    ///
+    /// # Parameters
+    ///
+    /// - `num` - The maximum number of redirections allowed. A value of `0` disables redirection.
+    ///
+    /// # Returns
+    ///
+    /// A mutable reference to the current instance for method chaining.
+    ///
+    /// # Notes
+    ///
+    /// Ensure that the value provided to `num` is within a valid range. Excessively high values
+    /// may lead to performance issues or unintended behavior.
+
+    pub fn max_redirect_times(&mut self, num: usize) -> &mut Self {
+        self.http_request.config.max_redirect_times = num;
         self
     }
 

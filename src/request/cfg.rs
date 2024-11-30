@@ -36,6 +36,8 @@ fn test_http_post_request() {
         .json(body)
         .headers(header)
         .timeout(6000)
+        .redirect()
+        .max_redirect_times(8)
         .builder();
     _request_builder
         .send()
@@ -56,6 +58,8 @@ fn test_http_get_request() {
         .get("http://localhost:80")
         .headers(header)
         .timeout(6000)
+        .redirect()
+        .max_redirect_times(8)
         .builder();
     _request_builder
         .send()
@@ -84,6 +88,8 @@ fn test_https_post_request() {
         .json(body)
         .headers(header)
         .timeout(6000)
+        .redirect()
+        .max_redirect_times(8)
         .builder();
     _request_builder
         .send()
@@ -104,6 +110,8 @@ fn test_https_get_request() {
         .get("https://git.ltpp.vip/root")
         .headers(header)
         .timeout(6000)
+        .redirect()
+        .max_redirect_times(8)
         .builder();
     _request_builder
         .send()
@@ -128,6 +136,8 @@ fn test_http_post_text_request() {
         .text("hello")
         .headers(header)
         .timeout(6000)
+        .redirect()
+        .max_redirect_times(8)
         .builder();
     _request_builder
         .send()

@@ -45,6 +45,7 @@ pub enum Error {
     TlsConnectorBuildError,
     SetReadTimeoutError,
     TlsStreamConnectError,
+    MaxRedirectTimes,
 }
 
 impl StdError for Error {}
@@ -60,6 +61,7 @@ impl fmt::Display for Error {
             Error::TlsConnectorBuildError => write!(f, "TLS Connector Build Error"),
             Error::SetReadTimeoutError => write!(f, "Failed to Set Read Timeout"),
             Error::TlsStreamConnectError => write!(f, "TLS Stream Connection Error"),
+            Error::MaxRedirectTimes => write!(f, "Max Redirect Times"),
         }
     }
 }

@@ -1,6 +1,6 @@
 use crate::{
     body::r#type::Body, header::r#type::Header, methods::r#type::Methods,
-    protocol::r#type::Protocol,
+    protocol::r#type::Protocol, request::config::r#type::Config,
 };
 use std::sync::Arc;
 /// Represents an HTTP request, encapsulating various components such as the method, URL, protocol,
@@ -22,6 +22,5 @@ pub struct HttpRequest {
     /// The type of the body, specifying whether it is text or JSON.
     pub body: Arc<Body>,
 
-    /// The timeout duration for the request in milliseconds.
-    pub timeout: Arc<u64>,
+    pub config: Config,
 }

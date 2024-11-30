@@ -33,6 +33,8 @@ let mut _request_builder = HttpRequestBuilder::new()
     .get("http://localhost:80")
     .headers(header)
     .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
     .builder();
 _request_builder
     .send()
@@ -59,6 +61,8 @@ let mut _request_builder = HttpRequestBuilder::new()
     .json(body)
     .headers(header)
     .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
     .builder();
 _request_builder
     .send()
@@ -81,6 +85,8 @@ let mut _request_builder = HttpRequestBuilder::new()
     .text("hello")
     .headers(header)
     .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
     .builder();
 _request_builder
     .send()
