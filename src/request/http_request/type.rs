@@ -2,7 +2,8 @@ use std::sync::Arc;
 
 use crate::{
     global_type::r#type::{Body, Header},
-    Methods, Protocol,
+    methods::r#type::Methods,
+    protocol::r#type::Protocol,
 };
 
 /// Represents an HTTP request with methods, URL, protocol, headers, body, and timeout settings.

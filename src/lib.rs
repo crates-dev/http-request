@@ -9,8 +9,6 @@ pub(crate) mod request_url;
 pub(crate) mod response;
 pub(crate) mod status_code;
 
-pub use methods::r#type::Methods;
-pub use protocol::r#type::Protocol;
 pub use request::{
     error::Error, http_request::r#type::HttpRequest,
     http_request_builder::r#type::HttpRequestBuilder,

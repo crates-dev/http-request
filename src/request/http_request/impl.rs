@@ -4,6 +4,8 @@ use super::r#type::HttpRequest;
 use crate::{
     constant::http::{CONTENT_TYPE, HTTP_BR, HTTP_DOUBLE_BR},
     content_type::r#type::ContentType,
+    methods::r#type::Methods,
+    protocol::r#type::Protocol,
     request::error::Error,
     request_url::r#type::RequestUrl,
 };
@@ -17,7 +19,6 @@ use crate::{
     global_trait::r#trait::ReadWrite,
     global_type::r#type::{Body, Header},
     response::r#type::HttpResponse,
-    Methods, Protocol,
 };
 use std::{
     collections::HashMap,

@@ -3,8 +3,8 @@ use std::sync::Arc;
 use super::r#type::HttpRequestBuilder;
 use crate::{
     global_type::r#type::{Body, Header},
+    methods::r#type::Methods,
     request::http_request::r#type::HttpRequest,
-    Methods,
 };
 
 /// Provides a builder pattern implementation for constructing `HttpRequest` instances.
@@ -21,7 +21,7 @@ use crate::{
 /// - `new`: Creates a new instance of the builder with default values.
 /// - `set_methods`: Sets the HTTP method for the request (e.g., GET, POST).
 /// - `set_url`: Sets the target URL of the request.
-/// - `set_header`: Updates the headers of the request. Existing headers may be merged with
+/// - `headers`: Updates the headers of the request. Existing headers may be merged with
 ///   the provided ones.
 /// - `set_body`: Updates the body of the request. Existing body data may be merged with
 ///   the provided data.
@@ -61,8 +61,25 @@ impl HttpRequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
-    pub fn set_methods(&mut self, methods: Methods) -> &mut Self {
-        self.http_request.methods = Arc::new(methods);
+    pub fn post(&mut self, url: &str) -> &mut Self {
+        self.http_request.methods = Arc::new(Methods::POST);
+        self.set_url(url);
+        self
+    }
+
+    /// Sets the HTTP method for the request.
+    ///
+    /// This method allows you to specify the HTTP method (e.g., GET, POST) for the
+    /// request being built.
+    ///
+    /// # Arguments
+    /// - `methods`: The HTTP method to be set for the request.
+    ///
+    /// # Returns
+    /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
+    pub fn get(&mut self, url: &str) -> &mut Self {
+        self.http_request.methods = Arc::new(Methods::GET);
+        self.set_url(url);
         self
     }
 
@@ -75,7 +92,7 @@ impl HttpRequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
-    pub fn set_url(&mut self, url: &str) -> &mut Self {
+    fn set_url(&mut self, url: &str) -> &mut Self {
         self.http_request.url = Arc::new(url.to_owned());
         self
     }
@@ -90,7 +107,7 @@ impl HttpRequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
-    pub fn set_header(&mut self, header: &Header) -> &mut Self {
+    pub fn headers(&mut self, header: &Header) -> &mut Self {
         if let Some(tmp_header) = Arc::get_mut(&mut self.http_request.header) {
             for (key, value) in header {
                 tmp_header.insert(key.clone(), value.clone());
@@ -132,7 +149,7 @@ impl HttpRequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
-    pub fn set_timeout(&mut self, timeout: u64) -> &mut Self {
+    pub fn timeout(&mut self, timeout: u64) -> &mut Self {
         self.http_request.timeout = Arc::new(timeout);
         self
     }

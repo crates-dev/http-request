@@ -32,11 +32,10 @@ fn test_http_post_request() {
     let mut body: HashMap<String, String> = HashMap::new();
     body.insert("body-key".to_string(), "body-value".to_string());
     let mut _request_builder = HttpRequestBuilder::new()
-        .set_methods(Methods::POST)
-        .set_url("http://localhost:80")
+        .post("http://localhost:80")
         .set_body(&body)
-        .set_header(&header)
-        .set_timeout(6000)
+        .headers(&header)
+        .timeout(6000)
         .builder();
     _request_builder
         .send()
@@ -54,10 +53,9 @@ fn test_http_get_request() {
     let mut body: HashMap<String, String> = HashMap::new();
     body.insert("body-key".to_string(), "body-value".to_string());
     let mut _request_builder = HttpRequestBuilder::new()
-        .set_methods(Methods::GET)
-        .set_url("http://localhost:80")
-        .set_header(&header)
-        .set_timeout(6000)
+        .get("http://localhost:80")
+        .headers(&header)
+        .timeout(6000)
         .builder();
     _request_builder
         .send()
@@ -85,11 +83,10 @@ fn test_https_post_request() {
     body.insert("language".to_string(), "rust".to_string());
     body.insert("testin".to_string(), "".to_string());
     let mut _request_builder = HttpRequestBuilder::new()
-        .set_methods(Methods::POST)
-        .set_url("https://code.ltpp.vip/")
+        .post("https://code.ltpp.vip/")
         .set_body(&body)
-        .set_header(&header)
-        .set_timeout(6000)
+        .headers(&header)
+        .timeout(6000)
         .builder();
     _request_builder
         .send()
@@ -107,10 +104,9 @@ fn test_https_get_request() {
     let mut body: HashMap<String, String> = HashMap::new();
     body.insert("body-key".to_string(), "body-value".to_string());
     let mut _request_builder = HttpRequestBuilder::new()
-        .set_methods(Methods::GET)
-        .set_url("https://git.ltpp.vip/root")
-        .set_header(&header)
-        .set_timeout(6000)
+        .get("https://git.ltpp.vip/root")
+        .headers(&header)
+        .timeout(6000)
         .builder();
     _request_builder
         .send()
