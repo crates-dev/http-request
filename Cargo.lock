@@ -25,9 +25,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "color-output"
-version = "3.0.1"
+version = "4.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b7f6ae9fd63a0a69ef87b9d08f1c4ad63c0310c47a12e577be8cf4f76d1a23c"
+checksum = "3cb28a94482f6a26c7b4b12e8e3fe741ae8a7671318c028d72ba1cb6e6fdaf18"
 
 [[package]]
 name = "core-foundation"

@@ -65,7 +65,7 @@ impl HttpRequest {
     /// # Arguments
     ///
     /// - `url`: The new URL to set.
-    fn set_url(&mut self, url: String) {
+    fn url(&mut self, url: String) {
         self.url = Arc::new(url);
     }
 
@@ -310,7 +310,7 @@ impl HttpRequest {
     ///
     /// Returns `Ok(HttpResponse)` if the redirection is successful, or `Err(Error)` otherwise.
     fn handle_redirect(&mut self, url: String) -> Result<HttpResponse, Error> {
-        self.set_url(url.clone());
+        self.url(url.clone());
         let url_obj: RequestUrl = self.parse_url().map_err(|_| Error::InvalidUrl)?;
         let host: String = url_obj.host.unwrap_or_default();
         let port: u16 = self.get_port(url_obj.port.clone().unwrap_or_default());

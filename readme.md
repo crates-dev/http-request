@@ -33,7 +33,7 @@ let mut body: HashMap<String, String> = HashMap::new();
 body.insert("body-key".to_string(), "body-value".to_string());
 let mut _request_builder = HttpRequestBuilder::new()
     .post("http://localhost:80")
-    .set_body(&body)
+    .body(&body)
     .headers(&header)
     .timeout(6000)
     .builder();

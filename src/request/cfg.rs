@@ -5,16 +5,16 @@ use std_macro_extensions::*;
 #[allow(dead_code)]
 fn output(title: &str, msg: &str, color: Color) {
     OutputBuilder::new()
-        .set_show_time(true)
-        .set_time_bg_color(ColorType::Use(Color::Cyan))
-        .set_time_text_blod(true)
-        .set_split_text(title)
-        .set_split_text_blod(true)
-        .set_split_bg_color(ColorType::Use(Color::Yellow))
-        .set_text(msg)
-        .set_text_bg_color(ColorType::Use(color))
-        .set_text_blod(true)
-        .set_endl(true)
+        .show_time(true)
+        .time_bg_color(ColorType::Use(Color::Cyan))
+        .time_text_blod(true)
+        .split_text(title)
+        .split_text_blod(true)
+        .split_bg_color(ColorType::Use(Color::Yellow))
+        .text(msg)
+        .text_bg_color(ColorType::Use(color))
+        .text_blod(true)
+        .endl(true)
         .build()
         .output();
 }
@@ -33,7 +33,7 @@ fn test_http_post_request() {
     body.insert("body-key".to_string(), "body-value".to_string());
     let mut _request_builder = HttpRequestBuilder::new()
         .post("http://localhost:80")
-        .set_body(&body)
+        .body(&body)
         .headers(&header)
         .timeout(6000)
         .builder();
@@ -84,7 +84,7 @@ fn test_https_post_request() {
     body.insert("testin".to_string(), "".to_string());
     let mut _request_builder = HttpRequestBuilder::new()
         .post("https://code.ltpp.vip/")
-        .set_body(&body)
+        .body(&body)
         .headers(&header)
         .timeout(6000)
         .builder();

@@ -19,11 +19,11 @@ use crate::{
 ///
 /// # Methods
 /// - `new`: Creates a new instance of the builder with default values.
-/// - `set_methods`: Sets the HTTP method for the request (e.g., GET, POST).
-/// - `set_url`: Sets the target URL of the request.
+/// - `methods`: Sets the HTTP method for the request (e.g., GET, POST).
+/// - `url`: Sets the target URL of the request.
 /// - `headers`: Updates the headers of the request. Existing headers may be merged with
 ///   the provided ones.
-/// - `set_body`: Updates the body of the request. Existing body data may be merged with
+/// - `body`: Updates the body of the request. Existing body data may be merged with
 ///   the provided data.
 /// - `builder`: Finalizes the configuration and returns a fully constructed `HttpRequest`
 ///   instance. Resets the builder's temporary state for subsequent use.
@@ -63,7 +63,7 @@ impl HttpRequestBuilder {
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
     pub fn post(&mut self, url: &str) -> &mut Self {
         self.http_request.methods = Arc::new(Methods::POST);
-        self.set_url(url);
+        self.url(url);
         self
     }
 
@@ -79,7 +79,7 @@ impl HttpRequestBuilder {
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
     pub fn get(&mut self, url: &str) -> &mut Self {
         self.http_request.methods = Arc::new(Methods::GET);
-        self.set_url(url);
+        self.url(url);
         self
     }
 
@@ -92,7 +92,7 @@ impl HttpRequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
-    fn set_url(&mut self, url: &str) -> &mut Self {
+    fn url(&mut self, url: &str) -> &mut Self {
         self.http_request.url = Arc::new(url.to_owned());
         self
     }
@@ -126,7 +126,7 @@ impl HttpRequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
-    pub fn set_body(&mut self, body: &Body) -> &mut Self {
+    pub fn body(&mut self, body: &Body) -> &mut Self {
         if let Some(tmp_body) = Arc::get_mut(&mut self.http_request.body) {
             for (key, value) in body {
                 tmp_body.insert(key.clone(), value.clone());
