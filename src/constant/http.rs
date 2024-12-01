@@ -25,6 +25,9 @@ pub static USER_AGENT: &str = "User-Agent";
 /// The HTTP header field name `Host`, used to specify the host and port number of the server.
 pub static HOST: &str = "Host";
 
+/// Unknown HTTP version
+pub static UNKNOWN_HTTP_VERSION: &str = "";
+
 /// The default HTTP version `HTTP/1.1` used in requests and responses.
 pub static HTTP_VERSION_1_1: &str = "HTTP/1.1";
 

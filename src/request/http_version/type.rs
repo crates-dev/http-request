@@ -20,4 +20,7 @@ pub enum HttpVersion {
 
     /// HTTP version 2.0
     HTTP2,
+
+    /// Unknown version
+    Unknown(String),
 }

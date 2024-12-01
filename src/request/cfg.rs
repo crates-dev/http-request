@@ -79,14 +79,17 @@ fn test_https_post_request() {
     header.insert("Connection", "keep-alive");
     header.insert("Accept-Encoding", "gzip, deflate");
     let mut body: HashMap<&str, &str> = HashMap::new();
-    body.insert("code", "hello");
+    body.insert(
+        "code",
+        "fn main() {\r\nloop {}    println!(\"hello world\");\r\n}",
+    );
     body.insert("language", "rust");
     body.insert("testin", "");
     let mut _request_builder = HttpRequestBuilder::new()
         .post("https://code.ltpp.vip/")
         .json(body)
         .headers(header)
-        .timeout(6000)
+        .timeout(1000)
         .redirect()
         .max_redirect_times(8)
         .http1_1_only()

@@ -347,6 +347,7 @@ impl HttpRequest {
     /// - `Error::TlsStreamConnectError`: If the TLS stream could not be established.
     fn get_connection_stream(&self, host: String, port: u16) -> Result<Box<dyn ReadWrite>, Error> {
         let host_port: (String, u16) = (host.clone(), port);
+        let timeout: Duration = Duration::from_millis(self.config.timeout);
         let stream: Result<Box<dyn ReadWrite>, Error> = if self.get_protocol().is_https() {
             let tls_connector: TlsConnector = TlsConnector::builder()
                 .build()
@@ -354,8 +355,11 @@ impl HttpRequest {
             let tcp_stream: TcpStream =
                 TcpStream::connect(host_port.clone()).map_err(|_| Error::TcpStreamConnectError)?;
             tcp_stream
-                .set_read_timeout(Some(Duration::from_secs(self.config.timeout)))
+                .set_read_timeout(Some(timeout))
                 .map_err(|_| Error::SetReadTimeoutError)?;
+            tcp_stream
+                .set_write_timeout(Some(timeout))
+                .map_err(|_| Error::SetWriteTimeoutError)?;
             let tls_stream: TlsStream<TcpStream> = tls_connector
                 .connect(&host.clone(), tcp_stream)
                 .map_err(|_| Error::TlsStreamConnectError)?;
@@ -364,8 +368,11 @@ impl HttpRequest {
             let tcp_stream: TcpStream =
                 TcpStream::connect(host_port.clone()).map_err(|_| Error::TcpStreamConnectError)?;
             tcp_stream
-                .set_read_timeout(Some(Duration::from_millis(self.config.timeout)))
+                .set_read_timeout(Some(timeout))
                 .map_err(|_| Error::SetReadTimeoutError)?;
+            tcp_stream
+                .set_write_timeout(Some(timeout))
+                .map_err(|_| Error::SetWriteTimeoutError)?;
             Ok(Box::new(tcp_stream))
         };
         stream

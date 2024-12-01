@@ -7,7 +7,7 @@
 
 [Official Documentation](https://docs.ltpp.vip/HTTP-REQUEST/)
 
-> http_request is a lightweight, efficient library for building, sending, and handling HTTP/HTTPS requests in Rust applications. It provides a simple and intuitive API, allowing developers to easily interact with web services, whether they use the "HTTP" or "HTTPS" protocol. The library supports various HTTP methods, custom headers, request bodies, and automatic handling of redirects (including detecting redirect loops), enabling fast and secure communication. Whether working with secure "HTTPS" connections or standard "HTTP" requests, the library is optimized for performance, minimal resource usage, and easy integration into Rust projects.
+> http_request is a lightweight, efficient library for building, sending, and handling HTTP/HTTPS requests in Rust applications. It provides a simple and intuitive API, allowing developers to easily interact with web services, whether they use the "HTTP" or "HTTPS" protocol. The library supports various HTTP methods, custom headers, request bodies, timeout, and automatic handling of redirects (including detecting redirect loops), enabling fast and secure communication. Whether working with secure "HTTPS" connections or standard "HTTP" requests, the library is optimized for performance, minimal resource usage, and easy integration into Rust projects.
 
 ## Features
 
@@ -20,6 +20,7 @@
 - **Response Handling**: Provides a simple wrapper around HTTP responses, making it easy to access and process response data.
 - **Optimized Memory Management**: Implements efficient memory management to minimize unnecessary memory allocations and improve performance.
 - **Redirect Handling**: Supports redirect handling, allows setting the maximum number of redirects, and includes redirect loop detection.
+- **timeout**: Supports timeout
 
 ## Installation
 

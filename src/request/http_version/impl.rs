@@ -1,5 +1,5 @@
 use super::r#type::HttpVersion;
-use crate::constant::http::{HTTP_VERSION_1_1, HTTP_VERSION_2};
+use crate::constant::http::{HTTP_VERSION_1_1, HTTP_VERSION_2, UNKNOWN_HTTP_VERSION};
 use std::fmt;
 
 impl Default for HttpVersion {
@@ -32,6 +32,7 @@ impl fmt::Display for HttpVersion {
         let version_str = match self {
             HttpVersion::HTTP1_1 => HTTP_VERSION_1_1,
             HttpVersion::HTTP2 => HTTP_VERSION_2,
+            HttpVersion::Unknown(_) => UNKNOWN_HTTP_VERSION,
         };
         write!(f, "{}", version_str)
     }
