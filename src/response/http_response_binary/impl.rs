@@ -1,10 +1,11 @@
-use super::r#type::{HttpResponse, HttpResponseText};
+use super::r#type::HttpResponseBinary;
 use crate::{
     constant::{
         common::{BR_BYTES, COLON_SPACE_BYTES},
         http::{CONTENT_LENGTH, HTTP_BR, HTTP_BR_BYTES},
     },
     request::http_version::r#type::HttpVersion,
+    response::http_response_text::r#type::HttpResponseText,
     status_code::r#type::StatusCode,
     utils::vec::{split_multi_byte, split_whitespace},
 };
@@ -13,13 +14,13 @@ use std::{collections::HashMap, vec::IntoIter};
 /// Provides functionality for parsing and working with HTTP responses.
 ///
 /// This implementation contains methods for extracting specific information from HTTP response
-/// strings, such as content length, and parsing the entire response into an `HttpResponse` object.
+/// strings, such as content length, and parsing the entire response into an `HttpResponseBinary` object.
 ///
 /// # Methods
 /// - `get_content_length`: Extracts the `Content-Length` value from the HTTP response string.
-/// - `from`: Parses a raw HTTP response string into an `HttpResponse` struct, including the
+/// - `from`: Parses a raw HTTP response string into an `HttpResponseBinary` struct, including the
 ///   status line, headers, and body.
-impl HttpResponse {
+impl HttpResponseBinary {
     /// Extracts the `Content-Length` from the response string.
     ///
     /// This method scans the HTTP response string for the `Content-Length` header and parses
@@ -53,7 +54,7 @@ impl HttpResponse {
             .unwrap_or_default()
     }
 
-    /// Parses an HTTP response from a byte slice and returns an `HttpResponse` object.
+    /// Parses an HTTP response from a byte slice and returns an `HttpResponseBinary` object.
     ///
     /// This function processes the raw HTTP response in byte form. It splits the response into
     /// the status line, headers, and body, parsing each part accordingly. The status line is parsed
@@ -64,7 +65,7 @@ impl HttpResponse {
     /// - `response`: A byte slice representing the raw HTTP response.
     ///
     /// # Returns
-    /// Returns an `HttpResponse` object containing the parsed HTTP version, status code, status text,
+    /// Returns an `HttpResponseBinary` object containing the parsed HTTP version, status code, status text,
     /// headers, and body. If parsing any part fails, defaults are used (e.g., `HTTP/1.1`, status code `200`).
     ///
     /// # Panics
@@ -103,7 +104,7 @@ impl HttpResponse {
             }
         }
         let body: Vec<u8> = lines.clone().collect::<Vec<&[u8]>>().join(BR_BYTES);
-        HttpResponse {
+        HttpResponseBinary {
             http_version,
             status_code,
             status_text,
@@ -114,35 +115,34 @@ impl HttpResponse {
 
     /// Converts the response body to text format.
     ///
-    /// This function takes the current response and creates a new `HttpResponse`
+    /// This function takes the current response and creates a new `HttpResponseBinary`
     /// instance with the body converted to a text representation. The `body` is
     /// extracted as text from the original response body and stored in the new
     /// response as a `ResponseBody::Text` variant.
     ///
     /// # Returns
     ///
-    /// - `Self` - A new `HttpResponse` instance with the body converted to text.
+    /// - `Self` - A new `HttpResponseBinary` instance with the body converted to text.
     pub fn text(self) -> HttpResponseText {
-        let res: HttpResponse = self.clone();
-        let body: String = String::from_utf8_lossy(&res.body).to_string();
+        let body: String = String::from_utf8_lossy(&self.body).to_string();
         HttpResponseText {
-            http_version: res.http_version,
-            status_code: res.status_code,
-            status_text: res.status_text,
-            headers: res.headers,
+            http_version: self.http_version,
+            status_code: self.status_code,
+            status_text: self.status_text,
+            headers: self.headers,
             body,
         }
     }
 }
 
-/// Default implementation for `HttpResponse`.
+/// Default implementation for `HttpResponseBinary`.
 ///
-/// This implementation provides default values for an `HttpResponse` instance, setting the HTTP
+/// This implementation provides default values for an `HttpResponseBinary` instance, setting the HTTP
 /// version to the default version, the status code to `StatusCode::Unknown`, and initializing the
 /// headers and body to empty collections.
-impl Default for HttpResponse {
+impl Default for HttpResponseBinary {
     fn default() -> Self {
-        HttpResponse {
+        HttpResponseBinary {
             http_version: HttpVersion::Unknown(String::new()).to_string(),
             status_code: StatusCode::Unknown.code(),
             status_text: StatusCode::Unknown.to_string(),

@@ -30,7 +30,7 @@ fn test_http_post_request() {
     body.insert("code", "hello");
     body.insert("language", "rust");
     body.insert("testin", "");
-    let mut _request_builder = HttpRequestBuilder::new()
+    let mut _request_builder: HttpRequest = HttpRequestBuilder::new()
         .post("http://localhost:80/rust?hello=rust")
         .json(body)
         .headers(header)
@@ -59,7 +59,7 @@ fn test_http_get_request() {
     header.insert("header-key", "header-value");
     let mut body: HashMap<&str, &str> = HashMap::new();
     body.insert("body-key", "body-value");
-    let mut _request_builder = HttpRequestBuilder::new()
+    let mut _request_builder: HttpRequest = HttpRequestBuilder::new()
         .get("http://localhost:80")
         .headers(header)
         .timeout(6000)
@@ -92,7 +92,7 @@ fn test_https_post_request() {
     body.insert("code", "fn main() {\r\n    println!(\"hello world\");\r\n}");
     body.insert("language", "rust");
     body.insert("testin", "");
-    let mut _request_builder = HttpRequestBuilder::new()
+    let mut _request_builder: HttpRequest = HttpRequestBuilder::new()
         .post("https://code.ltpp.vip/")
         .json(body)
         .headers(header)
@@ -121,7 +121,7 @@ fn test_https_get_request() {
     header.insert("header-key", "header-value");
     let mut body: HashMap<&str, &str> = HashMap::new();
     body.insert("body-key", "body-value");
-    let mut _request_builder = HttpRequestBuilder::new()
+    let mut _request_builder: HttpRequest = HttpRequestBuilder::new()
         .get("https://code.ltpp.vip/")
         .headers(header)
         .timeout(10000)
@@ -148,7 +148,7 @@ fn test_http_post_text_request() {
     let mut header: HashMap<&str, &str> = HashMap::new();
     header.insert("Accept", "*/*");
     header.insert("Content-Type", "application/json");
-    let mut _request_builder = HttpRequestBuilder::new()
+    let mut _request_builder: HttpRequest = HttpRequestBuilder::new()
         .post("http://localhost:80")
         .text("hello")
         .headers(header)
@@ -176,7 +176,7 @@ fn test_http_post_binary_request() {
     let mut header: HashMap<&str, &str> = HashMap::new();
     header.insert("Accept", "*/*");
     header.insert("Content-Type", "application/json");
-    let mut _request_builder = HttpRequestBuilder::new()
+    let mut _request_builder: HttpRequest = HttpRequestBuilder::new()
         .post("http://localhost:80")
         .body("hello".as_bytes())
         .headers(header)

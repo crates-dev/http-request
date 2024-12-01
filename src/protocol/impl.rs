@@ -17,6 +17,7 @@ impl Protocol {
     /// Creates a new instance of `Protocol` with the default value of `Protocol::HTTP`.
     ///
     /// This is a shorthand for using the `default` method.
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Protocol::default()
     }
@@ -24,6 +25,7 @@ impl Protocol {
     /// Checks if the current protocol is `HTTP`.
     ///
     /// Returns `true` if the protocol is `HTTP`, otherwise returns `false`.
+    #[allow(dead_code)]
     pub fn is_http(&self) -> bool {
         self.to_owned() == Protocol::HTTP.to_owned()
     }

@@ -15,12 +15,12 @@ use crate::{
         config::r#type::Config, error::Error, request_url::r#type::RequestUrl, tmp::r#type::Tmp,
     },
     utils::vec::case_insensitive_match,
+    HttpResponseBinary,
 };
 use crate::{
     constant::http::{CONTENT_LENGTH, DEFAULT_HTTP_PATH, HOST, LOCATION},
     global_trait::r#trait::ReadWrite,
     header::r#type::Header,
-    response::r#type::HttpResponse,
 };
 use native_tls::{TlsConnector, TlsStream};
 use std::{
@@ -219,10 +219,13 @@ impl HttpRequest {
     ///   for sending and receiving data.
     ///
     /// # Returns
-    /// Returns a `Result<HttpResponse, Error>`, where:
-    /// - `Ok(HttpResponse)` contains the HTTP response received from the server.
+    /// Returns a `Result<HttpResponseBinary, Error>`, where:
+    /// - `Ok(HttpResponseBinary)` contains the HTTP response received from the server.
     /// - `Err(Error)` indicates that an error occurred while sending the request or reading the response.
-    fn send_get_request(&mut self, stream: &mut Box<dyn ReadWrite>) -> Result<HttpResponse, Error> {
+    fn send_get_request(
+        &mut self,
+        stream: &mut Box<dyn ReadWrite>,
+    ) -> Result<HttpResponseBinary, Error> {
         let mut request: Vec<u8> = Vec::new();
         let path: String = self.get_path();
         let request_line_string: String =
@@ -247,13 +250,13 @@ impl HttpRequest {
     ///   for sending and receiving data.
     ///
     /// # Returns
-    /// Returns a `Result<HttpResponse, Error>`, where:
-    /// - `Ok(HttpResponse)` contains the HTTP response received from the server.
+    /// Returns a `Result<HttpResponseBinary, Error>`, where:
+    /// - `Ok(HttpResponseBinary)` contains the HTTP response received from the server.
     /// - `Err(Error)` indicates that an error occurred while sending the request or reading the response.
     fn send_post_request(
         &mut self,
         stream: &mut Box<dyn ReadWrite>,
-    ) -> Result<HttpResponse, Error> {
+    ) -> Result<HttpResponseBinary, Error> {
         let mut request: Vec<u8> = Vec::new();
         let path: String = self.get_path();
         let request_line_string: String =
@@ -281,10 +284,13 @@ impl HttpRequest {
     ///   for receiving the response.
     ///
     /// # Returns
-    /// Returns a `Result<HttpResponse, Error>`, where:
-    /// - `Ok(HttpResponse)` contains the complete HTTP response after processing headers and body.
+    /// Returns a `Result<HttpResponseBinary, Error>`, where:
+    /// - `Ok(HttpResponseBinary)` contains the complete HTTP response after processing headers and body.
     /// - `Err(Error)` indicates that an error occurred while reading the response.
-    fn read_response(&mut self, stream: &mut Box<dyn ReadWrite>) -> Result<HttpResponse, Error> {
+    fn read_response(
+        &mut self,
+        stream: &mut Box<dyn ReadWrite>,
+    ) -> Result<HttpResponseBinary, Error> {
         let buffer_size: usize = self.config.buffer;
         let mut buffer: Vec<u8> = vec![0; buffer_size];
         let mut response_bytes: Vec<u8> = Vec::new();
@@ -336,7 +342,7 @@ impl HttpRequest {
                 break 'read_loop;
             }
         }
-        self.response = HttpResponse::from(&response_bytes);
+        self.response = HttpResponseBinary::from(&response_bytes);
         if !self.config.redirect || redirect_url.is_none() {
             return Ok(self.response.clone());
         }
@@ -431,8 +437,8 @@ impl HttpRequest {
     ///
     /// - `url`: The redirection URL to follow.
     ///
-    /// Returns `Ok(HttpResponse)` if the redirection is successful, or `Err(Error)` otherwise.
-    fn handle_redirect(&mut self, url: String) -> Result<HttpResponse, Error> {
+    /// Returns `Ok(HttpResponseBinary)` if the redirection is successful, or `Err(Error)` otherwise.
+    fn handle_redirect(&mut self, url: String) -> Result<HttpResponseBinary, Error> {
         if self.tmp.visit_url.contains(&url) {
             return Err(Error::RedirectUrlDeadLoop);
         }
@@ -522,8 +528,8 @@ impl HttpRequest {
     ///
     /// Determines the HTTP method and constructs the appropriate request (GET or POST).
     ///
-    /// Returns `Ok(HttpResponse)` if the request is successful, or `Err(Error)` otherwise.
-    pub fn send(&mut self) -> Result<HttpResponse, Error> {
+    /// Returns `Ok(HttpResponseBinary)` if the request is successful, or `Err(Error)` otherwise.
+    pub fn send(&mut self) -> Result<HttpResponseBinary, Error> {
         self.config.url_obj = self.parse_url().map_err(|_| Error::InvalidUrl)?;
         let methods: Methods = self.get_methods();
         let host: String = self.config.url_obj.host.clone().unwrap_or_default();
@@ -531,7 +537,7 @@ impl HttpRequest {
         let mut stream: Box<dyn ReadWrite> = self
             .get_connection_stream(host, port)
             .map_err(|_| Error::TcpStreamConnectError)?;
-        let res: Result<HttpResponse, Error> = match methods {
+        let res: Result<HttpResponseBinary, Error> = match methods {
             m if m.is_get() => self.send_get_request(&mut stream),
             m if m.is_post() => self.send_post_request(&mut stream),
             _ => Err(Error::RequestError),
@@ -550,7 +556,7 @@ impl Default for HttpRequest {
             body: Arc::new(Body::default()),
             config: Config::default(),
             tmp: Tmp::default(),
-            response: HttpResponse::default(),
+            response: HttpResponseBinary::default(),
         }
     }
 }

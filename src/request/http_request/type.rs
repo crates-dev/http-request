@@ -3,7 +3,7 @@ use crate::{
     header::r#type::Header,
     methods::r#type::Methods,
     request::{config::r#type::Config, tmp::r#type::Tmp},
-    HttpResponse,
+    HttpResponseBinary,
 };
 use std::sync::Arc;
 /// Represents an HTTP request, encapsulating various components such as the method, URL, protocol,
@@ -11,23 +11,23 @@ use std::sync::Arc;
 #[derive(Debug, Clone, PartialEq)]
 pub struct HttpRequest {
     /// The HTTP method of the request (e.g., GET, POST, etc.).
-    pub methods: Arc<Methods>,
+    pub(crate) methods: Arc<Methods>,
 
     /// The target URL of the request.
-    pub url: Arc<String>,
+    pub(crate) url: Arc<String>,
 
     /// The headers included in the request.
-    pub header: Arc<Header>,
+    pub(crate) header: Arc<Header>,
 
     /// The type of the body, specifying whether it is text or JSON.
-    pub body: Arc<Body>,
+    pub(crate) body: Arc<Body>,
 
     /// Represents the configuration settings for the HTTP request.
-    pub config: Config,
+    pub(crate) config: Config,
 
     /// Stores temporary data during the HTTP request process.
-    pub tmp: Tmp,
+    pub(crate) tmp: Tmp,
 
     /// Http response
-    pub response: HttpResponse,
+    pub(crate) response: HttpResponseBinary,
 }

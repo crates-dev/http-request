@@ -1,2 +1,2 @@
-pub mod r#impl;
-pub mod r#type;
+pub mod http_response_binary;
+pub mod http_response_text;

@@ -14,4 +14,4 @@ pub use request::{
     error::Error, http_request::r#type::HttpRequest,
     http_request_builder::r#type::HttpRequestBuilder,
 };
-pub use response::r#type::HttpResponse;
+pub use response::http_response_binary::r#type::HttpResponseBinary;
