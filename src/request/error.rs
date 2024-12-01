@@ -19,6 +19,7 @@ use std::{
 /// - `TlsStreamConnectError`: Represents an error that occurred while establishing a TLS stream connection.
 /// - `MaxRedirectTimes`: Occurs when the maximum number of redirects is exceeded.
 /// - `RedirectUrlDeadLoop`: Indicates that a redirect URL has resulted in a dead loop.
+/// - `RedirectInvalidUrl`: Occurs when a redirect URL is invalid.
 #[derive(Debug)]
 pub enum Error {
     InvalidUrl,
@@ -32,6 +33,7 @@ pub enum Error {
     TlsStreamConnectError,
     MaxRedirectTimes,
     RedirectUrlDeadLoop,
+    RedirectInvalidUrl,
 }
 
 impl StdError for Error {}
@@ -61,6 +63,7 @@ impl fmt::Display for Error {
             Error::TlsStreamConnectError => write!(f, "TLS Stream Connection Error"),
             Error::MaxRedirectTimes => write!(f, "Max Redirect Times"),
             Error::RedirectUrlDeadLoop => write!(f, "Redirect URL Dead Loop"),
+            Error::RedirectInvalidUrl => write!(f, "Redirect Invalid Url"),
         }
     }
 }

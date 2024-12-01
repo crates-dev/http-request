@@ -3,6 +3,7 @@ use crate::{
     header::r#type::Header,
     methods::r#type::Methods,
     request::{config::r#type::Config, tmp::r#type::Tmp},
+    HttpResponse,
 };
 use std::sync::Arc;
 /// Represents an HTTP request, encapsulating various components such as the method, URL, protocol,
@@ -26,4 +27,7 @@ pub struct HttpRequest {
 
     /// Stores temporary data during the HTTP request process.
     pub tmp: Tmp,
+
+    /// Http response
+    pub response: HttpResponse,
 }

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use super::r#type::HttpRequestBuilder;
 use crate::{
-    body::r#type::{Body, BodyJson, BodyText},
+    body::r#type::{Body, BodyBinary, BodyJson, BodyText},
     header::r#type::Header,
     methods::r#type::Methods,
     request::{http_request::r#type::HttpRequest, http_version::r#type::HttpVersion},
@@ -57,7 +57,7 @@ impl HttpRequestBuilder {
     /// This method allows you to specify the HTTP method (e.g., GET, POST) for the
     /// request being built.
     ///
-    /// # Arguments
+    /// # Parameters
     /// - `methods`: The HTTP method to be set for the request.
     ///
     /// # Returns
@@ -73,7 +73,7 @@ impl HttpRequestBuilder {
     /// This method allows you to specify the HTTP method (e.g., GET, POST) for the
     /// request being built.
     ///
-    /// # Arguments
+    /// # Parameters
     /// - `methods`: The HTTP method to be set for the request.
     ///
     /// # Returns
@@ -88,7 +88,7 @@ impl HttpRequestBuilder {
     ///
     /// This method allows you to specify the URL for the request being built.
     ///
-    /// # Arguments
+    /// # Parameters
     /// - `url`: The target URL of the request.
     ///
     /// # Returns
@@ -131,7 +131,7 @@ impl HttpRequestBuilder {
     /// This method allows you to specify the headers for the request being built.
     /// Existing headers may be merged with the provided ones.
     ///
-    /// # Arguments
+    /// # Parameters
     /// - `header`: The headers to be set for the request.
     ///
     /// # Returns
@@ -150,7 +150,7 @@ impl HttpRequestBuilder {
     /// This method allows you to set the body of the request as JSON data. If there is existing
     /// body data, it will be replaced with the provided JSON data.
     ///
-    /// # Arguments
+    /// # Parameters
     /// - `body`: The JSON body data to be set for the request.
     ///
     /// # Returns
@@ -165,13 +165,35 @@ impl HttpRequestBuilder {
     /// This method allows you to set the body of the request as plain text. If there is existing
     /// body data, it will be replaced with the provided text data.
     ///
-    /// # Arguments
+    /// # Parameters
     /// - `body`: The text body data to be set for the request.
     ///
     /// # Returns
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
     pub fn text(&mut self, body: BodyText) -> &mut Self {
         self.http_request.body = Arc::new(Body::Text(body));
+        self
+    }
+
+    /// Sets the HTTP request body to the given binary content.
+    ///
+    /// This method assigns the provided binary data to the body of the HTTP request.
+    /// The body is wrapped in an `Arc` to enable shared ownership and safe concurrency.
+    ///
+    /// # Parameters
+    ///
+    /// - `body` - A `BodyBinary` representing the binary content to be used as the HTTP request body.
+    ///
+    /// # Returns
+    ///
+    /// Returns a mutable reference to the current instance of the struct, allowing method chaining.
+    ///
+    /// # Notes
+    ///
+    /// This method overrides any previously set body. Use it when you want to assign binary content
+    /// specifically as the body of the HTTP request.
+    pub fn body(&mut self, body: BodyBinary) -> &mut Self {
+        self.http_request.body = Arc::new(Body::Binary(body));
         self
     }
 
@@ -229,9 +251,24 @@ impl HttpRequestBuilder {
     ///
     /// Ensure that the value provided to `num` is within a valid range. Excessively high values
     /// may lead to performance issues or unintended behavior.
-
     pub fn max_redirect_times(&mut self, num: usize) -> &mut Self {
         self.http_request.config.max_redirect_times = num;
+        self
+    }
+
+    /// Sets the buffer size for the HTTP request configuration.
+    ///
+    /// This method allows you to set the size of the buffer used for reading
+    /// the HTTP response. It modifies the `buffer` field of the HTTP request's
+    /// configuration, which will be used when processing the response data.
+    ///
+    /// # Parameters
+    /// - `buffer`: The size of the buffer to be used, in bytes.
+    ///
+    /// # Returns
+    /// Returns a mutable reference to `self`, allowing for method chaining.
+    pub fn buffer(&mut self, buffer: usize) -> &mut Self {
+        self.http_request.config.buffer = buffer;
         self
     }
 

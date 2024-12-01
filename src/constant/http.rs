@@ -1,8 +1,14 @@
 /// A carriage return and newline character sequence (`\r\n`), used to separate lines in HTTP headers.
 pub static HTTP_BR: &str = "\r\n";
 
+/// A static reference to a byte slice representing the HTTP line break (`\r\n`).
+pub static HTTP_BR_BYTES: &[u8] = HTTP_BR.as_bytes();
+
 /// A double carriage return and newline character sequence (`\r\n\r\n`), used to separate HTTP headers from the body.
 pub static HTTP_DOUBLE_BR: &str = "\r\n\r\n";
+
+/// A static reference to a byte slice representing the HTTP double line break (`\r\n\r\n`).
+pub static HTTP_DOUBLE_BR_BYTES: &[u8] = HTTP_DOUBLE_BR.as_bytes();
 
 /// The HTTP header field name `Location`, used to specify the URL to redirect a client.
 pub static LOCATION: &str = "Location";

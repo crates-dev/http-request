@@ -4,7 +4,8 @@ use crate::{
     constant::{
         common::APP_NAME,
         http::{
-            ACCEPT, ACCEPT_VALUE, CONTENT_TYPE, HTTP_BR, HTTP_DOUBLE_BR, QUERY_SYMBOL, USER_AGENT,
+            ACCEPT, ACCEPT_VALUE, CONTENT_TYPE, HTTP_BR, HTTP_BR_BYTES, HTTP_DOUBLE_BR_BYTES,
+            QUERY_SYMBOL, USER_AGENT,
         },
     },
     content_type::r#type::ContentType,
@@ -13,6 +14,7 @@ use crate::{
     request::{
         config::r#type::Config, error::Error, request_url::r#type::RequestUrl, tmp::r#type::Tmp,
     },
+    utils::vec::case_insensitive_match,
 };
 use crate::{
     constant::http::{CONTENT_LENGTH, DEFAULT_HTTP_PATH, HOST, LOCATION},
@@ -63,7 +65,7 @@ impl HttpRequest {
 
     /// Sets the URL for the HTTP request.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// - `url`: The new URL to set.
     fn url(&mut self, url: String) {
@@ -81,10 +83,31 @@ impl HttpRequest {
         }
     }
 
-    /// Converts the headers into a formatted HTTP header string.
+    /// Converts the HTTP headers into a formatted HTTP header string and returns it as a byte vector.
     ///
-    /// Returns a string where each header is formatted as `key: value`.
-    fn get_header_str(&self) -> String {
+    /// This method processes the HTTP headers by combining both user-defined and required headers.
+    /// Required headers such as `Host`, `Content-Length`, `Accept`, and `User-Agent` are added if
+    /// they are missing, with appropriate default values. The headers are then formatted into
+    /// the standard HTTP header format and converted into a vector of bytes.
+    ///
+    /// # Returns
+    ///
+    /// A `Vec<u8>` containing the formatted HTTP headers as a byte sequence.
+    ///
+    /// # Notes
+    ///
+    /// - The `Host` header is derived from the URL's host in the configuration.
+    /// - The `Content-Length` header is calculated based on the request method:
+    ///   - For `GET` requests, it is set to `0`.
+    ///   - For other methods, it is determined by the length of the body.
+    /// - If any required header is missing, it is automatically added with its default value.
+    /// - Headers are concatenated into a string with each header ending in a line break specified by `HTTP_BR`.
+    ///
+    /// # Behavior
+    ///
+    /// This function ensures that all necessary headers are present and correctly formatted
+    /// before constructing the HTTP request.
+    fn get_header_bytes(&self) -> Vec<u8> {
         let mut header: HashMap<&str, &str> = self.get_header();
         let mut header_string = String::new();
         let required_headers: [(&str, &str); 4] = [
@@ -97,7 +120,7 @@ impl HttpRequest {
                 if self.get_methods().is_get() {
                     &0.to_string()
                 } else {
-                    &self.get_body_str().len().to_string()
+                    &self.get_body_bytes().len().to_string()
                 },
             ),
             (ACCEPT, ACCEPT_VALUE),
@@ -111,13 +134,27 @@ impl HttpRequest {
         for (key, value) in &header {
             header_string.push_str(&format!("{}: {}{}", key, value, HTTP_BR));
         }
-        header_string
+        header_string.as_bytes().to_vec()
     }
 
-    /// Converts the body into a URL-encoded string.
+    /// Converts the HTTP body into a URL-encoded byte vector (`Vec<u8>`).
     ///
-    /// Returns a string in the format `key1=value1&key2=value2`.
-    fn get_body_str(&self) -> String {
+    /// This method processes the body of the HTTP request based on the `Content-Type` header.
+    /// If the `Content-Type` is valid and supports conversion, the body is transformed into a
+    /// URL-encoded string and returned as a vector of bytes.
+    ///
+    /// # Returns
+    ///
+    /// A `Vec<u8>` containing the URL-encoded representation of the HTTP body.
+    /// If the `Content-Type` is not recognized or if the body cannot be converted,
+    /// an empty byte vector is returned.
+    ///
+    /// # Notes
+    ///
+    /// The `Content-Type` header is matched case-insensitively. If no matching `Content-Type`
+    /// is found or the parsing fails, the method defaults to returning an empty byte vector.
+    /// The body processing relies on the implementation of the `ContentType` parsing logic.
+    fn get_body_bytes(&self) -> Vec<u8> {
         let content_type_key: String = CONTENT_TYPE.to_lowercase();
         let header: HashMap<&str, &str> = self.get_header();
         let body: Body = self.get_body();
@@ -132,7 +169,42 @@ impl HttpRequest {
                 break;
             }
         }
-        res
+        res.into_bytes()
+    }
+
+    /// Retrieves the full path of the HTTP request, including the query string if present.
+    ///
+    /// This function constructs and returns the complete path of the HTTP request, which
+    /// is composed of the path and, if available, the query string. The method checks if
+    /// the `url_obj` contains a query string, and if it does, appends it to the path using
+    /// the appropriate query separator (`?`). If no query string is present, only the
+    /// path is returned.
+    ///
+    /// The function defaults to a predefined path (`DEFAULT_HTTP_PATH`) if the path is
+    /// not set in the `url_obj` configuration. If the query string is empty, the function
+    /// simply returns the path.
+    ///
+    /// # Returns
+    ///
+    /// - `String` - The full path, including the query string if available, or just the
+    ///   path if no query string is present.
+    fn get_path(&self) -> String {
+        let query: String = self.config.url_obj.query.clone().unwrap_or_default();
+        let path: String = if query.is_empty() {
+            self.config
+                .url_obj
+                .path
+                .clone()
+                .unwrap_or(DEFAULT_HTTP_PATH.to_string())
+        } else {
+            format!(
+                "{}{}{}",
+                self.config.url_obj.path.clone().unwrap_or_default(),
+                QUERY_SYMBOL,
+                query
+            )
+        };
+        path
     }
 
     /// Sends a GET request over the provided stream and returns the HTTP response.
@@ -151,31 +223,16 @@ impl HttpRequest {
     /// - `Ok(HttpResponse)` contains the HTTP response received from the server.
     /// - `Err(Error)` indicates that an error occurred while sending the request or reading the response.
     fn send_get_request(&mut self, stream: &mut Box<dyn ReadWrite>) -> Result<HttpResponse, Error> {
-        let query: String = self.config.url_obj.query.clone().unwrap_or_default();
-        let path: String = if query.is_empty() {
-            self.config
-                .url_obj
-                .path
-                .clone()
-                .unwrap_or(DEFAULT_HTTP_PATH.to_string())
-        } else {
-            format!(
-                "{}{}{}",
-                self.config.url_obj.path.clone().unwrap_or_default(),
-                QUERY_SYMBOL,
-                query
-            )
-        };
-        let mut request: String = format!(
-            "{} {} {}{}",
-            Methods::GET,
-            path,
-            self.config.http_version,
-            HTTP_BR
-        );
-        request.push_str(&self.get_header_str());
-        request.push_str(HTTP_BR);
-        stream.write_all(request.as_bytes()).unwrap();
+        let mut request: Vec<u8> = Vec::new();
+        let path: String = self.get_path();
+        let request_line_string: String =
+            format!("{} {} {}", Methods::GET, path, self.config.http_version,);
+        let request_line: &[u8] = request_line_string.as_bytes();
+        request.extend_from_slice(request_line);
+        request.extend_from_slice(HTTP_BR_BYTES);
+        request.extend_from_slice(&self.get_header_bytes());
+        request.extend_from_slice(HTTP_BR_BYTES);
+        stream.write_all(&request).unwrap();
         self.read_response(stream)
     }
 
@@ -197,24 +254,18 @@ impl HttpRequest {
         &mut self,
         stream: &mut Box<dyn ReadWrite>,
     ) -> Result<HttpResponse, Error> {
-        let path: String = self
-            .config
-            .url_obj
-            .path
-            .clone()
-            .unwrap_or(DEFAULT_HTTP_PATH.to_string());
-        let mut request: String = format!(
-            "{} {} {}{}",
-            Methods::POST,
-            path,
-            self.config.http_version,
-            HTTP_BR
-        );
-        request.push_str(&self.get_header_str());
-        request.push_str(HTTP_BR);
-        let body_str: &String = &self.get_body_str();
-        request.push_str(body_str);
-        stream.write_all(request.as_bytes()).unwrap();
+        let mut request: Vec<u8> = Vec::new();
+        let path: String = self.get_path();
+        let request_line_string: String =
+            format!("{} {} {}", Methods::POST, path, self.config.http_version,);
+        let request_line: &[u8] = request_line_string.as_bytes();
+        request.extend_from_slice(request_line);
+        request.extend_from_slice(HTTP_BR_BYTES);
+        request.extend_from_slice(&self.get_header_bytes());
+        request.extend_from_slice(HTTP_BR_BYTES);
+        let body_str: &Vec<u8> = &self.get_body_bytes();
+        request.extend_from_slice(body_str);
+        stream.write_all(&request).unwrap();
         self.read_response(stream)
     }
 
@@ -234,60 +285,149 @@ impl HttpRequest {
     /// - `Ok(HttpResponse)` contains the complete HTTP response after processing headers and body.
     /// - `Err(Error)` indicates that an error occurred while reading the response.
     fn read_response(&mut self, stream: &mut Box<dyn ReadWrite>) -> Result<HttpResponse, Error> {
-        let mut buffer: [u8; 1024] = [0; 1024];
-        let mut response_string: String = String::new();
+        let buffer_size: usize = self.config.buffer;
+        let mut buffer: Vec<u8> = vec![0; buffer_size];
+        let mut response_bytes: Vec<u8> = Vec::new();
         let mut headers_done: bool = false;
         let mut content_length: usize = 0;
-        let mut redirect_url: Option<String> = None;
+        let mut redirect_url: Option<Vec<u8>> = None;
         let http_version: String = self.config.http_version.to_string();
-        'first_loop: while let Ok(n) = stream.read(&mut buffer) {
+        let http_version_bytes: Vec<u8> = http_version.to_lowercase().into_bytes();
+        let location_sign_key: Vec<u8> = format!("{}:", LOCATION.to_lowercase()).into_bytes();
+        'read_loop: while let Ok(n) = stream.read(&mut buffer) {
             if n == 0 {
                 break;
             }
-            response_string.push_str(&String::from_utf8_lossy(&buffer[..n]));
-            if !headers_done && response_string.contains(HTTP_DOUBLE_BR) {
+            response_bytes.extend_from_slice(&buffer[..n]);
+            if !headers_done
+                && response_bytes
+                    .windows(HTTP_DOUBLE_BR_BYTES.len())
+                    .any(|window| window == HTTP_DOUBLE_BR_BYTES)
+            {
                 headers_done = true;
-                let status_pos_res: Option<usize> = response_string.find(&http_version);
-                if status_pos_res.is_none() {
-                    continue;
-                }
-                let status_pos: usize = status_pos_res.unwrap_or_default();
-                let status_code: usize = response_string[status_pos + 9..status_pos + 12]
-                    .trim()
-                    .parse::<usize>()
-                    .unwrap_or_default();
-                if (300..=399).contains(&status_code) {
-                    let location_sign_key: String = format!("{}:", LOCATION.to_lowercase());
-                    let location_pos_res = response_string.to_lowercase().find(&location_sign_key);
-                    if location_pos_res.is_none() {
-                        continue;
+                if let Some(status_pos) = response_bytes
+                    .windows(http_version_bytes.len())
+                    .position(|window| case_insensitive_match(window, &http_version_bytes))
+                {
+                    let status_code_start: usize = status_pos + http_version_bytes.len() + 1; // Skip "HTTP/1.1 "
+                    let status_code_end: usize = status_code_start + 3; // Status code is 3 digits
+                    let status_code: usize = Self::parse_status_code(
+                        &response_bytes[status_code_start..status_code_end],
+                    );
+                    if (300..=399).contains(&status_code) {
+                        if let Some(location_pos) = response_bytes
+                            .windows(location_sign_key.len())
+                            .position(|window| case_insensitive_match(window, &location_sign_key))
+                        {
+                            let start: usize = location_pos + location_sign_key.len();
+                            if let Some(end_pos) = response_bytes[start..]
+                                .windows(HTTP_BR_BYTES.len())
+                                .position(|window| window == HTTP_BR_BYTES)
+                            {
+                                redirect_url =
+                                    Some(response_bytes[start..start + end_pos].to_vec());
+                            }
+                        }
                     }
-                    let location_pos: usize = location_pos_res.unwrap_or_default();
-                    let start: usize = location_pos + location_sign_key.len();
-                    let end_pos_res: Option<usize> = response_string[start..].find(HTTP_BR);
-                    if end_pos_res.is_none() {
-                        continue;
-                    }
-                    let end_pos: usize = end_pos_res.unwrap_or_default();
-                    redirect_url = Some(response_string[start..start + end_pos].trim().to_string());
+                    content_length = Self::get_content_length(&response_bytes);
                 }
-                content_length = HttpResponse::get_content_length(&response_string);
             }
-            if headers_done && response_string.len() >= content_length {
-                break 'first_loop;
+            if headers_done && response_bytes.len() >= content_length {
+                break 'read_loop;
             }
         }
-        let response: HttpResponse = HttpResponse::from(&response_string);
-        if redirect_url.is_none() {
-            return Ok(response);
+        self.response = HttpResponse::from(&response_bytes);
+        if !self.config.redirect || redirect_url.is_none() {
+            return Ok(self.response.clone());
         }
-        let url: String = redirect_url.unwrap();
+        let url: String =
+            String::from_utf8(redirect_url.unwrap()).map_err(|_| Error::InvalidUrl)?;
         self.handle_redirect(url)
+    }
+
+    /// Extracts the content length from the HTTP response bytes.
+    ///
+    /// This function searches for the `Content-Length` field in a case-insensitive
+    /// manner and parses its value if found.
+    ///
+    /// # Parameters
+    /// - `response_bytes`: A byte slice containing the raw HTTP response.
+    ///
+    /// # Returns
+    /// Returns the parsed content length as `usize`. If not found or invalid, returns `0`.
+    fn get_content_length(response_bytes: &[u8]) -> usize {
+        let content_length_key: Vec<u8> =
+            format!("{}:", CONTENT_LENGTH.to_lowercase()).into_bytes();
+        if let Some(pos) = Self::find_case_insensitive_key(response_bytes, &content_length_key) {
+            if let Some(length_str) =
+                Self::extract_value_from_position(response_bytes, pos, &HTTP_BR_BYTES)
+            {
+                return length_str.trim().parse::<usize>().unwrap_or(0);
+            }
+        }
+        0
+    }
+
+    /// Finds the position of a key in the response bytes, case-insensitively.
+    ///
+    /// This function scans the `response_bytes` for the given `key` and returns
+    /// the starting position of the match, if found.
+    ///
+    /// # Parameters
+    /// - `response_bytes`: A byte slice containing the raw HTTP response.
+    /// - `key`: The byte sequence to search for.
+    ///
+    /// # Returns
+    /// Returns an `Option<usize>` containing the starting position if the key is found, otherwise `None`.
+    fn find_case_insensitive_key(response_bytes: &[u8], key: &[u8]) -> Option<usize> {
+        response_bytes
+            .windows(key.len())
+            .position(|window| case_insensitive_match(window, key))
+    }
+
+    /// Extracts the value following a key at a specific position until the end delimiter.
+    ///
+    /// This function assumes the key ends with a colon (`:`) and extracts the value
+    /// up to the specified delimiter.
+    ///
+    /// # Parameters
+    /// - `response_bytes`: A byte slice containing the raw HTTP response.
+    /// - `key_pos`: The starting position of the key in the response bytes.
+    /// - `delimiter`: The byte sequence representing the end of the value.
+    ///
+    /// # Returns
+    /// Returns an `Option<&str>` containing the extracted value. If not found or invalid, returns `None`.
+    fn extract_value_from_position<'a>(
+        response_bytes: &'a [u8],
+        key_pos: usize,
+        delimiter: &'a [u8],
+    ) -> Option<&'a str> {
+        let start: usize = key_pos + delimiter.len();
+        response_bytes[start..]
+            .windows(delimiter.len())
+            .position(|window| window == delimiter)
+            .map(|end_pos| {
+                std::str::from_utf8(&response_bytes[start..start + end_pos]).unwrap_or_default()
+            })
+    }
+
+    /// Parses the status code from a byte slice.
+    ///
+    /// This function extracts and parses the HTTP status code from the response bytes.
+    ///
+    /// # Parameters
+    /// - `status_bytes`: A byte slice containing the status code as a string.
+    ///
+    /// # Returns
+    /// Returns the parsed status code as `usize`. If parsing fails, returns `0`.
+    fn parse_status_code(status_bytes: &[u8]) -> usize {
+        let status_str: &str = std::str::from_utf8(status_bytes).unwrap_or_default();
+        status_str.trim().parse::<usize>().unwrap_or_default()
     }
 
     /// Handles HTTP redirects by following the redirection URL.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// - `url`: The redirection URL to follow.
     ///
@@ -307,7 +447,7 @@ impl HttpRequest {
 
     /// Determines the appropriate port for the HTTP request.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// - `port`: The default port (if any).
     ///
@@ -410,6 +550,7 @@ impl Default for HttpRequest {
             body: Arc::new(Body::default()),
             config: Config::default(),
             tmp: Tmp::default(),
+            response: HttpResponse::default(),
         }
     }
 }

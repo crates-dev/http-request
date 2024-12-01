@@ -31,18 +31,23 @@ fn test_http_post_request() {
     body.insert("language", "rust");
     body.insert("testin", "");
     let mut _request_builder = HttpRequestBuilder::new()
-        .get("http://localhost:80/rust?hello=rust")
+        .post("http://localhost:80/rust?hello=rust")
         .json(body)
         .headers(header)
         .timeout(6000)
         .redirect()
+        .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
         .builder();
     _request_builder
         .send()
         .and_then(|response| {
-            output("response => ", &format!("{:?}", response), Color::Green);
+            output(
+                "response => ",
+                &format!("{:?}", response.text()),
+                Color::Green,
+            );
             Ok(())
         })
         .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));
@@ -59,13 +64,18 @@ fn test_http_get_request() {
         .headers(header)
         .timeout(6000)
         .redirect()
+        .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
         .builder();
     _request_builder
         .send()
         .and_then(|response| {
-            output("response => ", &format!("{:?}", response), Color::Green);
+            output(
+                "response => ",
+                &format!("{:?}", response.text()),
+                Color::Green,
+            );
             Ok(())
         })
         .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));
@@ -79,25 +89,27 @@ fn test_https_post_request() {
     header.insert("Connection", "keep-alive");
     header.insert("Accept-Encoding", "gzip, deflate");
     let mut body: HashMap<&str, &str> = HashMap::new();
-    body.insert(
-        "code",
-        "fn main() {\r\nloop {}    println!(\"hello world\");\r\n}",
-    );
+    body.insert("code", "fn main() {\r\n    println!(\"hello world\");\r\n}");
     body.insert("language", "rust");
     body.insert("testin", "");
     let mut _request_builder = HttpRequestBuilder::new()
         .post("https://code.ltpp.vip/")
         .json(body)
         .headers(header)
-        .timeout(1000)
+        .timeout(10000)
         .redirect()
+        .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
         .builder();
     _request_builder
         .send()
         .and_then(|response| {
-            output("response => ", &format!("{:?}", response), Color::Green);
+            output(
+                "response => ",
+                &format!("{:?}", response.text()),
+                Color::Green,
+            );
             Ok(())
         })
         .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));
@@ -110,17 +122,22 @@ fn test_https_get_request() {
     let mut body: HashMap<&str, &str> = HashMap::new();
     body.insert("body-key", "body-value");
     let mut _request_builder = HttpRequestBuilder::new()
-        .get("https://ltpp.vip/")
+        .get("https://code.ltpp.vip/")
         .headers(header)
-        .timeout(6000)
+        .timeout(10000)
         .redirect()
+        .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
         .builder();
     _request_builder
         .send()
         .and_then(|response| {
-            output("response => ", &format!("{:?}", response), Color::Green);
+            output(
+                "response => ",
+                &format!("{:?}", response.text()),
+                Color::Green,
+            );
             Ok(())
         })
         .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));
@@ -137,13 +154,18 @@ fn test_http_post_text_request() {
         .headers(header)
         .timeout(6000)
         .redirect()
+        .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
         .builder();
     _request_builder
         .send()
         .and_then(|response| {
-            output("response => ", &format!("{:?}", response), Color::Green);
+            output(
+                "response => ",
+                &format!("{:?}", response.text()),
+                Color::Green,
+            );
             Ok(())
         })
         .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));

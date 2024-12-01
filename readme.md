@@ -46,11 +46,12 @@ let mut _request_builder = HttpRequestBuilder::new()
     .redirect()
     .max_redirect_times(8)
     .http1_1_only()
+    .buffer(4096)
     .builder();
 _request_builder
     .send()
     .and_then(|response| {
-        println!("{:?}", response);
+        println!("{:?}", response.text());
         Ok(())
     })
     .unwrap_or_else(|e| println!("error => {}", e));
@@ -75,11 +76,12 @@ let mut _request_builder = HttpRequestBuilder::new()
     .redirect()
     .max_redirect_times(8)
     .http1_1_only()
+    .buffer(4096)
     .builder();
 _request_builder
     .send()
     .and_then(|response| {
-        println!("{:?}", response);
+        println!("{:?}", response.text());
         Ok(())
     })
     .unwrap_or_else(|e| println!("error => {}", e));
@@ -100,11 +102,12 @@ let mut _request_builder = HttpRequestBuilder::new()
     .redirect()
     .max_redirect_times(8)
     .http1_1_only()
+    .buffer(4096)
     .builder();
 _request_builder
     .send()
     .and_then(|response| {
-        println!("{:?}", response);
+        println!("{:?}", response.text());
         Ok(())
     })
     .unwrap_or_else(|e| println!("error => {}", e));

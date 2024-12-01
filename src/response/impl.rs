@@ -1,14 +1,14 @@
-use super::r#type::HttpResponse;
+use super::r#type::{HttpResponse, HttpResponseText};
 use crate::{
     constant::{
-        common::{COLON_SPACE, SPACE},
-        http::{CONTENT_LENGTH, HTTP_BR},
+        common::{BR_BYTES, COLON_SPACE_BYTES},
+        http::{CONTENT_LENGTH, HTTP_BR, HTTP_BR_BYTES},
     },
     request::http_version::r#type::HttpVersion,
     status_code::r#type::StatusCode,
+    utils::vec::{split_multi_byte, split_whitespace},
 };
-use std::collections::HashMap;
-use std::str::Lines;
+use std::{collections::HashMap, vec::IntoIter};
 
 /// Provides functionality for parsing and working with HTTP responses.
 ///
@@ -26,7 +26,7 @@ impl HttpResponse {
     /// its value into a `usize`. If the header is not present or its value is invalid, the method
     /// returns `0` as a default.
     ///
-    /// # Arguments
+    /// # Parameters
     /// - `response_string`: A string representing the HTTP response.
     ///
     /// # Returns
@@ -53,52 +53,83 @@ impl HttpResponse {
             .unwrap_or_default()
     }
 
-    /// Parses a raw HTTP response string into an `HttpResponse` object.
+    /// Parses an HTTP response from a byte slice and returns an `HttpResponse` object.
     ///
-    /// This method takes a raw HTTP response string and splits it into different components,
-    /// such as the HTTP version, status code, status text, headers, and body.
+    /// This function processes the raw HTTP response in byte form. It splits the response into
+    /// the status line, headers, and body, parsing each part accordingly. The status line is parsed
+    /// to extract the HTTP version, status code, and status text. Headers are split and stored in
+    /// a `HashMap`. The body is collected into a byte vector.
     ///
-    /// # Arguments
-    /// - `response`: A string representing the raw HTTP response.
+    /// # Parameters
+    /// - `response`: A byte slice representing the raw HTTP response.
     ///
     /// # Returns
-    /// Returns an `HttpResponse` struct containing the parsed HTTP version, status code, status
-    /// text, headers, and body.
-    pub fn from(response: &str) -> Self {
-        let mut lines: Lines<'_> = response.lines();
-        let status_line: &str = lines.next().unwrap_or("");
-        let status_parts: Vec<&str> = status_line.split_whitespace().collect();
-        let http_version: String = status_parts
-            .get(0)
-            .unwrap_or(&HttpVersion::Unknown(String::new()).to_string().as_str())
-            .to_string();
+    /// Returns an `HttpResponse` object containing the parsed HTTP version, status code, status text,
+    /// headers, and body. If parsing any part fails, defaults are used (e.g., `HTTP/1.1`, status code `200`).
+    ///
+    /// # Panics
+    /// This method will panic if the HTTP response is malformed in ways that the unwrap operations cannot handle.
+    pub fn from(response: &[u8]) -> Self {
+        let split_lines: Vec<&[u8]> = split_multi_byte(response, HTTP_BR_BYTES);
+        let mut lines: IntoIter<&[u8]> = split_lines.into_iter();
+        let status_line: &[u8] = lines.next().unwrap_or(&[]);
+        let status_parts: Vec<&[u8]> = split_whitespace(&status_line);
+        let http_version: String = String::from_utf8_lossy(
+            status_parts
+                .get(0)
+                .unwrap_or(&HttpVersion::Unknown(String::new()).to_string().as_bytes()),
+        )
+        .to_string();
         let status_code: u16 = status_parts
             .get(1)
-            .unwrap_or(&StatusCode::Ok.to_string().as_str())
+            .and_then(|part| std::str::from_utf8(part).ok())
+            .unwrap_or(&StatusCode::Ok.to_string())
             .parse()
             .unwrap_or(StatusCode::Unknown.code());
-        let status_text: String = status_parts
-            .get(2..)
-            .unwrap_or(&[&StatusCode::Unknown.to_string()])
-            .join(SPACE);
+        let status_text: String = status_parts.get(2..).map_or_else(
+            || StatusCode::Unknown.to_string(),
+            |parts| String::from_utf8_lossy(&parts.concat()).to_string(),
+        );
         let mut headers: HashMap<String, String> = HashMap::new();
         while let Some(line) = lines.next() {
             if line.is_empty() {
                 break;
             }
-            let header_parts: Vec<&str> = line.splitn(2, COLON_SPACE).collect();
+            let header_parts: Vec<&[u8]> = split_multi_byte(&line, COLON_SPACE_BYTES);
             if header_parts.len() == 2 {
-                let key: String = header_parts[0].trim().to_string();
-                let value: String = header_parts[1].trim().to_string();
+                let key: String = String::from_utf8_lossy(header_parts[0]).trim().to_string();
+                let value: String = String::from_utf8_lossy(header_parts[1]).trim().to_string();
                 headers.insert(key, value);
             }
         }
-        let body: String = lines.collect::<Vec<&str>>().join(HTTP_BR);
+        let body: Vec<u8> = lines.clone().collect::<Vec<&[u8]>>().join(BR_BYTES);
         HttpResponse {
             http_version,
             status_code,
             status_text,
             headers,
+            body,
+        }
+    }
+
+    /// Converts the response body to text format.
+    ///
+    /// This function takes the current response and creates a new `HttpResponse`
+    /// instance with the body converted to a text representation. The `body` is
+    /// extracted as text from the original response body and stored in the new
+    /// response as a `ResponseBody::Text` variant.
+    ///
+    /// # Returns
+    ///
+    /// - `Self` - A new `HttpResponse` instance with the body converted to text.
+    pub fn text(self) -> HttpResponseText {
+        let res: HttpResponse = self.clone();
+        let body: String = String::from_utf8_lossy(&res.body).to_string();
+        HttpResponseText {
+            http_version: res.http_version,
+            status_code: res.status_code,
+            status_text: res.status_text,
+            headers: res.headers,
             body,
         }
     }
@@ -116,7 +147,7 @@ impl Default for HttpResponse {
             status_code: StatusCode::Unknown.code(),
             status_text: StatusCode::Unknown.to_string(),
             headers: HashMap::new(),
-            body: String::new(),
+            body: Vec::new(),
         }
     }
 }

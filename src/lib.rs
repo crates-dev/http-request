@@ -8,6 +8,7 @@ pub(crate) mod protocol;
 pub(crate) mod request;
 pub(crate) mod response;
 pub(crate) mod status_code;
+pub(crate) mod utils;
 
 pub use request::{
     error::Error, http_request::r#type::HttpRequest,

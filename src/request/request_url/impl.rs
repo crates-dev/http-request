@@ -29,7 +29,7 @@ impl RequestUrl {
     /// scheme, username, password, host, port, path, query, and fragment. If the URL
     /// is invalid, it returns an `Error::InvalidUrl` error.
     ///
-    /// # Arguments
+    /// # Parameters
     /// - `url_str`: A string slice representing the URL to be parsed.
     ///
     /// # Returns
