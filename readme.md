@@ -37,8 +37,8 @@ cargo add http-request
 ```rs
 use http_request::*;
 use std::collections::HashMap;
-let mut header: HashMap<String, String> = HashMap::new();
-header.insert("header-key"., "header-value".);
+let mut header: HashMap<&str, &str> = HashMap::new();
+header.insert("header-key", "header-value");
 let mut _request_builder = HttpRequestBuilder::new()
     .get("https://ltpp.vip/")
     .headers(header)
@@ -64,10 +64,10 @@ _request_builder
 ```rs
 use http_request::*;
 use std::collections::HashMap;
-let mut header: HashMap<String, String> = HashMap::new();
-header.insert("header-key"., "header-value".);
-let mut body: HashMap<String, String> = HashMap::new();
-body.insert("body-key"., "body-value".);
+let mut header: HashMap<&str, &str> = HashMap::new();
+header.insert("header-key", "header-value");
+let mut body: HashMap<&str, &str> = HashMap::new();
+body.insert("body-key", "body-value");
 let mut _request_builder = HttpRequestBuilder::new()
     .post("http://localhost:80")
     .json(body)
@@ -92,8 +92,8 @@ _request_builder
 ```rs
 use http_request::*;
 use std::collections::HashMap;
-let mut header: HashMap<String, String> = HashMap::new();
-header.insert("header-key"., "header-value".);
+let mut header: HashMap<&str, &str> = HashMap::new();
+header.insert("header-key", "header-value");
 let mut _request_builder = HttpRequestBuilder::new()
     .post("http://localhost")
     .text("hello")
