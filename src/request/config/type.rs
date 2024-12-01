@@ -1,4 +1,4 @@
-use crate::request::request_url::r#type::RequestUrl;
+use crate::request::{http_version::r#type::HttpVersion, request_url::r#type::RequestUrl};
 
 /// Configuration for HTTP requests.
 ///
@@ -40,4 +40,7 @@ pub struct Config {
 
     /// The current count of redirections followed during this request.
     pub redirect_times: usize,
+
+    /// The type of this field is `HttpVersion`.
+    pub http_version: HttpVersion,
 }

@@ -3,38 +3,22 @@ use std::{
     fmt::{self},
 };
 
-/// Custom error type for handling various HTTP-related errors.
+/// Represents different types of errors that can occur in the application.
 ///
-/// This `Error` enum is designed to capture and represent specific errors that can occur
-/// during HTTP operations, including issues with URL parsing, TCP stream connections,
-/// request processing, unsupported HTTP methods, and connection read failures.
-/// It provides clear and structured error reporting for HTTP-related functionalities.
+/// The `Error` enum defines various error types related to HTTP requests, network connections, and TLS operations.
+/// Each variant corresponds to a specific error that can occur during the execution of the application.
 ///
 /// # Variants
-///
-/// - `InvalidUrl`:
-///   Indicates that the provided URL is invalid, such as malformed or missing critical components.
-/// - `TcpStreamConnectError`:
-///   Represents a failure while attempting to establish a TCP stream connection.
-/// - `RequestError`:
-///   A general error that occurs during the processing of an HTTP request.
-/// - `MethodsNotSupport`:
-///   Signifies that the specified HTTP method is unsupported by the library or server.
-/// - `ReadConnectionError`:
-///   Occurs when reading data from a connection fails, such as during a response retrieval.
-/// - `TlsConnectorBuildError`:
-///   Indicates an error while constructing a TLS connector, potentially due to configuration issues.
-/// - `SetReadTimeoutError`:
-///   Represents an error when setting the read timeout on a connection fails.
-/// - `TlsStreamConnectError`:
-///   Occurs when a TLS-secured connection cannot be established.
-///
-/// # Traits Implemented
-///
-/// - `StdError`:
-///   Enables integration with Rust's standard error handling mechanisms, such as `Result`.
-/// - `fmt::Display`:
-///   Provides human-readable error messages for debugging or logging.
+/// - `InvalidUrl`: Indicates that the provided URL is invalid.
+/// - `TcpStreamConnectError`: Represents an error that occurred while attempting to connect a TCP stream.
+/// - `RequestError`: A general error related to making a request.
+/// - `MethodsNotSupport`: Indicates that the requested HTTP method is not supported.
+/// - `ReadConnectionError`: An error that occurred while reading from the connection.
+/// - `TlsConnectorBuildError`: Indicates an error during the construction of the TLS connector.
+/// - `SetReadTimeoutError`: Occurs when setting the read timeout fails.
+/// - `TlsStreamConnectError`: Represents an error that occurred while establishing a TLS stream connection.
+/// - `MaxRedirectTimes`: Occurs when the maximum number of redirects is exceeded.
+/// - `RedirectUrlDeadLoop`: Indicates that a redirect URL has resulted in a dead loop.
 #[derive(Debug)]
 pub enum Error {
     InvalidUrl,
@@ -46,11 +30,23 @@ pub enum Error {
     SetReadTimeoutError,
     TlsStreamConnectError,
     MaxRedirectTimes,
+    RedirectUrlDeadLoop,
 }
 
 impl StdError for Error {}
 
 impl fmt::Display for Error {
+    /// Formats the `Error` enum into a human-readable string.
+    ///
+    /// This method implements the `fmt::Display` trait for the `Error` enum, allowing it to be
+    /// formatted into a string representation. Each variant is matched and a corresponding
+    /// error message is returned for display.
+    ///
+    /// # Parameters
+    /// - `f`: A mutable reference to the `fmt::Formatter` that handles the formatting of the error.
+    ///
+    /// # Returns
+    /// A `fmt::Result` which indicates whether the formatting was successful.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Error::InvalidUrl => write!(f, "Invalid URL"),
@@ -62,6 +58,7 @@ impl fmt::Display for Error {
             Error::SetReadTimeoutError => write!(f, "Failed to Set Read Timeout"),
             Error::TlsStreamConnectError => write!(f, "TLS Stream Connection Error"),
             Error::MaxRedirectTimes => write!(f, "Max Redirect Times"),
+            Error::RedirectUrlDeadLoop => write!(f, "Redirect URL Dead Loop"),
         }
     }
 }

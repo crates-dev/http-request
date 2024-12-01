@@ -1,16 +1,21 @@
 use super::r#type::HttpRequest;
 use crate::{
     body::r#type::Body,
-    constant::http::{CONTENT_TYPE, HTTP_BR, HTTP_DOUBLE_BR},
+    constant::{
+        common::APP_NAME,
+        http::{
+            ACCEPT, ACCEPT_VALUE, CONTENT_TYPE, HTTP_BR, HTTP_DOUBLE_BR, QUERY_SYMBOL, USER_AGENT,
+        },
+    },
     content_type::r#type::ContentType,
     methods::r#type::Methods,
     protocol::r#type::Protocol,
-    request::{config::r#type::Config, error::Error, request_url::r#type::RequestUrl},
+    request::{
+        config::r#type::Config, error::Error, request_url::r#type::RequestUrl, tmp::r#type::Tmp,
+    },
 };
 use crate::{
-    constant::http::{
-        CONNECTION, CONTENT_LENGTH, DEFAULT_HTTP_PATH, DEFAULT_HTTP_VERSION, HOST, LOCATION,
-    },
+    constant::http::{CONTENT_LENGTH, DEFAULT_HTTP_PATH, HOST, LOCATION},
     global_trait::r#trait::ReadWrite,
     header::r#type::Header,
     response::r#type::HttpResponse,
@@ -80,11 +85,31 @@ impl HttpRequest {
     ///
     /// Returns a string where each header is formatted as `key: value`.
     fn get_header_str(&self) -> String {
-        let header: HashMap<&str, &str> = self.get_header();
-        let mut header_string: String = String::new();
-        for (key, value) in header {
-            let line: String = format!("{}: {}{}", key, value, HTTP_BR);
-            header_string.push_str(&line);
+        let mut header: HashMap<&str, &str> = self.get_header();
+        let mut header_string = String::new();
+        let required_headers: [(&str, &str); 4] = [
+            (
+                HOST,
+                self.config.url_obj.host.as_deref().unwrap_or_default(),
+            ),
+            (
+                CONTENT_LENGTH,
+                if self.get_methods().is_get() {
+                    &0.to_string()
+                } else {
+                    &self.get_body_str().len().to_string()
+                },
+            ),
+            (ACCEPT, ACCEPT_VALUE),
+            (USER_AGENT, APP_NAME),
+        ];
+        for &(key, default_value) in &required_headers {
+            if !header.contains_key(key) {
+                header.insert(key, default_value);
+            }
+        }
+        for (key, value) in &header {
+            header_string.push_str(&format!("{}: {}{}", key, value, HTTP_BR));
         }
         header_string
     }
@@ -110,79 +135,68 @@ impl HttpRequest {
         res
     }
 
-    /// Sends an HTTP GET request to the specified URL through the given stream.
+    /// Sends a GET request over the provided stream and returns the HTTP response.
     ///
-    /// This method constructs an HTTP GET request based on the provided `RequestUrl` object,
-    /// including necessary headers, and sends it through the provided stream. It then reads
-    /// the HTTP response from the stream and returns it.
+    /// This method constructs and sends an HTTP GET request to the server. It formats the URL path
+    /// and query parameters based on the current configuration and sends the request to the server
+    /// via the provided `stream`. After sending the request, it waits for the response and reads
+    /// the result.
     ///
     /// # Parameters
-    ///
-    /// - `stream`: A mutable reference to a stream that implements the `ReadWrite` trait.
-    ///   This stream is used to send the HTTP request and receive the HTTP response.
-    /// - `url_obj`: A reference to a `RequestUrl` object that contains the URL information
-    ///   (such as the host and path) to be used in the GET request.
+    /// - `stream`: A mutable reference to a `Box<dyn ReadWrite>`, representing the stream used
+    ///   for sending and receiving data.
     ///
     /// # Returns
-    ///
-    /// - `HttpResponse`: The HTTP response that was received after sending the GET request.
-    ///   This contains the status code, headers, and body of the response.
-    ///
-    /// # Errors
-    ///
-    /// This function may panic if the request construction or writing to the stream fails,
-    /// or if reading the response encounters an issue. It is recommended to handle potential
-    /// errors more gracefully in production code.
-    fn send_get_request(&mut self, stream: &mut Box<dyn ReadWrite>) -> HttpResponse {
-        let path: String = self
-            .config
-            .url_obj
-            .path
-            .clone()
-            .unwrap_or(DEFAULT_HTTP_PATH.to_string());
+    /// Returns a `Result<HttpResponse, Error>`, where:
+    /// - `Ok(HttpResponse)` contains the HTTP response received from the server.
+    /// - `Err(Error)` indicates that an error occurred while sending the request or reading the response.
+    fn send_get_request(&mut self, stream: &mut Box<dyn ReadWrite>) -> Result<HttpResponse, Error> {
+        let query: String = self.config.url_obj.query.clone().unwrap_or_default();
+        let path: String = if query.is_empty() {
+            self.config
+                .url_obj
+                .path
+                .clone()
+                .unwrap_or(DEFAULT_HTTP_PATH.to_string())
+        } else {
+            format!(
+                "{}{}{}",
+                self.config.url_obj.path.clone().unwrap_or_default(),
+                QUERY_SYMBOL,
+                query
+            )
+        };
         let mut request: String = format!(
             "{} {} {}{}",
             Methods::GET,
             path,
-            DEFAULT_HTTP_VERSION,
+            self.config.http_version,
             HTTP_BR
         );
-        request.push_str(&format!(
-            "{}: {}{}",
-            HOST,
-            self.config.url_obj.host.as_ref().unwrap_or(&"".to_string()),
-            HTTP_BR
-        ));
         request.push_str(&self.get_header_str());
         request.push_str(HTTP_BR);
         stream.write_all(request.as_bytes()).unwrap();
         self.read_response(stream)
     }
 
-    /// Sends an HTTP POST request to the specified URL through the given stream.
+    /// Sends a POST request over the provided stream and returns the HTTP response.
     ///
-    /// This method constructs an HTTP POST request, including the body, headers, and other
-    /// necessary details, and sends it through the provided stream. After sending the request,
-    /// it reads the HTTP response from the stream and returns it.
+    /// This method constructs and sends an HTTP POST request to the server. It formats the URL path
+    /// and sends the body content along with the headers to the server via the provided `stream`. After
+    /// sending the request, it waits for the response and reads the result.
     ///
     /// # Parameters
-    ///
-    /// - `stream`: A mutable reference to a stream that implements the `ReadWrite` trait.
-    ///   This stream is used to send the HTTP request and receive the HTTP response.
-    /// - `url_obj`: A reference to a `RequestUrl` object that contains the URL information
-    ///   (such as the host and path) to be used in the POST request.
+    /// - `stream`: A mutable reference to a `Box<dyn ReadWrite>`, representing the stream used
+    ///   for sending and receiving data.
     ///
     /// # Returns
-    ///
-    /// - `HttpResponse`: The HTTP response that was received after sending the POST request.
-    ///   This contains the status code, headers, and body of the response.
-    ///
-    /// # Errors
-    ///
-    /// This function may panic if the request construction or writing to the stream fails,
-    /// or if reading the response encounters an issue. It is recommended to handle potential
-    /// errors more gracefully in production code.
-    fn send_post_request(&mut self, stream: &mut Box<dyn ReadWrite>) -> HttpResponse {
+    /// Returns a `Result<HttpResponse, Error>`, where:
+    /// - `Ok(HttpResponse)` contains the HTTP response received from the server.
+    /// - `Err(Error)` indicates that an error occurred while sending the request or reading the response.
+    fn send_post_request(
+        &mut self,
+        stream: &mut Box<dyn ReadWrite>,
+    ) -> Result<HttpResponse, Error> {
         let path: String = self
             .config
             .url_obj
@@ -193,58 +207,39 @@ impl HttpRequest {
             "{} {} {}{}",
             Methods::POST,
             path,
-            DEFAULT_HTTP_VERSION,
+            self.config.http_version,
             HTTP_BR
         );
-        request.push_str(&format!(
-            "{}: {}{}",
-            HOST,
-            self.config.url_obj.host.as_ref().unwrap_or(&"".to_string()),
-            HTTP_BR
-        ));
         request.push_str(&self.get_header_str());
-        let body_str: String = self.get_body_str();
-        request.push_str(&format!(
-            "{}: {}{}",
-            CONTENT_LENGTH,
-            body_str.len(),
-            HTTP_BR
-        ));
         request.push_str(HTTP_BR);
-        request.push_str(&format!("{}{}", body_str, HTTP_BR));
+        let body_str: &String = &self.get_body_str();
+        request.push_str(body_str);
         stream.write_all(request.as_bytes()).unwrap();
         self.read_response(stream)
     }
 
-    /// Reads the HTTP response from the given stream and handles potential redirects.
+    /// Reads the HTTP response from the provided stream.
     ///
-    /// This method reads data from the provided stream and processes the response. It handles
-    /// the response headers, including checking for redirects (HTTP status codes 3xx), and
-    /// collects the response body once the headers are fully received. If a redirect is detected,
-    /// it follows the redirect URL and retrieves the new response.
+    /// This method reads the response from the server after sending an HTTP request. It processes the
+    /// headers, checks for redirects, and retrieves the response body based on the content length.
+    /// If a redirect is detected, it follows the redirection URL. The method ensures that the entire
+    /// response is read before returning.
     ///
     /// # Parameters
-    ///
-    /// - `stream`: A mutable reference to a stream that implements the `ReadWrite` trait.
-    ///   This stream is used to read the HTTP response from the server.
+    /// - `stream`: A mutable reference to a `Box<dyn ReadWrite>`, representing the stream used
+    ///   for receiving the response.
     ///
     /// # Returns
-    ///
-    /// - `HttpResponse`: The final HTTP response after reading from the stream, including the
-    ///   status code, headers, and body. If a redirect is encountered, the response from the
-    ///   redirected URL is returned.
-    ///
-    /// # Errors
-    ///
-    /// This function may panic if unexpected issues occur during reading or processing the
-    /// response. In production code, error handling should be implemented to manage any failures
-    /// during the reading or redirect process.
-    fn read_response(&mut self, stream: &mut Box<dyn ReadWrite>) -> HttpResponse {
+    /// Returns a `Result<HttpResponse, Error>`, where:
+    /// - `Ok(HttpResponse)` contains the complete HTTP response after processing headers and body.
+    /// - `Err(Error)` indicates that an error occurred while reading the response.
+    fn read_response(&mut self, stream: &mut Box<dyn ReadWrite>) -> Result<HttpResponse, Error> {
         let mut buffer: [u8; 1024] = [0; 1024];
         let mut response_string: String = String::new();
         let mut headers_done: bool = false;
         let mut content_length: usize = 0;
         let mut redirect_url: Option<String> = None;
+        let http_version: String = self.config.http_version.to_string();
         'first_loop: while let Ok(n) = stream.read(&mut buffer) {
             if n == 0 {
                 break;
@@ -252,7 +247,7 @@ impl HttpRequest {
             response_string.push_str(&String::from_utf8_lossy(&buffer[..n]));
             if !headers_done && response_string.contains(HTTP_DOUBLE_BR) {
                 headers_done = true;
-                let status_pos_res: Option<usize> = response_string.find(DEFAULT_HTTP_VERSION);
+                let status_pos_res: Option<usize> = response_string.find(&http_version);
                 if status_pos_res.is_none() {
                     continue;
                 }
@@ -269,7 +264,7 @@ impl HttpRequest {
                     }
                     let location_pos: usize = location_pos_res.unwrap_or_default();
                     let start: usize = location_pos + location_sign_key.len();
-                    let end_pos_res = response_string[start..].find(HTTP_BR);
+                    let end_pos_res: Option<usize> = response_string[start..].find(HTTP_BR);
                     if end_pos_res.is_none() {
                         continue;
                     }
@@ -283,18 +278,11 @@ impl HttpRequest {
             }
         }
         let response: HttpResponse = HttpResponse::from(&response_string);
-        let res: HttpResponse = redirect_url
-            .and_then(|url| {
-                // Handle redirects.
-                let redirect_res: HttpResponse = if let Ok(res) = self.handle_redirect(url) {
-                    res
-                } else {
-                    response.clone()
-                };
-                Some(redirect_res)
-            })
-            .unwrap_or_else(|| response);
-        res
+        if redirect_url.is_none() {
+            return Ok(response);
+        }
+        let url: String = redirect_url.unwrap();
+        self.handle_redirect(url)
     }
 
     /// Handles HTTP redirects by following the redirection URL.
@@ -305,32 +293,16 @@ impl HttpRequest {
     ///
     /// Returns `Ok(HttpResponse)` if the redirection is successful, or `Err(Error)` otherwise.
     fn handle_redirect(&mut self, url: String) -> Result<HttpResponse, Error> {
+        if self.tmp.visit_url.contains(&url) {
+            return Err(Error::RedirectUrlDeadLoop);
+        }
+        self.tmp.visit_url.insert(url.clone());
         if self.config.redirect && self.config.redirect_times >= self.config.max_redirect_times {
             return Err(Error::MaxRedirectTimes);
         }
         self.config.redirect_times = self.config.redirect_times + 1;
         self.url(url.clone());
-        self.config.url_obj = self.parse_url().map_err(|_| Error::InvalidUrl)?;
-        let host: String = self.config.url_obj.host.clone().unwrap_or_default();
-        let port: u16 = self.get_port(self.config.url_obj.port.clone().unwrap_or_default());
-        let path: String = self.config.url_obj.path.clone().unwrap_or_default();
-        let request: String = format!(
-            "{} {} {}{}{}: {}{}{}: close{}",
-            Methods::GET,
-            path,
-            DEFAULT_HTTP_VERSION,
-            HTTP_DOUBLE_BR,
-            HOST,
-            host,
-            HTTP_DOUBLE_BR,
-            CONNECTION,
-            HTTP_DOUBLE_BR
-        );
-        let mut stream = self
-            .get_connection_stream(host, port)
-            .map_err(|_| Error::TcpStreamConnectError)?;
-        stream.write_all(request.as_bytes()).unwrap();
-        Ok(self.read_response(&mut stream))
+        self.send()
     }
 
     /// Determines the appropriate port for the HTTP request.
@@ -413,8 +385,8 @@ impl HttpRequest {
             .get_connection_stream(host, port)
             .map_err(|_| Error::TcpStreamConnectError)?;
         let res: Result<HttpResponse, Error> = match methods {
-            m if m.is_get() => Ok(self.send_get_request(&mut stream)),
-            m if m.is_post() => Ok(self.send_post_request(&mut stream)),
+            m if m.is_get() => self.send_get_request(&mut stream),
+            m if m.is_post() => self.send_post_request(&mut stream),
             _ => Err(Error::RequestError),
         };
         res
@@ -431,6 +403,7 @@ impl Default for HttpRequest {
             header: Arc::new(HashMap::new()),
             body: Arc::new(Body::default()),
             config: Config::default(),
+            tmp: Tmp::default(),
         }
     }
 }

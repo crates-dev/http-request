@@ -1,6 +1,6 @@
 use super::r#type::HttpResponse;
 use crate::{
-    constant::http::{CONTENT_LENGTH, DEFAULT_HTTP_VERSION, HTTP_BR},
+    constant::http::{CONTENT_LENGTH, HTTP_BR, HTTP_VERSION_1_1},
     status_code::r#type::StatusCode,
 };
 use std::collections::HashMap;
@@ -64,10 +64,7 @@ impl HttpResponse {
         let mut lines: Lines<'_> = response.lines();
         let status_line: &str = lines.next().unwrap_or("");
         let status_parts: Vec<&str> = status_line.split_whitespace().collect();
-        let http_version: String = status_parts
-            .get(0)
-            .unwrap_or(&DEFAULT_HTTP_VERSION)
-            .to_string();
+        let http_version: String = status_parts.get(0).unwrap_or(&HTTP_VERSION_1_1).to_string();
         let status_code: u16 = status_parts
             .get(1)
             .unwrap_or(&StatusCode::Ok.to_string().as_str())
@@ -105,7 +102,7 @@ impl HttpResponse {
 impl Default for HttpResponse {
     fn default() -> Self {
         HttpResponse {
-            http_version: DEFAULT_HTTP_VERSION.to_string(),
+            http_version: HTTP_VERSION_1_1.to_string(),
             status_code: StatusCode::Unknown.code(),
             status_text: StatusCode::Unknown.to_string(),
             headers: HashMap::new(),

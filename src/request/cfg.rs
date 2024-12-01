@@ -22,22 +22,22 @@ fn output(title: &str, msg: &str, color: Color) {
 #[test]
 fn test_http_post_request() {
     let mut header: HashMap<&str, &str> = HashMap::new();
-    header.insert("header-key", "header-value");
-    header.insert(":authority", "code.ltpp.vip");
-    header.insert(":method", "POST");
-    header.insert(":path", "/");
-    header.insert(":scheme", "http");
     header.insert("Accept", "*/*");
     header.insert("Content-Type", "application/json");
+    header.insert("Connection", "keep-alive");
+    header.insert("Accept-Encoding", "gzip, deflate");
     let mut body: HashMap<&str, &str> = HashMap::new();
-    body.insert("body-key", "body-value");
+    body.insert("code", "hello");
+    body.insert("language", "rust");
+    body.insert("testin", "");
     let mut _request_builder = HttpRequestBuilder::new()
-        .post("http://localhost:80")
+        .get("http://localhost:80/rust?hello=rust")
         .json(body)
         .headers(header)
         .timeout(6000)
         .redirect()
         .max_redirect_times(8)
+        .http1_1_only()
         .builder();
     _request_builder
         .send()
@@ -60,6 +60,7 @@ fn test_http_get_request() {
         .timeout(6000)
         .redirect()
         .max_redirect_times(8)
+        .http1_1_only()
         .builder();
     _request_builder
         .send()
@@ -73,14 +74,12 @@ fn test_http_get_request() {
 #[test]
 fn test_https_post_request() {
     let mut header: HashMap<&str, &str> = HashMap::new();
-    header.insert(":authority", "code.ltpp.vip");
-    header.insert(":method", "POST");
-    header.insert(":path", "/");
-    header.insert(":scheme", "https");
     header.insert("Accept", "*/*");
     header.insert("Content-Type", "application/json");
+    header.insert("Connection", "keep-alive");
+    header.insert("Accept-Encoding", "gzip, deflate");
     let mut body: HashMap<&str, &str> = HashMap::new();
-    body.insert("code", "fn main() {\r\n    println!(\"hello world\");\r\n}");
+    body.insert("code", "hello");
     body.insert("language", "rust");
     body.insert("testin", "");
     let mut _request_builder = HttpRequestBuilder::new()
@@ -90,6 +89,7 @@ fn test_https_post_request() {
         .timeout(6000)
         .redirect()
         .max_redirect_times(8)
+        .http1_1_only()
         .builder();
     _request_builder
         .send()
@@ -112,6 +112,7 @@ fn test_https_get_request() {
         .timeout(6000)
         .redirect()
         .max_redirect_times(8)
+        .http1_1_only()
         .builder();
     _request_builder
         .send()
@@ -125,10 +126,6 @@ fn test_https_get_request() {
 #[test]
 fn test_http_post_text_request() {
     let mut header: HashMap<&str, &str> = HashMap::new();
-    header.insert(":authority", "code.ltpp.vip");
-    header.insert(":method", "POST");
-    header.insert(":path", "/");
-    header.insert(":scheme", "http");
     header.insert("Accept", "*/*");
     header.insert("Content-Type", "application/json");
     let mut _request_builder = HttpRequestBuilder::new()
@@ -138,6 +135,7 @@ fn test_http_post_text_request() {
         .timeout(6000)
         .redirect()
         .max_redirect_times(8)
+        .http1_1_only()
         .builder();
     _request_builder
         .send()

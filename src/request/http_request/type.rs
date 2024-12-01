@@ -1,6 +1,9 @@
 use crate::{
-    body::r#type::Body, header::r#type::Header, methods::r#type::Methods,
-    protocol::r#type::Protocol, request::config::r#type::Config,
+    body::r#type::Body,
+    header::r#type::Header,
+    methods::r#type::Methods,
+    protocol::r#type::Protocol,
+    request::{config::r#type::Config, tmp::r#type::Tmp},
 };
 use std::sync::Arc;
 /// Represents an HTTP request, encapsulating various components such as the method, URL, protocol,
@@ -23,4 +26,6 @@ pub struct HttpRequest {
     pub body: Arc<Body>,
 
     pub config: Config,
+
+    pub tmp: Tmp,
 }

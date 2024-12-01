@@ -5,7 +5,7 @@ use crate::constant::http::{
 use serde::Serialize;
 use serde_json;
 use serde_xml_rs;
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 use std::str::FromStr;
 
 impl ContentType {
@@ -21,7 +21,7 @@ impl ContentType {
     /// # Returns
     /// A string containing the serialized JSON representation of the provided data.
     /// If serialization fails, it returns an empty JSON object (`{}`).
-    fn get_application_json<T: Serialize>(data: &T) -> String {
+    fn get_application_json<T: Serialize + Display>(data: &T) -> String {
         serde_json::to_string(data).unwrap_or_else(|_| String::from("{}"))
     }
 
@@ -37,7 +37,7 @@ impl ContentType {
     /// # Returns
     /// A string containing the serialized XML representation of the provided data.
     /// If serialization fails, it returns an empty XML root element (`<root></root>`).
-    fn get_application_xml<T: Serialize>(data: &T) -> String {
+    fn get_application_xml<T: Serialize + Display>(data: &T) -> String {
         serde_xml_rs::to_string(data).unwrap_or_else(|_| String::from("<root></root>"))
     }
 
@@ -52,8 +52,8 @@ impl ContentType {
     ///
     /// # Returns
     /// A plain text string representing the provided data, formatted with the `Debug` trait.
-    fn get_text_plain<T: Serialize + Debug + Clone + Default>(data: &T) -> String {
-        format!("{:?}", data)
+    fn get_text_plain<T: Serialize + Debug + Clone + Default + Display>(data: &T) -> String {
+        data.to_string()
     }
 
     /// Handles the `text/html` Content-Type by formatting the provided data
@@ -86,7 +86,7 @@ impl ContentType {
     /// # Returns
     /// A string containing the URL-encoded representation of the provided data.
     /// If serialization fails, it returns an empty string.
-    fn get_form_url_encoded<T: Serialize>(data: &T) -> String {
+    fn get_form_url_encoded<T: Serialize + Display>(data: &T) -> String {
         serde_urlencoded::to_string(data).unwrap_or_else(|_| String::from(""))
     }
 
@@ -101,9 +101,8 @@ impl ContentType {
     ///
     /// # Returns
     /// A string containing the hexadecimal encoding of the provided data.
-    fn get_binary<T: Serialize + Debug + Clone + Default>(data: &T) -> String {
-        let raw_data = format!("{:?}", data);
-        hex::encode(raw_data)
+    fn get_binary<T: Serialize + Debug + Clone + Default + Display>(data: &T) -> String {
+        hex::encode(data.to_string())
     }
 
     /// Public interface for getting a formatted body string based on the `ContentType`.
@@ -119,7 +118,10 @@ impl ContentType {
     ///
     /// # Returns
     /// A string containing the formatted body based on the content type, such as JSON, XML, plain text, HTML, etc.
-    pub fn get_body_string<T: Serialize + Debug + Clone + Default>(&self, data: &T) -> String {
+    pub fn get_body_string<T: Serialize + Debug + Clone + Default + Display>(
+        &self,
+        data: &T,
+    ) -> String {
         match self {
             ContentType::ApplicationJson => ContentType::get_application_json(data),
             ContentType::ApplicationXml => ContentType::get_application_xml(data),

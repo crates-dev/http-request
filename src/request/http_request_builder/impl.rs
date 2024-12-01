@@ -5,7 +5,7 @@ use crate::{
     body::r#type::{Body, BodyJson, BodyText},
     header::r#type::Header,
     methods::r#type::Methods,
-    request::http_request::r#type::HttpRequest,
+    request::{http_request::r#type::HttpRequest, http_version::r#type::HttpVersion},
 };
 
 /// Provides a builder pattern implementation for constructing `HttpRequest` instances.
@@ -95,6 +95,34 @@ impl HttpRequestBuilder {
     /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
     fn url(&mut self, url: &str) -> &mut Self {
         self.http_request.url = Arc::new(url.to_owned());
+        self
+    }
+
+    /// Sets the HTTP version to 1.1 for the request configuration.
+    ///
+    /// This method updates the HTTP version to `HTTP1_1` for the current
+    /// `http_request` configuration. It allows the user to force the
+    /// request to use HTTP 1.1 only, overriding any other version that may
+    /// have been previously set.
+    ///
+    /// # Returns
+    /// Returns a mutable reference to `self` to allow method chaining.
+    pub fn http1_1_only(&mut self) -> &mut Self {
+        self.http_request.config.http_version = HttpVersion::HTTP1_1;
+        self
+    }
+
+    /// Sets the HTTP version to 2.0 for the request configuration.
+    ///
+    /// This method updates the HTTP version to `HTTP2` for the current
+    /// `http_request` configuration. It allows the user to force the
+    /// request to use HTTP 2.0 only, overriding any other version that may
+    /// have been previously set.
+    ///
+    /// # Returns
+    /// Returns a mutable reference to `self` to allow method chaining.
+    pub fn http2_only(&mut self) -> &mut Self {
+        self.http_request.config.http_version = HttpVersion::HTTP2;
         self
     }
 
