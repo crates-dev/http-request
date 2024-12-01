@@ -25,9 +25,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "color-output"
-version = "4.0.0"
+version = "4.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3cb28a94482f6a26c7b4b12e8e3fe741ae8a7671318c028d72ba1cb6e6fdaf18"
+checksum = "e4e9d1e47024f751bf15e182e4069dd4b18d35d4afb06adbd75da32b8d8e014f"
 
 [[package]]
 name = "core-foundation"
@@ -104,7 +104,7 @@ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
 name = "http-request"
-version = "3.2.0"
+version = "4.0.0"
 dependencies = [
  "color-output",
  "hex",
@@ -517,9 +517,9 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 
 [[package]]
 name = "std-macro-extensions"
-version = "0.16.0"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9312dd4c67a6bcff4051a2c10369956549a31aa306176a0a476b1b16489ea349"
+checksum = "b1f2ea2f51123842c81bf359d985fc38a8bcbe5a93eb7d5a5c95987ed818c30f"
 
 [[package]]
 name = "syn"

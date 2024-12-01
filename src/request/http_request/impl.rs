@@ -38,7 +38,7 @@ use std::{
 impl HttpRequest {
     /// Returns the protocol of the HTTP request.
     fn get_protocol(&self) -> Protocol {
-        self.protocol.as_ref().clone()
+        self.config.url_obj.protocol.clone()
     }
 
     /// Returns the HTTP method used for the request.
@@ -399,7 +399,6 @@ impl Default for HttpRequest {
         HttpRequest {
             methods: Arc::new(Methods::new()),
             url: Arc::new(String::new()),
-            protocol: Arc::new(Protocol::new()),
             header: Arc::new(HashMap::new()),
             body: Arc::new(Body::default()),
             config: Config::default(),

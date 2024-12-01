@@ -1,3 +1,5 @@
+use crate::protocol::r#type::Protocol;
+
 /// A struct representing a parsed URL with various components.
 ///
 /// This struct is used to store the different components of a URL, such as the scheme,
@@ -6,8 +8,6 @@
 ///
 /// # Fields
 /// - `scheme`: The URL scheme (e.g., "http", "https") as a string, or `None` if not specified.
-/// - `username`: The username portion of the URL, if present, or `None` if not specified.
-/// - `password`: The password portion of the URL, if present, or `None` if not specified.
 /// - `host`: The host portion of the URL (e.g., "example.com"), or `None` if not specified.
 /// - `port`: The port number, if specified, or `None` if not specified.
 /// - `path`: The path portion of the URL (e.g., "/path/to/resource"), or `None` if not specified.
@@ -18,9 +18,7 @@
 /// for easy manipulation and access to the individual components.
 #[derive(Debug, Clone, PartialEq)]
 pub struct RequestUrl {
-    pub scheme: Option<String>,
-    pub username: Option<String>,
-    pub password: Option<String>,
+    pub protocol: Protocol,
     pub host: Option<String>,
     pub port: Option<u16>,
     pub path: Option<String>,

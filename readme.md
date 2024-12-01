@@ -7,18 +7,19 @@
 
 [Official Documentation](https://docs.ltpp.vip/HTTP-REQUEST/)
 
-> Http request is a lightweight, efficient library for building, sending, and handling HTTP requests in Rust applications.
+> http_request is a lightweight, efficient library for building, sending, and handling HTTP/HTTPS requests in Rust applications. It provides a simple and intuitive API, allowing developers to easily interact with web services, whether they use the "HTTP" or "HTTPS" protocol. The library supports various HTTP methods, custom headers, request bodies, and automatic handling of redirects (including detecting redirect loops), enabling fast and secure communication. Whether working with secure "HTTPS" connections or standard "HTTP" requests, the library is optimized for performance, minimal resource usage, and easy integration into Rust projects.
 
 ## Features
 
-- **Lightweight Design**: The http_request crate provides a simple and efficient API for building, sending, and handling HTTP requests, designed to minimize resource consumption.
-- **Supports Common HTTP Methods**: Supports various HTTP methods such as GET, POST.
-  Flexible Request Building: Offers rich configuration options through HttpRequestBuilder to set request headers, body, and URL.
-- **Simple Error Handling**: Utilizes the Result type for handling errors in requests and responses, making it easy to deal with error scenarios.
-- **Custom Headers and Body**: Easily add custom headers and request bodies to the HTTP request.
-- **Response Handling**: Provides a simple wrapper around HTTP responses, allowing you to easily access and process the response data.
-- **Optimized Memory Management**: Implements efficient memory handling, minimizing unnecessary memory allocations and improving performance.
-- **Redirect**: Support setting redirection and maximum redirection times.
+- **Support for HTTP/HTTPS**: Supports both HTTP and HTTPS protocols.
+- **Lightweight Design**: The `http_request` crate provides a simple and efficient API for building, sending, and handling HTTP requests while minimizing resource consumption.
+- **Supports Common HTTP Methods**: Supports common HTTP methods such as GET and POST.
+- **Flexible Request Building**: Offers rich configuration options through `HttpRequestBuilder` to set request headers, bodies, and URLs.
+- **Simple Error Handling**: Utilizes the `Result` type to handle errors in requests and responses, making error handling straightforward.
+- **Custom Headers and Request Bodies**: Easily add custom headers and request bodies.
+- **Response Handling**: Provides a simple wrapper around HTTP responses, making it easy to access and process response data.
+- **Optimized Memory Management**: Implements efficient memory management to minimize unnecessary memory allocations and improve performance.
+- **Redirect Handling**: Supports redirect handling, allows setting the maximum number of redirects, and includes redirect loop detection.
 
 ## Installation
 
@@ -38,11 +39,12 @@ use std::collections::HashMap;
 let mut header: HashMap<String, String> = HashMap::new();
 header.insert("header-key"., "header-value".);
 let mut _request_builder = HttpRequestBuilder::new()
-    .get("http://localhost:80")
+    .get("https://ltpp.vip/")
     .headers(header)
     .timeout(6000)
     .redirect()
     .max_redirect_times(8)
+    .http1_1_only()
     .builder();
 _request_builder
     .send()
@@ -71,6 +73,7 @@ let mut _request_builder = HttpRequestBuilder::new()
     .timeout(6000)
     .redirect()
     .max_redirect_times(8)
+    .http1_1_only()
     .builder();
 _request_builder
     .send()
@@ -89,12 +92,13 @@ use std::collections::HashMap;
 let mut header: HashMap<String, String> = HashMap::new();
 header.insert("header-key"., "header-value".);
 let mut _request_builder = HttpRequestBuilder::new()
-    .post("http://localhost:80")
+    .post("http://localhost")
     .text("hello")
     .headers(header)
     .timeout(6000)
     .redirect()
     .max_redirect_times(8)
+    .http1_1_only()
     .builder();
 _request_builder
     .send()

@@ -2,7 +2,6 @@ use crate::{
     body::r#type::Body,
     header::r#type::Header,
     methods::r#type::Methods,
-    protocol::r#type::Protocol,
     request::{config::r#type::Config, tmp::r#type::Tmp},
 };
 use std::sync::Arc;
@@ -16,16 +15,15 @@ pub struct HttpRequest {
     /// The target URL of the request.
     pub url: Arc<String>,
 
-    /// The protocol version used in the request (e.g., HTTP/1.1, HTTP/2.0).
-    pub protocol: Arc<Protocol>,
-
     /// The headers included in the request.
     pub header: Arc<Header>,
 
     /// The type of the body, specifying whether it is text or JSON.
     pub body: Arc<Body>,
 
+    /// Represents the configuration settings for the HTTP request.
     pub config: Config,
 
+    /// Stores temporary data during the HTTP request process.
     pub tmp: Tmp,
 }

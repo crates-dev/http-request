@@ -107,7 +107,7 @@ fn test_https_get_request() {
     let mut body: HashMap<&str, &str> = HashMap::new();
     body.insert("body-key", "body-value");
     let mut _request_builder = HttpRequestBuilder::new()
-        .get("https://git.ltpp.vip/root")
+        .get("https://ltpp.vip/")
         .headers(header)
         .timeout(6000)
         .redirect()

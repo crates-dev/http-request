@@ -14,4 +14,6 @@ pub enum Protocol {
     HTTP,
     /// Represents the HTTPS protocol.
     HTTPS,
+    /// Unknown
+    Unknown(String),
 }

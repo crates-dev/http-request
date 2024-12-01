@@ -1,5 +1,5 @@
 use super::r#type::RequestUrl;
-use crate::request::error::Error;
+use crate::{protocol::r#type::Protocol, request::error::Error};
 use url::Url as UrlParser;
 
 /// Default implementation for `RequestUrl`.
@@ -12,9 +12,7 @@ use url::Url as UrlParser;
 impl Default for RequestUrl {
     fn default() -> Self {
         RequestUrl {
-            scheme: None,
-            username: None,
-            password: None,
+            protocol: Protocol::Unknown(String::new()),
             host: None,
             port: None,
             path: None,
@@ -40,13 +38,11 @@ impl RequestUrl {
     pub fn parse(url_str: &str) -> Result<Self, Error> {
         if let Ok(parsed_url) = UrlParser::parse(url_str) {
             let res: RequestUrl = RequestUrl {
-                scheme: Some(parsed_url.scheme().to_string()),
-                username: if parsed_url.username().is_empty() {
-                    None
-                } else {
-                    Some(parsed_url.username().to_string())
-                },
-                password: parsed_url.password().map(|p| p.to_string()),
+                protocol: parsed_url
+                    .scheme()
+                    .to_string()
+                    .parse::<Protocol>()
+                    .unwrap_or_default(),
                 host: parsed_url.host_str().map(|h| h.to_string()),
                 port: parsed_url.port(),
                 path: Some(parsed_url.path().to_string()),
