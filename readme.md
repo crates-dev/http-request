@@ -1,4 +1,4 @@
-## http request
+## http-request
 
 [![](https://img.shields.io/crates/v/http-request.svg)](https://crates.io/crates/http-request)
 [![](https://docs.rs/http-request/badge.svg)](https://docs.rs/http-request)
@@ -7,7 +7,7 @@
 
 [Official Documentation](https://docs.ltpp.vip/HTTP-REQUEST/)
 
-> http_request is a lightweight, efficient library for building, sending, and handling HTTP/HTTPS requests in Rust applications. It provides a simple and intuitive API, allowing developers to easily interact with web services, whether they use the "HTTP" or "HTTPS" protocol. The library supports various HTTP methods, custom headers, request bodies, timeout, and automatic handling of redirects (including detecting redirect loops), enabling fast and secure communication. Whether working with secure "HTTPS" connections or standard "HTTP" requests, the library is optimized for performance, minimal resource usage, and easy integration into Rust projects.
+> http-request is a lightweight, efficient library for building, sending, and handling HTTP/HTTPS requests in Rust applications. It provides a simple and intuitive API, allowing developers to easily interact with web services, whether they use the "HTTP" or "HTTPS" protocol. The library supports various HTTP methods, custom headers, request bodies, timeout, and automatic handling of redirects (including detecting redirect loops), enabling fast and secure communication. Whether working with secure "HTTPS" connections or standard "HTTP" requests, the library is optimized for performance, minimal resource usage, and easy integration into Rust projects.
 
 ## Features
 
