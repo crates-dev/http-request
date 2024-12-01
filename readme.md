@@ -113,6 +113,32 @@ _request_builder
     .unwrap_or_else(|e| println!("error => {}", e));
 ```
 
+#### Send Body Binary
+
+```rs
+use http_request::*;
+use std::collections::HashMap;
+let mut header: HashMap<&str, &str> = HashMap::new();
+header.insert("header-key", "header-value");
+let mut _request_builder = HttpRequestBuilder::new()
+    .post("http://localhost")
+    .body("hello".as_bytes())
+    .headers(header)
+    .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
+    .http1_1_only()
+    .buffer(4096)
+    .builder();
+_request_builder
+    .send()
+    .and_then(|response| {
+        println!("{:?}", response.text());
+        Ok(())
+    })
+    .unwrap_or_else(|e| println!("error => {}", e));
+```
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

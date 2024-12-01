@@ -170,3 +170,31 @@ fn test_http_post_text_request() {
         })
         .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));
 }
+
+#[test]
+fn test_http_post_binary_request() {
+    let mut header: HashMap<&str, &str> = HashMap::new();
+    header.insert("Accept", "*/*");
+    header.insert("Content-Type", "application/json");
+    let mut _request_builder = HttpRequestBuilder::new()
+        .post("http://localhost:80")
+        .body("hello".as_bytes())
+        .headers(header)
+        .timeout(6000)
+        .redirect()
+        .buffer(4096)
+        .max_redirect_times(8)
+        .http1_1_only()
+        .builder();
+    _request_builder
+        .send()
+        .and_then(|response| {
+            output(
+                "response => ",
+                &format!("{:?}", response.text()),
+                Color::Green,
+            );
+            Ok(())
+        })
+        .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));
+}
