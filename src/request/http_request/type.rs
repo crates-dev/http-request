@@ -3,9 +3,10 @@ use crate::{
     header::r#type::Header,
     methods::r#type::Methods,
     request::{config::r#type::Config, tmp::r#type::Tmp},
-    HttpResponseBinary,
+    response::http_response_binary::r#type::HttpResponseBinary,
 };
 use std::sync::Arc;
+
 /// Represents an HTTP request, encapsulating various components such as the method, URL, protocol,
 /// headers, body, and additional metadata.
 #[derive(Debug, Clone, PartialEq)]

@@ -14,8 +14,8 @@ use crate::{
     request::{
         config::r#type::Config, error::Error, request_url::r#type::RequestUrl, tmp::r#type::Tmp,
     },
+    response::{http_response_binary::r#type::HttpResponseBinary, r#trait::HttpResponse},
     utils::vec::case_insensitive_match,
-    HttpResponseBinary,
 };
 use crate::{
     constant::http::{CONTENT_LENGTH, DEFAULT_HTTP_PATH, HOST, LOCATION},
@@ -342,7 +342,7 @@ impl HttpRequest {
                 break 'read_loop;
             }
         }
-        self.response = HttpResponseBinary::from(&response_bytes);
+        self.response = <HttpResponseBinary as HttpResponse>::from(&response_bytes);
         if !self.config.redirect || redirect_url.is_none() {
             return Ok(self.response.clone());
         }

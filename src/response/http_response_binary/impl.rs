@@ -2,10 +2,10 @@ use super::r#type::HttpResponseBinary;
 use crate::{
     constant::{
         common::{BR_BYTES, COLON_SPACE_BYTES},
-        http::{CONTENT_LENGTH, HTTP_BR, HTTP_BR_BYTES},
+        http::HTTP_BR_BYTES,
     },
     request::http_version::r#type::HttpVersion,
-    response::http_response_text::r#type::HttpResponseText,
+    response::{http_response_text::r#type::HttpResponseText, r#trait::HttpResponse},
     status_code::r#type::StatusCode,
     utils::vec::{split_multi_byte, split_whitespace},
 };
@@ -20,40 +20,9 @@ use std::{collections::HashMap, vec::IntoIter};
 /// - `get_content_length`: Extracts the `Content-Length` value from the HTTP response string.
 /// - `from`: Parses a raw HTTP response string into an `HttpResponseBinary` struct, including the
 ///   status line, headers, and body.
-impl HttpResponseBinary {
-    /// Extracts the `Content-Length` from the response string.
-    ///
-    /// This method scans the HTTP response string for the `Content-Length` header and parses
-    /// its value into a `usize`. If the header is not present or its value is invalid, the method
-    /// returns `0` as a default.
-    ///
-    /// # Parameters
-    /// - `response_string`: A string representing the HTTP response.
-    ///
-    /// # Returns
-    /// Returns the `Content-Length` value extracted from the response, or `0` if not found.
-    pub fn get_content_length(response_string: &str) -> usize {
-        let content_length_sign_key: String = format!("{}:", CONTENT_LENGTH.to_lowercase());
-        response_string
-            .to_lowercase()
-            .find(&content_length_sign_key)
-            .and_then(|length_pos| {
-                let start: usize = length_pos + content_length_sign_key.len();
-                let tmp_res = response_string[start..]
-                    .find(HTTP_BR)
-                    .and_then(|end| {
-                        let content_length: usize = response_string[start..start + end]
-                            .trim()
-                            .parse()
-                            .unwrap_or(0);
-                        Some(content_length)
-                    })
-                    .unwrap_or_default();
-                Some(tmp_res)
-            })
-            .unwrap_or_default()
-    }
-
+impl HttpResponse for HttpResponseBinary {
+    type OutputText = HttpResponseText;
+    type OutputBinary = HttpResponseBinary;
     /// Parses an HTTP response from a byte slice and returns an `HttpResponseBinary` object.
     ///
     /// This function processes the raw HTTP response in byte form. It splits the response into
@@ -70,7 +39,7 @@ impl HttpResponseBinary {
     ///
     /// # Panics
     /// This method will panic if the HTTP response is malformed in ways that the unwrap operations cannot handle.
-    pub fn from(response: &[u8]) -> Self {
+    fn from(response: &[u8]) -> Self {
         let split_lines: Vec<&[u8]> = split_multi_byte(response, HTTP_BR_BYTES);
         let mut lines: IntoIter<&[u8]> = split_lines.into_iter();
         let status_line: &[u8] = lines.next().unwrap_or(&[]);
@@ -123,7 +92,7 @@ impl HttpResponseBinary {
     /// # Returns
     ///
     /// - `Self` - A new `HttpResponseBinary` instance with the body converted to text.
-    pub fn text(self) -> HttpResponseText {
+    fn text(self) -> HttpResponseText {
         let body: String = String::from_utf8_lossy(&self.body).to_string();
         HttpResponseText {
             http_version: self.http_version,
