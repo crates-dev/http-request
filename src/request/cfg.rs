@@ -44,13 +44,13 @@ fn test_http_post_request() {
         .send()
         .and_then(|response| {
             output(
-                "response => ",
+                "Response => ",
                 &format!("{:?}", response.text()),
                 Color::Green,
             );
             Ok(())
         })
-        .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));
+        .unwrap_or_else(|e| output("Error => ", &format!("{:?}", e), Color::Red));
 }
 
 #[test]
@@ -72,13 +72,13 @@ fn test_http_get_request() {
         .send()
         .and_then(|response| {
             output(
-                "response => ",
+                "Response => ",
                 &format!("{:?}", response.text()),
                 Color::Green,
             );
             Ok(())
         })
-        .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));
+        .unwrap_or_else(|e| output("Error => ", &format!("{:?}", e), Color::Red));
 }
 
 #[test]
@@ -106,13 +106,13 @@ fn test_https_post_request() {
         .send()
         .and_then(|response| {
             output(
-                "response => ",
+                "Response => ",
                 &format!("{:?}", response.text()),
                 Color::Green,
             );
             Ok(())
         })
-        .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));
+        .unwrap_or_else(|e| output("Error => ", &format!("{:?}", e), Color::Red));
 }
 
 #[test]
@@ -134,13 +134,13 @@ fn test_https_get_request() {
         .send()
         .and_then(|response| {
             output(
-                "response => ",
+                "Response => ",
                 &format!("{:?}", response.text()),
                 Color::Green,
             );
             Ok(())
         })
-        .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));
+        .unwrap_or_else(|e| output("Error => ", &format!("{:?}", e), Color::Red));
 }
 
 #[test]
@@ -162,13 +162,13 @@ fn test_http_post_text_request() {
         .send()
         .and_then(|response| {
             output(
-                "response => ",
+                "Response => ",
                 &format!("{:?}", response.text()),
                 Color::Green,
             );
             Ok(())
         })
-        .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));
+        .unwrap_or_else(|e| output("Error => ", &format!("{:?}", e), Color::Red));
 }
 
 #[test]
@@ -190,11 +190,11 @@ fn test_http_post_binary_request() {
         .send()
         .and_then(|response| {
             output(
-                "response => ",
+                "Response => ",
                 &format!("{:?}", response.text()),
                 Color::Green,
             );
             Ok(())
         })
-        .unwrap_or_else(|e| output("error => ", &format!("{:?}", e), Color::Red));
+        .unwrap_or_else(|e| output("Error => ", &format!("{:?}", e), Color::Red));
 }

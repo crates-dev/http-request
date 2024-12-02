@@ -54,7 +54,7 @@ _request_builder
         println!("{:?}", response.text());
         Ok(())
     })
-    .unwrap_or_else(|e| println!("error => {}", e));
+    .unwrap_or_else(|e| println!("Error => {}", e));
 ```
 
 ### Send post request
@@ -84,7 +84,7 @@ _request_builder
         println!("{:?}", response.text());
         Ok(())
     })
-    .unwrap_or_else(|e| println!("error => {}", e));
+    .unwrap_or_else(|e| println!("Error => {}", e));
 ```
 
 #### Send Body Text
@@ -110,7 +110,7 @@ _request_builder
         println!("{:?}", response.text());
         Ok(())
     })
-    .unwrap_or_else(|e| println!("error => {}", e));
+    .unwrap_or_else(|e| println!("Error => {}", e));
 ```
 
 #### Send Body Binary
@@ -136,7 +136,7 @@ _request_builder
         println!("{:?}", response.text());
         Ok(())
     })
-    .unwrap_or_else(|e| println!("error => {}", e));
+    .unwrap_or_else(|e| println!("Error => {}", e));
 ```
 
 ## License
