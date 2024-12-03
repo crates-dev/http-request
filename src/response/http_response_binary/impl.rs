@@ -4,7 +4,7 @@ use crate::{
         common::{BR_BYTES, COLON_SPACE_BYTES},
         http::HTTP_BR_BYTES,
     },
-    request::http_version::r#type::HttpVersion,
+    http_version::r#type::HttpVersion,
     response::{http_response_text::r#type::HttpResponseText, r#trait::HttpResponse},
     status_code::r#type::StatusCode,
     utils::vec::{split_multi_byte, split_whitespace},

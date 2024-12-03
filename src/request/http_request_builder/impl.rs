@@ -4,8 +4,9 @@ use super::r#type::HttpRequestBuilder;
 use crate::{
     body::r#type::{Body, BodyBinary, BodyJson, BodyText},
     header::r#type::Header,
+    http_version::r#type::HttpVersion,
     methods::r#type::Methods,
-    request::{http_request::r#type::HttpRequest, http_version::r#type::HttpVersion},
+    request::http_request::r#type::HttpRequest,
 };
 
 /// Provides a builder pattern implementation for constructing `HttpRequest` instances.

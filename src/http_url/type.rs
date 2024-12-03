@@ -17,7 +17,7 @@ use crate::protocol::r#type::Protocol;
 /// This struct is primarily used for holding the components of a URL after parsing, allowing
 /// for easy manipulation and access to the individual components.
 #[derive(Debug, Clone, PartialEq)]
-pub struct RequestUrl {
+pub struct HttpUrl {
     pub protocol: Protocol,
     pub host: Option<String>,
     pub port: Option<u16>,

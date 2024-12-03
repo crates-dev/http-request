@@ -3,6 +3,8 @@ pub(crate) mod constant;
 pub(crate) mod content_type;
 pub(crate) mod global_trait;
 pub(crate) mod header;
+pub(crate) mod http_url;
+pub(crate) mod http_version;
 pub(crate) mod methods;
 pub(crate) mod protocol;
 pub(crate) mod request;

@@ -9,11 +9,10 @@ use crate::{
         },
     },
     content_type::r#type::ContentType,
+    http_url::r#type::HttpUrl,
     methods::r#type::Methods,
     protocol::r#type::Protocol,
-    request::{
-        config::r#type::Config, error::Error, request_url::r#type::RequestUrl, tmp::r#type::Tmp,
-    },
+    request::{config::r#type::Config, error::Error, tmp::r#type::Tmp},
     response::{
         http_response_binary::r#type::HttpResponseBinary, r#trait::HttpResponse,
         r#type::BoxHttpResponse,
@@ -75,11 +74,11 @@ impl HttpRequest {
         self.url = Arc::new(url);
     }
 
-    /// Parses the current URL into a `RequestUrl` object.
+    /// Parses the current URL into a `HttpUrl` object.
     ///
-    /// Returns `Ok(RequestUrl)` if the parsing succeeds, or `Err(Error::InvalidUrl)` otherwise.
-    fn parse_url(&self) -> Result<RequestUrl, Error> {
-        if let Ok(parse_res) = RequestUrl::parse(&self.get_url()) {
+    /// Returns `Ok(HttpUrl)` if the parsing succeeds, or `Err(Error::InvalidUrl)` otherwise.
+    fn parse_url(&self) -> Result<HttpUrl, Error> {
+        if let Ok(parse_res) = HttpUrl::parse(&self.get_url()) {
             Ok(parse_res)
         } else {
             Err(Error::InvalidUrl)
