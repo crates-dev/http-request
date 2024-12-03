@@ -13,7 +13,7 @@ use std::collections::HashMap;
 /// - `headers`: A `HashMap<String, String>` containing the headers of the response, where each key is the header name
 ///   (e.g., "Content-Type"), and the value is the corresponding header value.
 /// - `body`: A `Vec<u8>` representing the body of the HTTP response, which contains the content being returned.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct HttpResponseBinary {
     /// The HTTP version of the response (e.g., "HTTP/1.1").
     pub http_version: String,

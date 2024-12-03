@@ -1,16 +1,15 @@
 use crate::{
     body::r#type::Body,
-    header::r#type::Header,
     methods::r#type::Methods,
-    request::{config::r#type::Config, tmp::r#type::Tmp},
-    response::http_response_binary::r#type::HttpResponseBinary,
+    request::{config::r#type::Config, header::r#type::Header, tmp::r#type::Tmp},
+    response::response_binary::r#type::HttpResponseBinary,
 };
 use std::sync::Arc;
 
 /// Represents an HTTP request, encapsulating various components such as the method, URL, protocol,
 /// headers, body, and additional metadata.
-#[derive(Debug, Clone, PartialEq)]
-pub struct HttpRequest {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Request {
     /// The HTTP method of the request (e.g., GET, POST, etc.).
     pub(crate) methods: Arc<Methods>,
 

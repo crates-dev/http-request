@@ -7,13 +7,7 @@
 /// The variants include:
 /// - `HTTP1_1`: Represents HTTP version 1.1.
 /// - `HTTP2`: Represents HTTP version 2.0.
-///
-/// # Derives
-/// The enum derives the following traits:
-/// - `Debug`: Allows for formatting the enum for debugging purposes.
-/// - `PartialEq`: Allows for comparing instances of `HttpVersion` for equality.
-/// - `Clone`: Allows for creating a copy of `HttpVersion` instances.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Eq)]
 pub enum HttpVersion {
     /// HTTP version 1.1
     HTTP1_1,

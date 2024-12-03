@@ -9,7 +9,7 @@
 /// # Associated Types
 /// - `OutputText`: The type returned by the `text` method, typically a text-based HTTP response.
 /// - `OutputBinary`: The type returned by the `binary` method, typically a binary-based HTTP response.
-pub trait HttpResponse {
+pub trait Response {
     type OutputText;
     type OutputBinary;
 
@@ -42,4 +42,16 @@ pub trait HttpResponse {
     fn from(response: &[u8]) -> Self
     where
         Self: Sized;
+
+    /// Decodes the data using a specified buffer size.
+    ///
+    /// This method takes a buffer size as input and performs the decoding process.
+    /// It returns the decoded output in the form of `Self::OutputBinary`.
+    ///
+    /// # Parameters
+    /// - `buffer_size`: The buffer size to be used during decoding.
+    ///
+    /// # Returns
+    /// Returns the decoded data as `Self::OutputBinary`. The exact type of `OutputBinary` depends on the implementation of the `Self` type.
+    fn decode(&self, buffer_size: usize) -> Self::OutputBinary;
 }

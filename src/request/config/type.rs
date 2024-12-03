@@ -45,7 +45,7 @@ use crate::{http_url::r#type::HttpUrl, http_version::r#type::HttpVersion};
 ///
 /// - Adjust the `buffer` size depending on your application’s memory usage and the size of the responses
 ///   you expect to receive. A larger buffer can help improve performance when handling large responses.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Config {
     /// The timeout duration for the request in milliseconds.
     pub timeout: u64,
@@ -65,6 +65,9 @@ pub struct Config {
     /// The type of this field is `HttpVersion`.
     pub http_version: HttpVersion,
 
-    /// The buffer size for reading the HTTP response.
+    /// The buffer size for reading the HTTP response and decode.
     pub buffer: usize,
+
+    /// Auto decode response data
+    pub decode: bool,
 }

@@ -1,5 +1,5 @@
 use super::r#type::ContentType;
-use crate::constant::http::{
+use crate::request::constant::{
     APPLICATION_JSON, APPLICATION_XML, FORM_URLENCODED, TEXT_HTML, TEXT_PLAIN,
 };
 use serde::Serialize;
@@ -123,12 +123,12 @@ impl ContentType {
         data: &T,
     ) -> String {
         match self {
-            ContentType::ApplicationJson => ContentType::get_application_json(data),
-            ContentType::ApplicationXml => ContentType::get_application_xml(data),
-            ContentType::TextPlain => ContentType::get_text_plain(data),
-            ContentType::TextHtml => ContentType::get_text_html(data),
-            ContentType::FormUrlEncoded => ContentType::get_form_url_encoded(data),
-            ContentType::Unknown => ContentType::get_binary(data),
+            Self::ApplicationJson => Self::get_application_json(data),
+            Self::ApplicationXml => Self::get_application_xml(data),
+            Self::TextPlain => Self::get_text_plain(data),
+            Self::TextHtml => Self::get_text_html(data),
+            Self::FormUrlEncoded => Self::get_form_url_encoded(data),
+            Self::Unknown => Self::get_binary(data),
         }
     }
 }
@@ -136,37 +136,19 @@ impl ContentType {
 impl FromStr for ContentType {
     type Err = ();
 
-    /// Parses a string to convert it into a `ContentType` enum variant.
-    ///
-    /// This implementation compares the input string (case-insensitive) with predefined content
-    /// types and returns the corresponding `ContentType` variant.
-    ///
-    /// # Parameters
-    /// - `data`: The string representing the content type to be parsed.
-    ///
-    /// # Returns
-    /// - A `Result` containing the matching `ContentType` variant if the string matches a known
-    ///   content type, or `ContentType::Unknown` if the string does not match any predefined content
-    ///   type.
     fn from_str(data: &str) -> Result<Self, Self::Err> {
         match data.to_lowercase().as_str() {
-            _data if _data == APPLICATION_JSON => Ok(ContentType::ApplicationJson),
-            _data if _data == APPLICATION_XML => Ok(ContentType::ApplicationXml),
-            _data if _data == TEXT_PLAIN => Ok(ContentType::TextPlain),
-            _data if _data == TEXT_HTML => Ok(ContentType::TextHtml),
-            _data if _data == FORM_URLENCODED => Ok(ContentType::FormUrlEncoded),
-            _ => Ok(ContentType::Unknown),
+            _data if _data == APPLICATION_JSON => Ok(Self::ApplicationJson),
+            _data if _data == APPLICATION_XML => Ok(Self::ApplicationXml),
+            _data if _data == TEXT_PLAIN => Ok(Self::TextPlain),
+            _data if _data == TEXT_HTML => Ok(Self::TextHtml),
+            _data if _data == FORM_URLENCODED => Ok(Self::FormUrlEncoded),
+            _ => Ok(Self::Unknown),
         }
     }
 }
 
 impl Default for ContentType {
-    /// Returns the default `ContentType`, which is `ContentType::Unknown`.
-    ///
-    /// This is used when no specific content type is provided or when the content type is not recognized.
-    ///
-    /// # Returns
-    /// - The `ContentType::Unknown` variant.
     fn default() -> Self {
         Self::Unknown
     }

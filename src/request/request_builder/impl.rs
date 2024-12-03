@@ -1,56 +1,32 @@
 use std::sync::Arc;
 
-use super::r#type::HttpRequestBuilder;
+use super::r#type::RequestBuilder;
 use crate::{
     body::r#type::{Body, BodyBinary, BodyJson, BodyText},
-    header::r#type::Header,
     http_version::r#type::HttpVersion,
     methods::r#type::Methods,
-    request::http_request::r#type::HttpRequest,
+    request::{header::r#type::Header, request::r#type::Request},
 };
 
-/// Provides a builder pattern implementation for constructing `HttpRequest` instances.
-///
-/// The `HttpRequestBuilder` struct is used to create and configure `HttpRequest` objects
-/// through a series of method calls, enabling a flexible and clear way to construct
-/// requests.
-///
-/// # Traits Implemented
-/// - `Default`: Provides a default instance of the builder, initializing all fields
-///   with default values.
-///
-/// # Methods
-/// - `new`: Creates a new instance of the builder with default values.
-/// - `methods`: Sets the HTTP method for the request (e.g., GET, POST).
-/// - `url`: Sets the target URL of the request.
-/// - `headers`: Updates the headers of the request. Existing headers may be merged with
-///   the provided ones.
-/// - `body`: Updates the body of the request. Existing body data may be merged with
-///   the provided data.
-/// - `builder`: Finalizes the configuration and returns a fully constructed `HttpRequest`
-///   instance. Resets the builder's temporary state for subsequent use.
-///
-/// This builder simplifies the construction of `HttpRequest` objects while maintaining
-/// thread safety and ensuring immutability for shared references where applicable.
-impl Default for HttpRequestBuilder {
-    fn default() -> HttpRequestBuilder {
-        HttpRequestBuilder {
-            http_request: HttpRequest::default(),
-            builder: HttpRequest::default(),
+impl Default for RequestBuilder {
+    fn default() -> Self {
+        Self {
+            http_request: Request::default(),
+            builder: Request::default(),
         }
     }
 }
 
-impl HttpRequestBuilder {
+impl RequestBuilder {
     /// Creates a new instance of the builder with default values.
     ///
-    /// This method initializes the `HttpRequestBuilder` with default values for all
+    /// This method initializes the `RequestBuilder` with default values for all
     /// fields.
     ///
     /// # Returns
-    /// Returns a new instance of `HttpRequestBuilder`.
+    /// Returns a new instance of `RequestBuilder`.
     pub fn new() -> Self {
-        HttpRequestBuilder::default()
+        Self::default()
     }
 
     /// Sets the HTTP method for the request.
@@ -62,7 +38,7 @@ impl HttpRequestBuilder {
     /// - `methods`: The HTTP method to be set for the request.
     ///
     /// # Returns
-    /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
+    /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
     pub fn post(&mut self, url: &str) -> &mut Self {
         self.http_request.methods = Arc::new(Methods::POST);
         self.url(url);
@@ -78,7 +54,7 @@ impl HttpRequestBuilder {
     /// - `methods`: The HTTP method to be set for the request.
     ///
     /// # Returns
-    /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
+    /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
     pub fn get(&mut self, url: &str) -> &mut Self {
         self.http_request.methods = Arc::new(Methods::GET);
         self.url(url);
@@ -93,7 +69,7 @@ impl HttpRequestBuilder {
     /// - `url`: The target URL of the request.
     ///
     /// # Returns
-    /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
+    /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
     fn url(&mut self, url: &str) -> &mut Self {
         self.http_request.url = Arc::new(url.to_owned());
         self
@@ -136,7 +112,7 @@ impl HttpRequestBuilder {
     /// - `header`: The headers to be set for the request.
     ///
     /// # Returns
-    /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
+    /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
     pub fn headers(&mut self, header: Header) -> &mut Self {
         if let Some(tmp_header) = Arc::get_mut(&mut self.http_request.header) {
             for (key, value) in header {
@@ -155,7 +131,7 @@ impl HttpRequestBuilder {
     /// - `body`: The JSON body data to be set for the request.
     ///
     /// # Returns
-    /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
+    /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
     pub fn json(&mut self, body: BodyJson) -> &mut Self {
         self.http_request.body = Arc::new(Body::Json(body));
         self
@@ -170,7 +146,7 @@ impl HttpRequestBuilder {
     /// - `body`: The text body data to be set for the request.
     ///
     /// # Returns
-    /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
+    /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
     pub fn text(&mut self, body: BodyText) -> &mut Self {
         self.http_request.body = Arc::new(Body::Text(body));
         self
@@ -211,7 +187,7 @@ impl HttpRequestBuilder {
     ///   connection timeout.
     ///
     /// # Returns
-    /// Returns a mutable reference to the `HttpRequestBuilder` to allow method chaining.
+    /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
     pub fn timeout(&mut self, timeout: u64) -> &mut Self {
         self.http_request.config.timeout = timeout;
         self
@@ -273,17 +249,41 @@ impl HttpRequestBuilder {
         self
     }
 
-    /// Finalizes the builder and returns a fully constructed `HttpRequest` instance.
+    /// Enables automatic response decoding.
+    ///
+    /// When enabled, the response body will be automatically decompressed if it is encoded
+    /// using a supported compression format (e.g., `gzip`, `deflate`, `br`).
+    ///
+    /// # Returns
+    /// A mutable reference to the current instance, allowing for method chaining.
+    pub fn decode(&mut self) -> &mut Self {
+        self.http_request.config.decode = true;
+        self
+    }
+
+    /// Disables automatic response decoding.
+    ///
+    /// When disabled, the response body will not be automatically decompressed,
+    /// and the raw encoded data will be returned as-is.
+    ///
+    /// # Returns
+    /// A mutable reference to the current instance, allowing for method chaining.
+    pub fn undecode(&mut self) -> &mut Self {
+        self.http_request.config.decode = false;
+        self
+    }
+
+    /// Finalizes the builder and returns a fully constructed `Request` instance.
     ///
     /// This method takes the current configuration stored in `http_request`, creates a new
-    /// `HttpRequest` instance with the configuration, and resets the builder's temporary
+    /// `Request` instance with the configuration, and resets the builder's temporary
     /// state for further use.
     ///
     /// # Returns
-    /// Returns a fully constructed `HttpRequest` instance based on the current builder state.
-    pub fn builder(&mut self) -> HttpRequest {
+    /// Returns a fully constructed `Request` instance based on the current builder state.
+    pub fn builder(&mut self) -> Request {
         self.builder = self.http_request.clone();
-        self.http_request = HttpRequest::default();
+        self.http_request = Request::default();
         self.builder.clone()
     }
 }

@@ -28,62 +28,53 @@ impl StatusCode {
     ///
     /// This method returns the corresponding HTTP numeric status code based on the `StatusCode` variant.
     /// For example:
-    /// - `StatusCode::Ok` returns 200.
-    /// - `StatusCode::BadRequest` returns 400.
-    /// - `StatusCode::Unknown` returns 0 (the default for unrecognized status codes).
+    /// - `Self::Ok` returns 200.
+    /// - `Self::BadRequest` returns 400.
+    /// - `Self::Unknown` returns 0 (the default for unrecognized status codes).
     ///
     /// # Parameters
     /// - `&self`: A reference to the `StatusCode` enum instance. This represents the specific variant of the `StatusCode` enum that the method is called on.
     ///
     /// # Return Value
     /// - `u16`: The numeric HTTP status code associated with the `StatusCode` variant. For example:
-    ///   - `StatusCode::Ok` returns `200`.
-    ///   - `StatusCode::BadRequest` returns `400`.
-    ///   - `StatusCode::Unknown` returns `0`.
+    ///   - `Self::Ok` returns `200`.
+    ///   - `Self::BadRequest` returns `400`.
+    ///   - `Self::Unknown` returns `0`.
     pub fn code(&self) -> u16 {
         match self {
-            StatusCode::Ok => 200,
-            StatusCode::Created => 201,
-            StatusCode::NoContent => 204,
-            StatusCode::BadRequest => 400,
-            StatusCode::Unauthorized => 401,
-            StatusCode::Forbidden => 403,
-            StatusCode::NotFound => 404,
-            StatusCode::InternalServerError => 500,
-            StatusCode::NotImplemented => 501,
-            StatusCode::BadGateway => 502,
-            StatusCode::Unknown => 0,
+            Self::Ok => 200,
+            Self::Created => 201,
+            Self::NoContent => 204,
+            Self::BadRequest => 400,
+            Self::Unauthorized => 401,
+            Self::Forbidden => 403,
+            Self::NotFound => 404,
+            Self::InternalServerError => 500,
+            Self::NotImplemented => 501,
+            Self::BadGateway => 502,
+            Self::Unknown => 0,
         }
+    }
+
+    pub fn same(&self, code_str: &str) -> bool {
+        self.code().to_string() == code_str || self.to_string() == code_str
     }
 }
 
 impl Display for StatusCode {
-    /// Formats the `StatusCode` as a human-readable string, such as "OK" or "Not Found".
-    ///
-    /// This method formats the `StatusCode` variant into a string that can be easily displayed.
-    /// For example:
-    /// - `StatusCode::Ok` formats to `"OK"`.
-    /// - `StatusCode::BadRequest` formats to `"Bad Request"`.
-    ///
-    /// # Parameters
-    /// - `&self`: A reference to the `StatusCode` enum instance, representing the specific status code variant.
-    /// - `f`: A mutable reference to the `fmt::Formatter` that is responsible for formatting the output.
-    ///
-    /// # Return Value
-    /// - `fmt::Result`: A result that indicates whether the formatting was successful. The result is `Ok(())` if the formatting was successful, or an error if it failed.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let res: &str = match self {
-            StatusCode::Ok => "OK",
-            StatusCode::Created => "Created",
-            StatusCode::NoContent => "No Content",
-            StatusCode::BadRequest => "Bad Request",
-            StatusCode::Unauthorized => "Unauthorized",
-            StatusCode::Forbidden => "Forbidden",
-            StatusCode::NotFound => "Not Found",
-            StatusCode::InternalServerError => "Internal Server Error",
-            StatusCode::NotImplemented => "Not Implemented",
-            StatusCode::BadGateway => "Bad Gateway",
-            StatusCode::Unknown => "Unknown",
+            Self::Ok => "OK",
+            Self::Created => "Created",
+            Self::NoContent => "No Content",
+            Self::BadRequest => "Bad Request",
+            Self::Unauthorized => "Unauthorized",
+            Self::Forbidden => "Forbidden",
+            Self::NotFound => "Not Found",
+            Self::InternalServerError => "Internal Server Error",
+            Self::NotImplemented => "Not Implemented",
+            Self::BadGateway => "Bad Gateway",
+            Self::Unknown => "Unknown",
         };
         write!(f, "{}", res)
     }
@@ -92,50 +83,25 @@ impl Display for StatusCode {
 impl FromStr for StatusCode {
     type Err = ();
 
-    /// Converts a string representation of an HTTP status code (either numeric or textual)
-    /// into the corresponding `StatusCode` enum variant.
-    ///
-    /// This method allows parsing of both numeric status codes (e.g., "200", "404") and their
-    /// corresponding textual representations (e.g., "OK", "Not Found") into the `StatusCode` enum.
-    ///
-    /// # Parameters
-    /// - `code_str`: A string slice (`&str`) representing the status code. This can be either numeric (e.g., "200") or textual (e.g., "OK").
-    ///
-    /// # Return Value
-    /// - `Result<StatusCode, ()>`: Returns a `Result`:
-    ///   - `Ok(StatusCode::Ok)` for "200" or "OK".
-    ///   - `Ok(StatusCode::BadRequest)` for "400" or "Bad Request".
-    ///   - `Ok(StatusCode::NotFound)` for "404" or "Not Found".
-    ///   - `Ok(StatusCode::Unknown)` if the string is not a recognized status code.
     fn from_str(code_str: &str) -> Result<Self, Self::Err> {
         match code_str {
-            "200" | "OK" => Ok(StatusCode::Ok),
-            "201" | "Created" => Ok(StatusCode::Created),
-            "204" | "No Content" => Ok(StatusCode::NoContent),
-            "400" | "Bad Request" => Ok(StatusCode::BadRequest),
-            "401" | "Unauthorized" => Ok(StatusCode::Unauthorized),
-            "403" | "Forbidden" => Ok(StatusCode::Forbidden),
-            "404" | "Not Found" => Ok(StatusCode::NotFound),
-            "500" | "Internal Server Error" => Ok(StatusCode::InternalServerError),
-            "501" | "Not Implemented" => Ok(StatusCode::NotImplemented),
-            "502" | "Bad Gateway" => Ok(StatusCode::BadGateway),
-            _ => Ok(StatusCode::Unknown),
+            _code_str if Self::Ok.same(_code_str) => Ok(Self::Ok),
+            _code_str if Self::Created.same(_code_str) => Ok(Self::Created),
+            _code_str if Self::NoContent.same(_code_str) => Ok(Self::NoContent),
+            _code_str if Self::BadRequest.same(_code_str) => Ok(Self::BadRequest),
+            _code_str if Self::Unauthorized.same(_code_str) => Ok(Self::Unauthorized),
+            _code_str if Self::Forbidden.same(_code_str) => Ok(Self::Forbidden),
+            _code_str if Self::NotFound.same(_code_str) => Ok(Self::NotFound),
+            _code_str if Self::InternalServerError.same(_code_str) => Ok(Self::InternalServerError),
+            _code_str if Self::NotImplemented.same(_code_str) => Ok(Self::NotImplemented),
+            _code_str if Self::BadGateway.same(_code_str) => Ok(Self::BadGateway),
+            _ => Ok(Self::Unknown),
         }
     }
 }
 
 impl Default for StatusCode {
-    /// Returns the default status code, which is `StatusCode::Ok` (HTTP 200).
-    ///
-    /// This method provides a default status code, typically used when no specific status code is set.
-    /// It returns `StatusCode::Ok`, which corresponds to HTTP status code 200 (OK).
-    ///
-    /// # Parameters
-    /// - None
-    ///
-    /// # Return Value
-    /// - `StatusCode::Ok`: The default HTTP status code, which is 200 (OK).
     fn default() -> Self {
-        StatusCode::Ok
+        Self::Ok
     }
 }

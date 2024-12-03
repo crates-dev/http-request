@@ -1,28 +1,29 @@
-use super::r#type::HttpRequest;
+use super::r#type::Request;
 use crate::{
     body::r#type::Body,
-    constant::{
-        common::APP_NAME,
-        http::{
-            ACCEPT, ACCEPT_VALUE, CONTENT_TYPE, HTTP_BR, HTTP_BR_BYTES, HTTP_DOUBLE_BR_BYTES,
-            QUERY_SYMBOL, USER_AGENT,
-        },
-    },
+    constant::common::APP_NAME,
     content_type::r#type::ContentType,
     http_url::r#type::HttpUrl,
     methods::r#type::Methods,
     protocol::r#type::Protocol,
-    request::{config::r#type::Config, error::Error, tmp::r#type::Tmp},
+    request::{
+        config::r#type::Config,
+        constant::{
+            ACCEPT, ACCEPT_VALUE, CONTENT_TYPE, HTTP_BR, HTTP_BR_BYTES, HTTP_DOUBLE_BR_BYTES,
+            QUERY_SYMBOL, USER_AGENT,
+        },
+        error::r#type::Error,
+        header::r#type::Header,
+        tmp::r#type::Tmp,
+    },
     response::{
-        http_response_binary::r#type::HttpResponseBinary, r#trait::HttpResponse,
-        r#type::BoxHttpResponse,
+        r#trait::Response, r#type::BoxHttpResponse, response_binary::r#type::HttpResponseBinary,
     },
     utils::vec::case_insensitive_match,
 };
 use crate::{
-    constant::http::{CONTENT_LENGTH, DEFAULT_HTTP_PATH, HOST, LOCATION},
     global_trait::r#trait::ReadWrite,
-    header::r#type::Header,
+    request::constant::{CONTENT_LENGTH, DEFAULT_HTTP_PATH, HOST, LOCATION},
 };
 use native_tls::{TlsConnector, TlsStream};
 use std::{
@@ -33,13 +34,13 @@ use std::{
     time::Duration,
 };
 
-/// Implements methods for the `HttpRequest` struct.
+/// Implements methods for the `Request` struct.
 ///
 /// These methods provide functionality for managing HTTP requests, including:
 /// - Retrieving or setting HTTP attributes (e.g., URL, headers, protocol).
 /// - Constructing and sending HTTP GET or POST requests.
 /// - Parsing responses and handling redirects.
-impl HttpRequest {
+impl Request {
     /// Returns the protocol of the HTTP request.
     fn get_protocol(&self) -> Protocol {
         self.config.url_obj.protocol.clone()
@@ -341,8 +342,11 @@ impl HttpRequest {
                 break 'read_loop;
             }
         }
-        self.response = <HttpResponseBinary as HttpResponse>::from(&response_bytes);
+        self.response = <HttpResponseBinary as Response>::from(&response_bytes);
         if !self.config.redirect || redirect_url.is_none() {
+            if self.config.decode {
+                self.response = self.response.decode(self.config.buffer);
+            }
             return Ok(Box::new(self.response.clone()));
         }
         let url: String =
@@ -438,11 +442,14 @@ impl HttpRequest {
     ///
     /// Returns `Ok(HttpResponseBinary)` if the redirection is successful, or `Err(Error)` otherwise.
     fn handle_redirect(&mut self, url: String) -> Result<BoxHttpResponse, Error> {
+        if !self.config.redirect {
+            return Err(Error::NeedOpenRedirect);
+        }
         if self.tmp.visit_url.contains(&url) {
             return Err(Error::RedirectUrlDeadLoop);
         }
         self.tmp.visit_url.insert(url.clone());
-        if self.config.redirect && self.config.redirect_times >= self.config.max_redirect_times {
+        if self.config.redirect_times >= self.config.max_redirect_times {
             return Err(Error::MaxRedirectTimes);
         }
         self.config.redirect_times = self.config.redirect_times + 1;
@@ -545,10 +552,9 @@ impl HttpRequest {
     }
 }
 
-/// Default implementation for `HttpRequest`.
-impl Default for HttpRequest {
-    fn default() -> HttpRequest {
-        HttpRequest {
+impl Default for Request {
+    fn default() -> Self {
+        Self {
             methods: Arc::new(Methods::new()),
             url: Arc::new(String::new()),
             header: Arc::new(HashMap::new()),

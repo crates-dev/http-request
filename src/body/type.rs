@@ -14,7 +14,7 @@ pub type BodyBinary = &'static [u8];
 /// Represents the body of an HTTP request, which can be either plain text, JSON, or binary data.
 /// This enum allows different types of content to be used in the body of the request, supporting
 /// both structured and unstructured data formats.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Body {
     /// The text variant of the body, containing plain string content.
     ///
