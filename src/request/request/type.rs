@@ -9,7 +9,7 @@ use std::sync::Arc;
 /// Represents an HTTP request, encapsulating various components such as the method, URL, protocol,
 /// headers, body, and additional metadata.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Request {
+pub struct HttpRequest {
     /// The HTTP method of the request (e.g., GET, POST, etc.).
     pub(crate) methods: Arc<Methods>,
 

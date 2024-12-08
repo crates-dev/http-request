@@ -1,4 +1,4 @@
-use crate::request::request::r#type::Request;
+use crate::request::request::r#type::HttpRequest;
 
 /// Builder pattern for constructing `Request` instances.
 ///
@@ -17,6 +17,6 @@ use crate::request::request::r#type::Request;
 /// HTTP requests with various configurations.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RequestBuilder {
-    pub(crate) http_request: Request,
-    pub(crate) builder: Request,
+    pub(crate) http_request: HttpRequest,
+    pub(crate) builder: HttpRequest,
 }

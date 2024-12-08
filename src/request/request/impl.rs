@@ -1,4 +1,4 @@
-use super::r#type::Request;
+use super::r#type::HttpRequest;
 use crate::{
     body::r#type::Body,
     constant::common::APP_NAME,
@@ -14,6 +14,8 @@ use crate::{
         },
         error::r#type::Error,
         header::r#type::Header,
+        r#trait::Request,
+        r#type::RequestResult,
         tmp::r#type::Tmp,
     },
     response::{
@@ -34,13 +36,13 @@ use std::{
     time::Duration,
 };
 
-/// Implements methods for the `Request` struct.
+/// Implements methods for the `HttpRequest` struct.
 ///
 /// These methods provide functionality for managing HTTP requests, including:
 /// - Retrieving or setting HTTP attributes (e.g., URL, headers, protocol).
 /// - Constructing and sending HTTP GET or POST requests.
 /// - Parsing responses and handling redirects.
-impl Request {
+impl HttpRequest {
     /// Returns the protocol of the HTTP request.
     fn get_protocol(&self) -> Protocol {
         self.config.url_obj.protocol.clone()
@@ -529,13 +531,11 @@ impl Request {
         };
         stream
     }
+}
 
-    /// Sends the HTTP request.
-    ///
-    /// Determines the HTTP method and constructs the appropriate request (GET or POST).
-    ///
-    /// Returns `Ok(HttpResponseBinary)` if the request is successful, or `Err(Error)` otherwise.
-    pub fn send(&mut self) -> Result<BoxHttpResponse, Error> {
+impl Request for HttpRequest {
+    type RequestResult = RequestResult;
+    fn send(&mut self) -> Self::RequestResult {
         self.config.url_obj = self.parse_url().map_err(|_| Error::InvalidUrl)?;
         let methods: Methods = self.get_methods();
         let host: String = self.config.url_obj.host.clone().unwrap_or_default();
@@ -552,7 +552,7 @@ impl Request {
     }
 }
 
-impl Default for Request {
+impl Default for HttpRequest {
     fn default() -> Self {
         Self {
             methods: Arc::new(Methods::new()),

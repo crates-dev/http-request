@@ -5,14 +5,14 @@ use crate::{
     body::r#type::{Body, BodyBinary, BodyJson, BodyText},
     http_version::r#type::HttpVersion,
     methods::r#type::Methods,
-    request::{header::r#type::Header, request::r#type::Request},
+    request::{header::r#type::Header, r#type::BoxHttpRequest, request::r#type::HttpRequest},
 };
 
 impl Default for RequestBuilder {
     fn default() -> Self {
         Self {
-            http_request: Request::default(),
-            builder: Request::default(),
+            http_request: HttpRequest::default(),
+            builder: HttpRequest::default(),
         }
     }
 }
@@ -281,9 +281,9 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a fully constructed `Request` instance based on the current builder state.
-    pub fn builder(&mut self) -> Request {
+    pub fn builder(&mut self) -> BoxHttpRequest {
         self.builder = self.http_request.clone();
-        self.http_request = Request::default();
-        self.builder.clone()
+        self.http_request = HttpRequest::default();
+        Box::new(self.builder.clone())
     }
 }

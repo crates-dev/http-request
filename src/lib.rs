@@ -15,6 +15,7 @@ pub(crate) mod status_code;
 pub(crate) mod utils;
 
 pub use request::{
-    error::r#type::Error, request::r#type::Request, request_builder::r#type::RequestBuilder,
+    error::r#type::Error, r#trait::Request, r#type::BoxHttpRequest,
+    request_builder::r#type::RequestBuilder,
 };
-pub use response::r#trait::Response;
+pub use response::{r#trait::Response, r#type::BoxHttpResponse};
