@@ -67,9 +67,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "color-output"
-version = "4.1.0"
+version = "4.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4e9d1e47024f751bf15e182e4069dd4b18d35d4afb06adbd75da32b8d8e014f"
+checksum = "c8d7e6fcd4e535c57c663834c9fcb758c57303847f7fec4603b7a291d31e087d"
 
 [[package]]
 name = "core-foundation"
@@ -165,7 +165,7 @@ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
 name = "http-request"
-version = "8.0.1"
+version = "8.0.2"
 dependencies = [
  "brotli",
  "color-output",
@@ -589,9 +589,9 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 
 [[package]]
 name = "std-macro-extensions"
-version = "0.17.0"
+version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1f2ea2f51123842c81bf359d985fc38a8bcbe5a93eb7d5a5c95987ed818c30f"
+checksum = "430543e5c343899ea51e93603ca7e4a50542948d3d850f06761757d2a0d1a86c"
 
 [[package]]
 name = "syn"
