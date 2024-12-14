@@ -1,4 +1,3 @@
-// TODO:
 use super::{
     r#trait::Response, response_binary::r#type::HttpResponseBinary,
     response_text::r#type::HttpResponseText,

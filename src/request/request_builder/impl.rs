@@ -1,4 +1,3 @@
-// TODO:
 use super::r#type::RequestBuilder;
 use crate::{
     body::r#type::{Body, BodyBinary, BodyJson, BodyText},

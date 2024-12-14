@@ -1,4 +1,3 @@
-// TODO:
 /// Enumeration of HTTP status codes representing various HTTP response statuses
 ///
 /// This enum includes common HTTP status codes that cover successful requests, client errors,

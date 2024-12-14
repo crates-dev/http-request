@@ -1,4 +1,3 @@
-// TODO:
 /// Represents the HTTP version used in the request or response.
 ///
 /// This enum is used to specify the HTTP version for HTTP requests and responses.

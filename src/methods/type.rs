@@ -1,4 +1,3 @@
-// TODO:
 /// Defines the `Methods` enum, representing HTTP request methods.
 ///
 /// The `Methods` enum includes commonly used HTTP methods such as `GET` and `POST`.

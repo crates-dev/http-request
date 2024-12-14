@@ -1,4 +1,3 @@
-// TODO:
 /// The name of the application.
 ///
 /// This constant represents the name of the application used for

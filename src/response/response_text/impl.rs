@@ -1,4 +1,3 @@
-// TODO:
 use super::r#type::HttpResponseText;
 use crate::{
     compress::r#type::Compress,

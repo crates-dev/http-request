@@ -1,4 +1,3 @@
-// TODO:
 use super::r#trait::Request;
 use crate::request::error::r#type::Error;
 use crate::response::r#type::BoxHttpResponse;

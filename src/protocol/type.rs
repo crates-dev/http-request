@@ -1,4 +1,3 @@
-// TODO:
 /// Defines the `Protocol` enum, representing HTTP-related protocols.
 ///
 /// The `Protocol` enum includes:

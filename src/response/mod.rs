@@ -1,4 +1,3 @@
-// TODO:
 pub mod response_binary;
 pub mod response_header;
 pub mod response_text;

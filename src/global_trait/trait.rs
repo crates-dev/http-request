@@ -1,4 +1,3 @@
-// TODO:
 /// A trait that combines `std::io::Read` and `std::io::Write`.
 ///
 /// The `ReadWrite` trait serves as a composite trait, requiring that any type implementing it

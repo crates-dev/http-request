@@ -1,4 +1,3 @@
-// TODO:
 /// Trait representing an HTTP request.
 ///
 /// Provides a method for sending an HTTP request and obtaining the result.

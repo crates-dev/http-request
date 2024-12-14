@@ -1,4 +1,3 @@
-// TODO:
 use super::r#type::Methods;
 use crate::methods::constant::{GET, POST};
 use std::fmt::{self, Display};

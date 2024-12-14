@@ -1,4 +1,3 @@
-// TODO:
 /// A carriage return and newline character sequence (`\r\n`), used to separate lines in HTTP headers.
 pub static HTTP_BR: &str = "\r\n";
 

@@ -1,4 +1,3 @@
-// TODO:
 use crate::protocol::r#type::Protocol;
 
 /// A struct representing a parsed URL with various components.

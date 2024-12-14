@@ -1,4 +1,3 @@
-// TODO:
 use super::r#type::Protocol;
 use crate::request::constant::{HTTP, HTTPS};
 use std::{

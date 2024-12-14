@@ -1,4 +1,3 @@
-// TODO:
 use super::r#type::ContentType;
 use crate::request::constant::{
     APPLICATION_JSON, APPLICATION_XML, FORM_URLENCODED, TEXT_HTML, TEXT_PLAIN,

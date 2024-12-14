@@ -1,4 +1,3 @@
-// TODO:
 /// Represents different types of errors that can occur in the application.
 ///
 /// The `Error` enum defines various error types related to HTTP requests, network connections, and TLS operations.

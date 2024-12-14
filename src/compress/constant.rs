@@ -1,4 +1,3 @@
-// TODO:
 /// A constant representing the "gzip" compression algorithm.
 ///
 /// This constant holds the string value `"gzip"`, which is commonly used to refer to the GZIP compression format.

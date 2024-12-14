@@ -1,4 +1,3 @@
-// TODO:
 use std::collections::HashMap;
 
 /// A struct representing an HTTP response.

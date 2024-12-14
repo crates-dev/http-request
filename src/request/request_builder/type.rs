@@ -1,4 +1,3 @@
-// TODO:
 use crate::request::request::r#type::HttpRequest;
 
 /// Builder pattern for constructing `Request` instances.

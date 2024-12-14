@@ -1,4 +1,3 @@
-// TODO:
 use crate::{http_url::r#type::HttpUrl, http_version::r#type::HttpVersion};
 
 /// Configuration for HTTP requests.

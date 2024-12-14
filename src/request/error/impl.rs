@@ -1,4 +1,3 @@
-// TODO:
 use super::r#type::Error;
 use std::{
     error::Error as StdError,

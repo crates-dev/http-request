@@ -1,4 +1,3 @@
-// TODO:
 use std::collections::HashMap;
 
 /// A type alias for a `HashMap<String, String>`, representing the headers of an HTTP request or response.
