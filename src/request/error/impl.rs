@@ -1,9 +1,9 @@
+// TODO:
+use super::r#type::Error;
 use std::{
     error::Error as StdError,
     fmt::{self, Display},
 };
-
-use super::r#type::Error;
 
 impl StdError for Error {}
 

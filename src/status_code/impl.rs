@@ -1,9 +1,9 @@
+// TODO:
+use super::r#type::StatusCode;
 use std::{
     fmt::{self, Display},
     str::FromStr,
 };
-
-use super::r#type::StatusCode;
 
 /// The `StatusCode` enum represents the HTTP status codes.
 ///

@@ -1,3 +1,4 @@
+// TODO:
 #[derive(Debug, PartialEq, Eq)]
 pub enum Compress {
     Gzip,

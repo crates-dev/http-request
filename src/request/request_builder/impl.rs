@@ -1,5 +1,4 @@
-use std::sync::Arc;
-
+// TODO:
 use super::r#type::RequestBuilder;
 use crate::{
     body::r#type::{Body, BodyBinary, BodyJson, BodyText},
@@ -7,6 +6,7 @@ use crate::{
     methods::r#type::Methods,
     request::{header::r#type::Header, r#type::BoxHttpRequest, request::r#type::HttpRequest},
 };
+use std::sync::Arc;
 
 impl Default for RequestBuilder {
     fn default() -> Self {

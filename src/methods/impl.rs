@@ -1,8 +1,7 @@
-use std::fmt::{self, Display};
-
-use crate::methods::constant::{GET, POST};
-
+// TODO:
 use super::r#type::Methods;
+use crate::methods::constant::{GET, POST};
+use std::fmt::{self, Display};
 
 impl Default for Methods {
     fn default() -> Self {

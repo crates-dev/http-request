@@ -1,3 +1,4 @@
+// TODO:
 use super::r#type::HttpResponseBinary;
 use crate::{
     compress::r#type::Compress,
