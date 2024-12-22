@@ -1,14 +1,12 @@
 use super::r#type::Config;
-use crate::{
-    constant::request::DEFAULT_TIMEOUT, http_url::r#type::HttpUrl,
-    http_version::r#type::HttpVersion,
-};
+use crate::constant::r#type::DEFAULT_TIMEOUT;
+use http_type::*;
 
 impl Default for Config {
     fn default() -> Self {
         Self {
             timeout: DEFAULT_TIMEOUT,
-            url_obj: HttpUrl::default(),
+            url_obj: HttpUrlComponents::default(),
             redirect: false,
             max_redirect_times: 8,
             redirect_times: 0,

@@ -1,10 +1,9 @@
 use super::r#type::RequestBuilder;
 use crate::{
     body::r#type::{Body, BodyBinary, BodyJson, BodyText},
-    http_version::r#type::HttpVersion,
-    methods::r#type::Methods,
-    request::{header::r#type::Header, r#type::BoxHttpRequest, request::r#type::HttpRequest},
+    request::{r#type::BoxHttpRequest, request::r#type::HttpRequest},
 };
+use http_type::*;
 use std::sync::Arc;
 
 impl Default for RequestBuilder {
@@ -112,7 +111,7 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
-    pub fn headers(&mut self, header: Header) -> &mut Self {
+    pub fn headers(&mut self, header: HttpHeaderSliceMap) -> &mut Self {
         if let Some(tmp_header) = Arc::get_mut(&mut self.http_request.header) {
             for (key, value) in header {
                 tmp_header.insert(key, value);

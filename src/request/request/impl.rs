@@ -1,21 +1,10 @@
 use super::r#type::HttpRequest;
+use crate::constant::r#type::APP_NAME;
+use crate::global_trait::r#trait::ReadWrite;
 use crate::{
     body::r#type::Body,
-    constant::common::APP_NAME,
-    content_type::r#type::ContentType,
-    http_url::r#type::HttpUrl,
-    methods::r#type::Methods,
-    protocol::r#type::Protocol,
     request::{
-        config::r#type::Config,
-        constant::{
-            ACCEPT, ACCEPT_VALUE, CONTENT_TYPE, HTTP_BR, HTTP_BR_BYTES, HTTP_DOUBLE_BR_BYTES,
-            QUERY_SYMBOL, USER_AGENT,
-        },
-        error::r#type::Error,
-        header::r#type::Header,
-        r#trait::Request,
-        r#type::RequestResult,
+        config::r#type::Config, error::r#type::Error, r#trait::Request, r#type::RequestResult,
         tmp::r#type::Tmp,
     },
     response::{
@@ -23,10 +12,8 @@ use crate::{
     },
     utils::vec::case_insensitive_match,
 };
-use crate::{
-    global_trait::r#trait::ReadWrite,
-    request::constant::{CONTENT_LENGTH, DEFAULT_HTTP_PATH, HOST, LOCATION},
-};
+use http_constant::*;
+use http_type::*;
 use native_tls::{TlsConnector, TlsStream};
 use std::{
     collections::HashMap,
@@ -59,7 +46,7 @@ impl HttpRequest {
     }
 
     /// Returns the headers of the HTTP request.
-    fn get_header(&self) -> Header {
+    fn get_header(&self) -> HttpHeaderSliceMap {
         self.header.as_ref().clone()
     }
 
@@ -77,11 +64,11 @@ impl HttpRequest {
         self.url = Arc::new(url);
     }
 
-    /// Parses the current URL into a `HttpUrl` object.
+    /// Parses the current URL into a `HttpUrlComponents` object.
     ///
-    /// Returns `Ok(HttpUrl)` if the parsing succeeds, or `Err(Error::InvalidUrl)` otherwise.
-    fn parse_url(&self) -> Result<HttpUrl, Error> {
-        if let Ok(parse_res) = HttpUrl::parse(&self.get_url()) {
+    /// Returns `Ok(HttpUrlComponents)` if the parsing succeeds, or `Err(Error::InvalidUrl)` otherwise.
+    fn parse_url(&self) -> Result<HttpUrlComponents, Error> {
+        if let Ok(parse_res) = HttpUrlComponents::parse(&self.get_url()) {
             Ok(parse_res)
         } else {
             Err(Error::InvalidUrl)

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use http_type::*;
 
 /// A struct representing an HTTP response.
 ///
@@ -25,7 +25,7 @@ pub struct HttpResponseText {
     pub status_text: String,
 
     /// A `HashMap` of headers, where the key is the header name and the value is the header value.
-    pub headers: HashMap<String, String>,
+    pub headers: HttpHeaderMap,
 
     /// The body of the response, which contains the content being returned.
     pub body: String,

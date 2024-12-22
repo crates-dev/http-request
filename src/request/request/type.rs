@@ -1,9 +1,9 @@
 use crate::{
     body::r#type::Body,
-    methods::r#type::Methods,
-    request::{config::r#type::Config, header::r#type::Header, tmp::r#type::Tmp},
+    request::{config::r#type::Config, tmp::r#type::Tmp},
     response::response_binary::r#type::HttpResponseBinary,
 };
+use http_type::*;
 use std::sync::Arc;
 
 /// Represents an HTTP request, encapsulating various components such as the method, URL, protocol,
@@ -17,7 +17,7 @@ pub struct HttpRequest {
     pub(crate) url: Arc<String>,
 
     /// The headers included in the request.
-    pub(crate) header: Arc<Header>,
+    pub(crate) header: Arc<HttpHeaderSliceMap>,
 
     /// The type of the body, specifying whether it is text or JSON.
     pub(crate) body: Arc<Body>,

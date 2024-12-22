@@ -1,4 +1,4 @@
-use crate::{http_url::r#type::HttpUrl, http_version::r#type::HttpVersion};
+use http_type::*;
 
 /// Configuration for HTTP requests.
 ///
@@ -12,7 +12,7 @@ use crate::{http_url::r#type::HttpUrl, http_version::r#type::HttpVersion};
 ///   Requests exceeding this duration will be terminated.
 ///
 /// - `url_obj` - The parsed URL object containing the details of the request destination.  
-///   This field represents the URL that the request will be sent to, parsed into a `HttpUrl` object.
+///   This field represents the URL that the request will be sent to, parsed into a `HttpUrlComponents` object.
 ///
 /// - `redirect` - A flag indicating whether redirection is enabled for the request.  
 ///   If `true`, the client will follow HTTP redirections (e.g., 3xx status codes).  
@@ -51,7 +51,7 @@ pub struct Config {
     pub timeout: u64,
 
     /// The parsed URL object containing the details of the request destination.
-    pub url_obj: HttpUrl,
+    pub url_obj: HttpUrlComponents,
 
     /// A flag indicating whether redirection is enabled for the request.
     pub redirect: bool,

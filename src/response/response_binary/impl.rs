@@ -1,13 +1,11 @@
 use super::r#type::HttpResponseBinary;
 use crate::{
-    compress::r#type::Compress,
-    constant::common::{BR_BYTES, COLON_SPACE_BYTES},
-    http_version::r#type::HttpVersion,
-    request::constant::HTTP_BR_BYTES,
     response::{r#trait::Response, response_text::r#type::HttpResponseText},
-    status_code::r#type::StatusCode,
     utils::vec::{split_multi_byte, split_whitespace},
 };
+use http_compress::Compress;
+use http_constant::*;
+use http_type::*;
 use std::{collections::HashMap, vec::IntoIter};
 
 /// Implements the `Response` trait for `HttpResponseBinary`.
