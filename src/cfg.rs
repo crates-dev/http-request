@@ -4,19 +4,23 @@ use std_macro_extensions::*;
 
 #[allow(dead_code)]
 fn output(title: &str, msg: &str, color: Color) {
-    OutputBuilder::new()
-        .show_time(true)
-        .time_bg_color(ColorType::Use(Color::Cyan))
-        .time_text_blod(true)
-        .split_text(title)
-        .split_text_blod(true)
-        .split_bg_color(ColorType::Use(Color::Yellow))
-        .text(msg)
-        .text_bg_color(ColorType::Use(color))
-        .text_blod(true)
-        .endl(true)
-        .build()
-        .output();
+    OutputListBuilder::new()
+        .add(
+            OutputBuilder::new()
+                .text(title)
+                .bg_color(ColorType::Use(Color::Cyan))
+                .blod(true)
+                .build(),
+        )
+        .add(
+            OutputBuilder::new()
+                .text(msg)
+                .bg_color(ColorType::Use(color))
+                .blod(true)
+                .endl(true)
+                .build(),
+        )
+        .run();
 }
 
 #[test]

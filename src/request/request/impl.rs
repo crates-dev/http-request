@@ -115,7 +115,7 @@ impl HttpRequest {
                     &self.get_body_bytes().len().to_string()
                 },
             ),
-            (ACCEPT, ACCEPT_VALUE),
+            (ACCEPT, ACCEPT_ANY),
             (USER_AGENT, APP_NAME),
         ];
         for &(key, default_value) in &required_headers {
