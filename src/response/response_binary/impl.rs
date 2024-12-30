@@ -4,7 +4,6 @@ use crate::{
     utils::vec::{split_multi_byte, split_whitespace},
 };
 use http_compress::Compress;
-use http_constant::*;
 use http_type::*;
 use std::{collections::HashMap, vec::IntoIter};
 

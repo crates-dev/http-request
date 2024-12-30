@@ -1,4 +1,4 @@
-use http_constant::{SPACE_U8, TAB_U8};
+use http_type::*;
 
 /// Splits a byte slice into parts based on whitespace characters (space or tab).
 ///

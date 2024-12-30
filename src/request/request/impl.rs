@@ -13,7 +13,6 @@ use crate::{
     },
     utils::vec::case_insensitive_match,
 };
-use http_constant::*;
 use http_type::*;
 use native_tls::{TlsConnector, TlsStream};
 use std::{
