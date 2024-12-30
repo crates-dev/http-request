@@ -143,6 +143,10 @@ _request_builder
     .unwrap_or_else(|e| println!("Error => {}", e));
 ```
 
+## Help
+
+Ensure that CMake is installed on the system
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

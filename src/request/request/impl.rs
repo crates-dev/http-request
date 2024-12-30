@@ -14,7 +14,8 @@ use crate::{
     utils::vec::case_insensitive_match,
 };
 use http_type::*;
-use native_tls::{TlsConnector, TlsStream};
+use rustls::pki_types::ServerName;
+use rustls::{ClientConfig, ClientConnection, RootCertStore, StreamOwned};
 use std::{
     collections::HashMap,
     io::{Read, Write},
@@ -22,6 +23,7 @@ use std::{
     sync::Arc,
     time::Duration,
 };
+use webpki_roots::TLS_SERVER_ROOTS;
 
 /// Implements methods for the `HttpRequest` struct.
 ///
@@ -493,20 +495,20 @@ impl HttpRequest {
         let host_port: (String, u16) = (host.clone(), port);
         let timeout: Duration = Duration::from_millis(self.config.timeout);
         let stream: Result<Box<dyn ReadWrite>, Error> = if self.get_protocol().is_https() {
-            let tls_connector: TlsConnector = TlsConnector::builder()
-                .build()
-                .map_err(|_| Error::TlsConnectorBuildError)?;
+            let roots: RootCertStore = RootCertStore {
+                roots: TLS_SERVER_ROOTS.to_vec(),
+            };
+            let config: ClientConfig = ClientConfig::builder()
+                .with_root_certificates(roots)
+                .with_no_client_auth();
             let tcp_stream: TcpStream =
                 TcpStream::connect(host_port.clone()).map_err(|_| Error::TcpStreamConnectError)?;
-            tcp_stream
-                .set_read_timeout(Some(timeout))
-                .map_err(|_| Error::SetReadTimeoutError)?;
-            tcp_stream
-                .set_write_timeout(Some(timeout))
-                .map_err(|_| Error::SetWriteTimeoutError)?;
-            let tls_stream: TlsStream<TcpStream> = tls_connector
-                .connect(&host.clone(), tcp_stream)
-                .map_err(|_| Error::TlsStreamConnectError)?;
+            let client_config = Arc::new(config);
+            let dns_name =
+                ServerName::try_from(host.clone()).map_err(|_| Error::TlsConnectorBuildError)?;
+            let session = ClientConnection::new(Arc::clone(&client_config), dns_name)
+                .map_err(|_| Error::TlsConnectorBuildError)?;
+            let tls_stream = StreamOwned::new(session, tcp_stream);
             Ok(Box::new(tls_stream))
         } else {
             let tcp_stream: TcpStream =
