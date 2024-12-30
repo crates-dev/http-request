@@ -8,7 +8,7 @@ pub(crate) mod response;
 pub(crate) mod utils;
 
 pub use request::{
-    error::r#type::Error, r#trait::Request, r#type::BoxHttpRequest,
+    error::r#type::Error as RequestError, r#trait::RequestTrait, r#type::BoxRequestTrait,
     request_builder::r#type::RequestBuilder,
 };
-pub use response::{r#trait::Response, r#type::BoxHttpResponse};
+pub use response::{r#trait::ResponseTrait, r#type::BoxResponseTrait};

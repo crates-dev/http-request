@@ -1,14 +1,15 @@
 use super::r#type::HttpRequest;
 use crate::constant::r#type::APP_NAME;
 use crate::global_trait::r#trait::ReadWrite;
+use crate::request::r#trait::RequestTrait;
 use crate::{
     body::r#type::Body,
     request::{
-        config::r#type::Config, error::r#type::Error, r#trait::Request, r#type::RequestResult,
-        tmp::r#type::Tmp,
+        config::r#type::Config, error::r#type::Error, r#type::RequestResult, tmp::r#type::Tmp,
     },
     response::{
-        r#trait::Response, r#type::BoxHttpResponse, response_binary::r#type::HttpResponseBinary,
+        r#trait::ResponseTrait, r#type::BoxResponseTrait,
+        response_binary::r#type::HttpResponseBinary,
     },
     utils::vec::case_insensitive_match,
 };
@@ -217,7 +218,7 @@ impl HttpRequest {
     fn send_get_request(
         &mut self,
         stream: &mut Box<dyn ReadWrite>,
-    ) -> Result<BoxHttpResponse, Error> {
+    ) -> Result<BoxResponseTrait, Error> {
         let mut request: Vec<u8> = Vec::new();
         let path: String = self.get_path();
         let request_line_string: String =
@@ -248,7 +249,7 @@ impl HttpRequest {
     fn send_post_request(
         &mut self,
         stream: &mut Box<dyn ReadWrite>,
-    ) -> Result<BoxHttpResponse, Error> {
+    ) -> Result<BoxResponseTrait, Error> {
         let mut request: Vec<u8> = Vec::new();
         let path: String = self.get_path();
         let request_line_string: String =
@@ -279,7 +280,10 @@ impl HttpRequest {
     /// Returns a `Result<HttpResponseBinary, Error>`, where:
     /// - `Ok(HttpResponseBinary)` contains the complete HTTP response after processing headers and body.
     /// - `Err(Error)` indicates that an error occurred while reading the response.
-    fn read_response(&mut self, stream: &mut Box<dyn ReadWrite>) -> Result<BoxHttpResponse, Error> {
+    fn read_response(
+        &mut self,
+        stream: &mut Box<dyn ReadWrite>,
+    ) -> Result<BoxResponseTrait, Error> {
         let buffer_size: usize = self.config.buffer;
         let mut buffer: Vec<u8> = vec![0; buffer_size];
         let mut response_bytes: Vec<u8> = Vec::new();
@@ -331,7 +335,7 @@ impl HttpRequest {
                 break 'read_loop;
             }
         }
-        self.response = <HttpResponseBinary as Response>::from(&response_bytes);
+        self.response = <HttpResponseBinary as ResponseTrait>::from(&response_bytes);
         if !self.config.redirect || redirect_url.is_none() {
             if self.config.decode {
                 self.response = self.response.decode(self.config.buffer);
@@ -430,7 +434,7 @@ impl HttpRequest {
     /// - `url`: The redirection URL to follow.
     ///
     /// Returns `Ok(HttpResponseBinary)` if the redirection is successful, or `Err(Error)` otherwise.
-    fn handle_redirect(&mut self, url: String) -> Result<BoxHttpResponse, Error> {
+    fn handle_redirect(&mut self, url: String) -> Result<BoxResponseTrait, Error> {
         if !self.config.redirect {
             return Err(Error::NeedOpenRedirect);
         }
@@ -520,7 +524,7 @@ impl HttpRequest {
     }
 }
 
-impl Request for HttpRequest {
+impl RequestTrait for HttpRequest {
     type RequestResult = RequestResult;
     fn send(&mut self) -> Self::RequestResult {
         self.config.url_obj = self.parse_url().map_err(|_| Error::InvalidUrl)?;
@@ -530,7 +534,7 @@ impl Request for HttpRequest {
         let mut stream: Box<dyn ReadWrite> = self
             .get_connection_stream(host, port)
             .map_err(|_| Error::TcpStreamConnectError)?;
-        let res: Result<BoxHttpResponse, Error> = match methods {
+        let res: Result<BoxResponseTrait, Error> = match methods {
             m if m.is_get() => self.send_get_request(&mut stream),
             m if m.is_post() => self.send_post_request(&mut stream),
             _ => Err(Error::RequestError),

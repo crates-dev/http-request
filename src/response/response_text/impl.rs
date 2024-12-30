@@ -1,10 +1,10 @@
 use super::r#type::HttpResponseText;
-use crate::response::{r#trait::Response, response_binary::r#type::HttpResponseBinary};
+use crate::response::{r#trait::ResponseTrait, response_binary::r#type::HttpResponseBinary};
 use http_compress::Compress;
 use http_type::*;
 use std::collections::HashMap;
 
-/// Implements the `Response` trait for `HttpResponseText`.
+/// Implements the `ResponseTrait` trait for `HttpResponseText`.
 ///
 /// This implementation allows `HttpResponseText` to convert between text and binary
 /// representations of HTTP responses. It provides methods for parsing raw responses, as well
@@ -13,7 +13,7 @@ use std::collections::HashMap;
 /// # Associated Types
 /// - `OutputText`: Specifies the text representation of an HTTP response (`HttpResponseText`).
 /// - `OutputBinary`: Specifies the binary representation of an HTTP response (`HttpResponseBinary`).
-impl Response for HttpResponseText {
+impl ResponseTrait for HttpResponseText {
     type OutputText = HttpResponseText;
     type OutputBinary = HttpResponseBinary;
 
@@ -21,7 +21,7 @@ impl Response for HttpResponseText {
     where
         Self: Sized,
     {
-        <HttpResponseBinary as Response>::from(response).text()
+        <HttpResponseBinary as ResponseTrait>::from(response).text()
     }
 
     fn text(&self) -> Self::OutputText {

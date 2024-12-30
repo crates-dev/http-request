@@ -48,7 +48,7 @@ fn test_http_post_request() {
         .send()
         .and_then(|response| {
             output(
-                "Response => ",
+                "ResponseTrait => ",
                 &format!("{:?}", response.text()),
                 Color::Green,
             );
@@ -76,7 +76,7 @@ fn test_http_get_request() {
         .send()
         .and_then(|response| {
             output(
-                "Response => ",
+                "ResponseTrait => ",
                 &format!("{:?}", response.text()),
                 Color::Green,
             );
@@ -110,7 +110,7 @@ fn test_https_post_request() {
         .send()
         .and_then(|response| {
             output(
-                "Response => ",
+                "ResponseTrait => ",
                 &format!("{:?}", response.text()),
                 Color::Green,
             );
@@ -138,7 +138,7 @@ fn test_https_get_request() {
         .send()
         .and_then(|response| {
             output(
-                "Response => ",
+                "ResponseTrait => ",
                 &format!("{:?}", response.text()),
                 Color::Green,
             );
@@ -166,7 +166,7 @@ fn test_http_post_text_request() {
         .send()
         .and_then(|response| {
             output(
-                "Response => ",
+                "ResponseTrait => ",
                 &format!("{:?}", response.text()),
                 Color::Green,
             );
@@ -194,7 +194,7 @@ fn test_http_post_binary_request() {
         .send()
         .and_then(|response| {
             output(
-                "Response => ",
+                "ResponseTrait => ",
                 &format!("{:?}", response.text()),
                 Color::Green,
             );
@@ -218,7 +218,7 @@ fn test_auto_gzip_get() {
         .send()
         .and_then(|response| {
             output(
-                "Response => ",
+                "ResponseTrait => ",
                 &format!("{:?}", response.text()),
                 Color::Green,
             );
@@ -241,7 +241,7 @@ fn test_gzip_get() {
         .send()
         .and_then(|response| {
             output(
-                "Response => ",
+                "ResponseTrait => ",
                 &format!("{:?}", response.decode(4096).text()),
                 Color::Green,
             );
@@ -264,7 +264,7 @@ fn test_unredirect_get() {
         .send()
         .and_then(|response| {
             output(
-                "Response => ",
+                "ResponseTrait => ",
                 &format!("{:?}", response.decode(4096).text()),
                 Color::Green,
             );

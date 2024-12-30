@@ -1,6 +1,6 @@
 use super::r#type::HttpResponseBinary;
 use crate::{
-    response::{r#trait::Response, response_text::r#type::HttpResponseText},
+    response::{r#trait::ResponseTrait, response_text::r#type::HttpResponseText},
     utils::vec::{split_multi_byte, split_whitespace},
 };
 use http_compress::Compress;
@@ -8,7 +8,7 @@ use http_constant::*;
 use http_type::*;
 use std::{collections::HashMap, vec::IntoIter};
 
-/// Implements the `Response` trait for `HttpResponseBinary`.
+/// Implements the `ResponseTrait` trait for `HttpResponseBinary`.
 ///
 /// This implementation specifies the associated types for binary and text representations
 /// of HTTP responses, enabling seamless conversion and handling of HTTP response data.
@@ -16,7 +16,7 @@ use std::{collections::HashMap, vec::IntoIter};
 /// # Associated Types
 /// - `OutputText`: Specifies the text representation of an HTTP response (`HttpResponseText`).
 /// - `OutputBinary`: Specifies the binary representation of an HTTP response (`HttpResponseBinary`).
-impl Response for HttpResponseBinary {
+impl ResponseTrait for HttpResponseBinary {
     type OutputText = HttpResponseText;
     type OutputBinary = HttpResponseBinary;
 

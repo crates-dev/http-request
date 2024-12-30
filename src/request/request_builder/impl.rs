@@ -1,7 +1,7 @@
 use super::r#type::RequestBuilder;
 use crate::{
     body::r#type::{Body, BodyBinary, BodyJson, BodyText},
-    request::{r#type::BoxHttpRequest, request::r#type::HttpRequest},
+    request::{r#type::BoxRequestTrait, request::r#type::HttpRequest},
 };
 use http_type::*;
 use std::sync::Arc;
@@ -271,15 +271,15 @@ impl RequestBuilder {
         self
     }
 
-    /// Finalizes the builder and returns a fully constructed `Request` instance.
+    /// Finalizes the builder and returns a fully constructed `HttpRequest` instance.
     ///
     /// This method takes the current configuration stored in `http_request`, creates a new
-    /// `Request` instance with the configuration, and resets the builder's temporary
+    /// `HttpRequest` instance with the configuration, and resets the builder's temporary
     /// state for further use.
     ///
     /// # Returns
-    /// Returns a fully constructed `Request` instance based on the current builder state.
-    pub fn builder(&mut self) -> BoxHttpRequest {
+    /// Returns a fully constructed `BoxRequestTrait` instance based on the current builder state.
+    pub fn builder(&mut self) -> BoxRequestTrait {
         self.builder = self.http_request.clone();
         self.http_request = HttpRequest::default();
         Box::new(self.builder.clone())
