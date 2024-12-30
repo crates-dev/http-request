@@ -11,4 +11,7 @@ pub use request::{
     error::r#type::Error as RequestError, r#trait::RequestTrait, r#type::BoxRequestTrait,
     request_builder::r#type::RequestBuilder,
 };
-pub use response::{r#trait::ResponseTrait, r#type::BoxResponseTrait};
+pub use response::{
+    r#trait::ResponseTrait, r#type::BoxResponseTrait, response_binary::r#type::HttpResponseBinary,
+    response_text::r#type::HttpResponseText,
+};
