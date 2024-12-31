@@ -111,10 +111,15 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
-    pub fn headers(&mut self, header: HttpHeaderSliceMap) -> &mut Self {
+    pub fn headers<K, V, T>(&mut self, header: T) -> &mut Self
+    where
+        T: IntoIterator<Item = (K, V)>,
+        K: Into<String>,
+        V: Into<String>,
+    {
         if let Some(tmp_header) = Arc::get_mut(&mut self.http_request.header) {
             for (key, value) in header {
-                tmp_header.insert(key, value);
+                tmp_header.insert(key.into(), value.into());
             }
         }
         self

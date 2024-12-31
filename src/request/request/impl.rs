@@ -102,7 +102,7 @@ impl HttpRequest {
     /// This function ensures that all necessary headers are present and correctly formatted
     /// before constructing the HTTP request.
     fn get_header_bytes(&self) -> Vec<u8> {
-        let mut header: HashMap<&str, &str> = self.get_header();
+        let mut header: HttpHeaderSliceMap = self.get_header();
         let mut header_string = String::new();
         let required_headers: [(&str, &str); 4] = [
             (
@@ -122,7 +122,7 @@ impl HttpRequest {
         ];
         for &(key, default_value) in &required_headers {
             if !header.contains_key(key) {
-                header.insert(key, default_value);
+                header.insert(key.to_owned(), default_value.to_owned());
             }
         }
         for (key, value) in &header {
@@ -150,7 +150,7 @@ impl HttpRequest {
     /// The body processing relies on the implementation of the `ContentType` parsing logic.
     fn get_body_bytes(&self) -> Vec<u8> {
         let content_type_key: String = CONTENT_TYPE.to_lowercase();
-        let header: HashMap<&str, &str> = self.get_header();
+        let header: HttpHeaderSliceMap = self.get_header();
         let body: Body = self.get_body();
         let mut res: String = String::new();
         for (key, value) in header {
