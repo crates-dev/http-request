@@ -1,6 +1,8 @@
 use std::collections::HashSet;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+use rustls::RootCertStore;
+
+#[derive(Debug, Clone)]
 /// Represents a structure that stores visited URLs.
 ///
 /// The `Tmp` struct is used to track the URLs that have been visited. It contains a single field,
@@ -12,4 +14,5 @@ use std::collections::HashSet;
 ///   that each URL is unique within the set.
 pub struct Tmp {
     pub visit_url: HashSet<String>,
+    pub root_cert: RootCertStore,
 }

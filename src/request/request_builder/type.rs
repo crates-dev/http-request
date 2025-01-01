@@ -15,7 +15,7 @@ use crate::request::request::r#type::HttpRequest;
 /// This builder simplifies the creation of `HttpRequest` objects, ensuring thread-safety
 /// and immutability of shared references, while providing a fluent API for constructing
 /// HTTP requests with various configurations.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct RequestBuilder {
     pub(crate) http_request: HttpRequest,
     pub(crate) builder: HttpRequest,

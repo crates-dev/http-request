@@ -23,7 +23,6 @@ use std::{
     sync::Arc,
     time::Duration,
 };
-use webpki_roots::TLS_SERVER_ROOTS;
 
 /// Implements methods for the `HttpRequest` struct.
 ///
@@ -494,15 +493,19 @@ impl HttpRequest {
     fn get_connection_stream(&self, host: String, port: u16) -> Result<Box<dyn ReadWrite>, Error> {
         let host_port: (String, u16) = (host.clone(), port);
         let timeout: Duration = Duration::from_millis(self.config.timeout);
+        let tcp_stream: TcpStream =
+            TcpStream::connect(host_port.clone()).map_err(|_| Error::TcpStreamConnectError)?;
+        tcp_stream
+            .set_read_timeout(Some(timeout))
+            .map_err(|_| Error::SetReadTimeoutError)?;
+        tcp_stream
+            .set_write_timeout(Some(timeout))
+            .map_err(|_| Error::SetWriteTimeoutError)?;
         let stream: Result<Box<dyn ReadWrite>, Error> = if self.get_protocol().is_https() {
-            let roots: RootCertStore = RootCertStore {
-                roots: TLS_SERVER_ROOTS.to_vec(),
-            };
+            let roots: RootCertStore = self.tmp.root_cert.clone();
             let config: ClientConfig = ClientConfig::builder()
                 .with_root_certificates(roots)
                 .with_no_client_auth();
-            let tcp_stream: TcpStream =
-                TcpStream::connect(host_port.clone()).map_err(|_| Error::TcpStreamConnectError)?;
             let client_config = Arc::new(config);
             let dns_name =
                 ServerName::try_from(host.clone()).map_err(|_| Error::TlsConnectorBuildError)?;
@@ -511,14 +514,6 @@ impl HttpRequest {
             let tls_stream = StreamOwned::new(session, tcp_stream);
             Ok(Box::new(tls_stream))
         } else {
-            let tcp_stream: TcpStream =
-                TcpStream::connect(host_port.clone()).map_err(|_| Error::TcpStreamConnectError)?;
-            tcp_stream
-                .set_read_timeout(Some(timeout))
-                .map_err(|_| Error::SetReadTimeoutError)?;
-            tcp_stream
-                .set_write_timeout(Some(timeout))
-                .map_err(|_| Error::SetWriteTimeoutError)?;
             Ok(Box::new(tcp_stream))
         };
         stream
