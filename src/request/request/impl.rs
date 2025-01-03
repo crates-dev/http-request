@@ -228,7 +228,10 @@ impl HttpRequest {
         request.extend_from_slice(HTTP_BR_BYTES);
         request.extend_from_slice(&self.get_header_bytes());
         request.extend_from_slice(HTTP_BR_BYTES);
-        stream.write_all(&request).unwrap();
+        stream
+            .write_all(&request)
+            .and_then(|_| stream.flush())
+            .unwrap();
         self.read_response(stream)
     }
 
@@ -261,7 +264,10 @@ impl HttpRequest {
         request.extend_from_slice(HTTP_BR_BYTES);
         let body_str: &Vec<u8> = &self.get_body_bytes();
         request.extend_from_slice(body_str);
-        stream.write_all(&request).unwrap();
+        stream
+            .write_all(&request)
+            .and_then(|_| stream.flush())
+            .unwrap();
         self.read_response(stream)
     }
 
