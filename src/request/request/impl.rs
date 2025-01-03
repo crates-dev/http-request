@@ -4,9 +4,7 @@ use crate::global_trait::r#trait::ReadWrite;
 use crate::request::r#trait::RequestTrait;
 use crate::{
     body::r#type::Body,
-    request::{
-        config::r#type::Config, error::r#type::Error, r#type::RequestResult, tmp::r#type::Tmp,
-    },
+    request::{config::r#type::Config, r#type::RequestResult, tmp::r#type::Tmp},
     response::{
         r#trait::ResponseTrait, r#type::BoxResponseTrait,
         response_binary::r#type::HttpResponseBinary,
@@ -67,12 +65,12 @@ impl HttpRequest {
 
     /// Parses the current URL into a `HttpUrlComponents` object.
     ///
-    /// Returns `Ok(HttpUrlComponents)` if the parsing succeeds, or `Err(Error::InvalidUrl)` otherwise.
-    fn parse_url(&self) -> Result<HttpUrlComponents, Error> {
+    /// Returns `Ok(HttpUrlComponents)` if the parsing succeeds, or `Err(RequestError::InvalidUrl)` otherwise.
+    fn parse_url(&self) -> Result<HttpUrlComponents, RequestError> {
         if let Ok(parse_res) = HttpUrlComponents::parse(&self.get_url()) {
             Ok(parse_res)
         } else {
-            Err(Error::InvalidUrl)
+            Err(RequestError::InvalidUrl)
         }
     }
 
@@ -212,13 +210,13 @@ impl HttpRequest {
     ///   for sending and receiving data.
     ///
     /// # Returns
-    /// Returns a `Result<HttpResponseBinary, Error>`, where:
+    /// Returns a `Result<HttpResponseBinary, RequestError>`, where:
     /// - `Ok(HttpResponseBinary)` contains the HTTP response received from the server.
-    /// - `Err(Error)` indicates that an error occurred while sending the request or reading the response.
+    /// - `Err(RequestError)` indicates that an error occurred while sending the request or reading the response.
     fn send_get_request(
         &mut self,
         stream: &mut Box<dyn ReadWrite>,
-    ) -> Result<BoxResponseTrait, Error> {
+    ) -> Result<BoxResponseTrait, RequestError> {
         let mut request: Vec<u8> = Vec::new();
         let path: String = self.get_path();
         let request_line_string: String =
@@ -246,13 +244,13 @@ impl HttpRequest {
     ///   for sending and receiving data.
     ///
     /// # Returns
-    /// Returns a `Result<HttpResponseBinary, Error>`, where:
+    /// Returns a `Result<HttpResponseBinary, RequestError>`, where:
     /// - `Ok(HttpResponseBinary)` contains the HTTP response received from the server.
-    /// - `Err(Error)` indicates that an error occurred while sending the request or reading the response.
+    /// - `Err(RequestError)` indicates that an error occurred while sending the request or reading the response.
     fn send_post_request(
         &mut self,
         stream: &mut Box<dyn ReadWrite>,
-    ) -> Result<BoxResponseTrait, Error> {
+    ) -> Result<BoxResponseTrait, RequestError> {
         let mut request: Vec<u8> = Vec::new();
         let path: String = self.get_path();
         let request_line_string: String =
@@ -283,13 +281,13 @@ impl HttpRequest {
     ///   for receiving the response.
     ///
     /// # Returns
-    /// Returns a `Result<HttpResponseBinary, Error>`, where:
+    /// Returns a `Result<HttpResponseBinary, RequestError>`, where:
     /// - `Ok(HttpResponseBinary)` contains the complete HTTP response after processing headers and body.
-    /// - `Err(Error)` indicates that an error occurred while reading the response.
+    /// - `Err(RequestError)` indicates that an error occurred while reading the response.
     fn read_response(
         &mut self,
         stream: &mut Box<dyn ReadWrite>,
-    ) -> Result<BoxResponseTrait, Error> {
+    ) -> Result<BoxResponseTrait, RequestError> {
         let buffer_size: usize = self.config.buffer;
         let mut buffer: Vec<u8> = vec![0; buffer_size];
         let mut response_bytes: Vec<u8> = Vec::new();
@@ -349,7 +347,7 @@ impl HttpRequest {
             return Ok(Box::new(self.response.clone()));
         }
         let url: String =
-            String::from_utf8(redirect_url.unwrap()).map_err(|_| Error::InvalidUrl)?;
+            String::from_utf8(redirect_url.unwrap()).map_err(|_| RequestError::InvalidUrl)?;
         self.handle_redirect(url)
     }
 
@@ -439,17 +437,17 @@ impl HttpRequest {
     ///
     /// - `url`: The redirection URL to follow.
     ///
-    /// Returns `Ok(HttpResponseBinary)` if the redirection is successful, or `Err(Error)` otherwise.
-    fn handle_redirect(&mut self, url: String) -> Result<BoxResponseTrait, Error> {
+    /// Returns `Ok(HttpResponseBinary)` if the redirection is successful, or `Err(RequestError)` otherwise.
+    fn handle_redirect(&mut self, url: String) -> Result<BoxResponseTrait, RequestError> {
         if !self.config.redirect {
-            return Err(Error::NeedOpenRedirect);
+            return Err(RequestError::NeedOpenRedirect);
         }
         if self.tmp.visit_url.contains(&url) {
-            return Err(Error::RedirectUrlDeadLoop);
+            return Err(RequestError::RedirectUrlDeadLoop);
         }
         self.tmp.visit_url.insert(url.clone());
         if self.config.redirect_times >= self.config.max_redirect_times {
-            return Err(Error::MaxRedirectTimes);
+            return Err(RequestError::MaxRedirectTimes);
         }
         self.config.redirect_times = self.config.redirect_times + 1;
         self.url(url.clone());
@@ -488,35 +486,39 @@ impl HttpRequest {
     ///
     /// - `Ok(Box<dyn ReadWrite>)`: A boxed stream that implements the `ReadWrite` trait,
     ///   representing the established connection.
-    /// - `Err(Error)`: An error indicating what went wrong during the connection process.
+    /// - `Err(RequestError)`: An error indicating what went wrong during the connection process.
     ///
     /// # Errors
     ///
-    /// - `Error::TlsConnectorBuildError`: If the TLS connector could not be built.
-    /// - `Error::TcpStreamConnectError`: If the TCP connection could not be established.
-    /// - `Error::SetReadTimeoutError`: If setting the read timeout failed.
-    /// - `Error::TlsStreamConnectError`: If the TLS stream could not be established.
-    fn get_connection_stream(&self, host: String, port: u16) -> Result<Box<dyn ReadWrite>, Error> {
+    /// - `RequestError::TlsConnectorBuildError`: If the TLS connector could not be built.
+    /// - `RequestError::TcpStreamConnectError`: If the TCP connection could not be established.
+    /// - `RequestError::SetReadTimeoutError`: If setting the read timeout failed.
+    /// - `RequestError::TlsStreamConnectError`: If the TLS stream could not be established.
+    fn get_connection_stream(
+        &self,
+        host: String,
+        port: u16,
+    ) -> Result<Box<dyn ReadWrite>, RequestError> {
         let host_port: (String, u16) = (host.clone(), port);
         let timeout: Duration = Duration::from_millis(self.config.timeout);
-        let tcp_stream: TcpStream =
-            TcpStream::connect(host_port.clone()).map_err(|_| Error::TcpStreamConnectError)?;
+        let tcp_stream: TcpStream = TcpStream::connect(host_port.clone())
+            .map_err(|_| RequestError::TcpStreamConnectError)?;
         tcp_stream
             .set_read_timeout(Some(timeout))
-            .map_err(|_| Error::SetReadTimeoutError)?;
+            .map_err(|_| RequestError::SetReadTimeoutError)?;
         tcp_stream
             .set_write_timeout(Some(timeout))
-            .map_err(|_| Error::SetWriteTimeoutError)?;
-        let stream: Result<Box<dyn ReadWrite>, Error> = if self.get_protocol().is_https() {
+            .map_err(|_| RequestError::SetWriteTimeoutError)?;
+        let stream: Result<Box<dyn ReadWrite>, RequestError> = if self.get_protocol().is_https() {
             let roots: RootCertStore = self.tmp.root_cert.clone();
             let config: ClientConfig = ClientConfig::builder()
                 .with_root_certificates(roots)
                 .with_no_client_auth();
             let client_config = Arc::new(config);
-            let dns_name =
-                ServerName::try_from(host.clone()).map_err(|_| Error::TlsConnectorBuildError)?;
+            let dns_name = ServerName::try_from(host.clone())
+                .map_err(|_| RequestError::TlsConnectorBuildError)?;
             let session = ClientConnection::new(Arc::clone(&client_config), dns_name)
-                .map_err(|_| Error::TlsConnectorBuildError)?;
+                .map_err(|_| RequestError::TlsConnectorBuildError)?;
             let tls_stream = StreamOwned::new(session, tcp_stream);
             Ok(Box::new(tls_stream))
         } else {
@@ -529,17 +531,17 @@ impl HttpRequest {
 impl RequestTrait for HttpRequest {
     type RequestResult = RequestResult;
     fn send(&mut self) -> Self::RequestResult {
-        self.config.url_obj = self.parse_url().map_err(|_| Error::InvalidUrl)?;
+        self.config.url_obj = self.parse_url().map_err(|_| RequestError::InvalidUrl)?;
         let methods: Methods = self.get_methods();
         let host: String = self.config.url_obj.host.clone().unwrap_or_default();
         let port: u16 = self.get_port(self.config.url_obj.port.clone().unwrap_or_default());
         let mut stream: Box<dyn ReadWrite> = self
             .get_connection_stream(host, port)
-            .map_err(|_| Error::TcpStreamConnectError)?;
-        let res: Result<BoxResponseTrait, Error> = match methods {
+            .map_err(|_| RequestError::TcpStreamConnectError)?;
+        let res: Result<BoxResponseTrait, RequestError> = match methods {
             m if m.is_get() => self.send_get_request(&mut stream),
             m if m.is_post() => self.send_post_request(&mut stream),
-            _ => Err(Error::RequestError),
+            _ => Err(RequestError::RequestError),
         };
         res
     }
