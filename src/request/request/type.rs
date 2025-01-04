@@ -11,23 +11,23 @@ use std::sync::Arc;
 #[derive(Debug, Clone)]
 pub struct HttpRequest {
     /// The HTTP method of the request (e.g., GET, POST, etc.).
-    pub(crate) methods: Arc<Methods>,
+    pub methods: Arc<Methods>,
 
     /// The target URL of the request.
-    pub(crate) url: Arc<String>,
+    pub url: Arc<String>,
 
     /// The headers included in the request.
-    pub(crate) header: Arc<HttpHeaderSliceMap>,
+    pub header: Arc<HttpHeaderSliceMap>,
 
     /// The type of the body, specifying whether it is text or JSON.
-    pub(crate) body: Arc<Body>,
+    pub body: Arc<Body>,
 
     /// Represents the configuration settings for the HTTP request.
-    pub(crate) config: Config,
+    pub config: Config,
 
     /// Stores temporary data during the HTTP request process.
-    pub(crate) tmp: Tmp,
+    pub tmp: Tmp,
 
     /// Http response
-    pub(crate) response: HttpResponseBinary,
+    pub response: HttpResponseBinary,
 }
