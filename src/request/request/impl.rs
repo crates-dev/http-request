@@ -100,24 +100,21 @@ impl HttpRequest {
     /// before constructing the HTTP request.
     fn get_header_bytes(&self) -> Vec<u8> {
         let mut header: HttpHeaderSliceMap = self.get_header();
-        let mut header_string = String::new();
-        let required_headers: [(&str, &str); 4] = [
-            (
-                HOST,
-                self.config.url_obj.host.as_deref().unwrap_or_default(),
-            ),
+        let mut header_string: String = String::new();
+        let required_headers: [(&str, String); 4] = [
+            (HOST, self.config.url_obj.host.clone().unwrap_or_default()),
             (
                 CONTENT_LENGTH,
                 if self.get_methods().is_get() {
-                    &0.to_string()
+                    ZERO_STR.to_string()
                 } else {
-                    &self.get_body_bytes().len().to_string()
+                    self.get_body_bytes().len().to_string()
                 },
             ),
-            (ACCEPT, ACCEPT_ANY),
-            (USER_AGENT, APP_NAME),
+            (ACCEPT, ACCEPT_ANY.to_owned()),
+            (USER_AGENT, APP_NAME.to_owned()),
         ];
-        for &(key, default_value) in &required_headers {
+        for (key, default_value) in required_headers {
             if !header.contains_key(key) {
                 header.insert(key.to_owned(), default_value.to_owned());
             }
