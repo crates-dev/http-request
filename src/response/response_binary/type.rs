@@ -13,20 +13,20 @@ use http_type::*;
 /// - `headers`: A `HashMap<String, String>` containing the headers of the response, where each key is the header name
 ///   (e.g., "Content-Type"), and the value is the corresponding header value.
 /// - `body`: A `Vec<u8>` representing the body of the HTTP response, which contains the content being returned.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct HttpResponseBinary {
     /// The HTTP version of the response (e.g., "HTTP/1.1").
-    pub http_version: String,
+    pub http_version: ArcRwLock<String>,
 
     /// The HTTP status code (e.g., 200, 404).
     pub status_code: u16,
 
     /// The status text associated with the status code (e.g., "OK", "Not Found").
-    pub status_text: String,
+    pub status_text: ArcRwLock<String>,
 
     /// A `HashMap` of headers, where the key is the header name and the value is the header value.
-    pub headers: HttpHeaderMap,
+    pub headers: ArcRwLock<HttpHeaderMap>,
 
     /// The body of the response, which contains the content being returned.
-    pub body: Vec<u8>,
+    pub body: ArcRwLock<Vec<u8>>,
 }

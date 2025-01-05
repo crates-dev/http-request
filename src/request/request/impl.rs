@@ -14,6 +14,7 @@ use crate::{
 use http_type::*;
 use rustls::pki_types::ServerName;
 use rustls::{ClientConfig, ClientConnection, RootCertStore, StreamOwned};
+use std::sync::RwLock;
 use std::{
     collections::HashMap,
     io::{Read, Write},
@@ -30,8 +31,8 @@ use std::{
 /// - Parsing responses and handling redirects.
 impl HttpRequest {
     /// Returns the protocol of the HTTP request.
-    fn get_protocol(&self) -> Protocol {
-        self.config.url_obj.protocol.clone()
+    fn get_protocol(config: &Config) -> Protocol {
+        config.url_obj.protocol.clone()
     }
 
     /// Returns the HTTP method used for the request.
@@ -101,22 +102,24 @@ impl HttpRequest {
     fn get_header_bytes(&self) -> Vec<u8> {
         let mut header: HttpHeaderSliceMap = self.get_header();
         let mut header_string: String = String::new();
-        let required_headers: [(&str, String); 4] = [
-            (HOST, self.config.url_obj.host.clone().unwrap_or_default()),
-            (
-                CONTENT_LENGTH,
-                if self.get_methods().is_get() {
-                    ZERO_STR.to_string()
-                } else {
-                    self.get_body_bytes().len().to_string()
-                },
-            ),
-            (ACCEPT, ACCEPT_ANY.to_owned()),
-            (USER_AGENT, APP_NAME.to_owned()),
-        ];
-        for (key, default_value) in required_headers {
-            if !header.contains_key(key) {
-                header.insert(key.to_owned(), default_value.to_owned());
+        if let Ok(config) = self.config.read() {
+            let required_headers = [
+                (HOST, config.url_obj.host.clone().unwrap_or_default()),
+                (
+                    CONTENT_LENGTH,
+                    if self.get_methods().is_get() {
+                        ZERO_STR.to_string()
+                    } else {
+                        self.get_body_bytes().len().to_string()
+                    },
+                ),
+                (ACCEPT, ACCEPT_ANY.to_owned()),
+                (USER_AGENT, APP_NAME.to_owned()),
+            ];
+            for (key, default_value) in required_headers {
+                if !header.contains_key(key) {
+                    header.insert(key.to_owned(), default_value.to_owned());
+                }
             }
         }
         for (key, value) in &header {
@@ -177,21 +180,23 @@ impl HttpRequest {
     /// - `String` - The full path, including the query string if available, or just the
     ///   path if no query string is present.
     fn get_path(&self) -> String {
-        let query: String = self.config.url_obj.query.clone().unwrap_or_default();
-        let path: String = if query.is_empty() {
-            self.config
-                .url_obj
-                .path
-                .clone()
-                .unwrap_or(DEFAULT_HTTP_PATH.to_string())
-        } else {
-            format!(
-                "{}{}{}",
-                self.config.url_obj.path.clone().unwrap_or_default(),
-                QUERY_SYMBOL,
-                query
-            )
-        };
+        let path: String = self.config.read().map_or(String::new(), |config| {
+            let query: String = config.url_obj.query.clone().unwrap_or_default();
+            if query.is_empty() {
+                config
+                    .url_obj
+                    .path
+                    .clone()
+                    .unwrap_or(DEFAULT_HTTP_PATH.to_string())
+            } else {
+                format!(
+                    "{}{}{}",
+                    config.url_obj.path.clone().unwrap_or_default(),
+                    QUERY_SYMBOL,
+                    query
+                )
+            }
+        });
         path
     }
 
@@ -216,8 +221,9 @@ impl HttpRequest {
     ) -> Result<BoxResponseTrait, RequestError> {
         let mut request: Vec<u8> = Vec::new();
         let path: String = self.get_path();
-        let request_line_string: String =
-            format!("{} {} {}", Methods::GET, path, self.config.http_version,);
+        let request_line_string: String = self.config.read().map_or(String::new(), |config| {
+            format!("{} {} {}", Methods::GET, path, config.http_version)
+        });
         let request_line: &[u8] = request_line_string.as_bytes();
         request.extend_from_slice(request_line);
         request.extend_from_slice(HTTP_BR_BYTES);
@@ -226,7 +232,7 @@ impl HttpRequest {
         stream
             .write_all(&request)
             .and_then(|_| stream.flush())
-            .unwrap();
+            .map_err(|_| RequestError::RequestError)?;
         self.read_response(stream)
     }
 
@@ -250,8 +256,9 @@ impl HttpRequest {
     ) -> Result<BoxResponseTrait, RequestError> {
         let mut request: Vec<u8> = Vec::new();
         let path: String = self.get_path();
-        let request_line_string: String =
-            format!("{} {} {}", Methods::POST, path, self.config.http_version,);
+        let request_line_string: String = self.config.read().map_or(String::new(), |config| {
+            format!("{} {} {}", Methods::POST, path, config.http_version)
+        });
         let request_line: &[u8] = request_line_string.as_bytes();
         request.extend_from_slice(request_line);
         request.extend_from_slice(HTTP_BR_BYTES);
@@ -262,7 +269,7 @@ impl HttpRequest {
         stream
             .write_all(&request)
             .and_then(|_| stream.flush())
-            .unwrap();
+            .map_err(|_| RequestError::RequestError)?;
         self.read_response(stream)
     }
 
@@ -285,13 +292,21 @@ impl HttpRequest {
         &mut self,
         stream: &mut Box<dyn ReadWrite>,
     ) -> Result<BoxResponseTrait, RequestError> {
-        let buffer_size: usize = self.config.buffer;
+        let buffer_size: usize = self
+            .config
+            .read()
+            .map_or(DEFAULT_BUFFER_SIZE, |config| config.buffer);
         let mut buffer: Vec<u8> = vec![0; buffer_size];
         let mut response_bytes: Vec<u8> = Vec::new();
         let mut headers_done: bool = false;
         let mut content_length: usize = 0;
         let mut redirect_url: Option<Vec<u8>> = None;
-        let http_version: String = self.config.http_version.to_string();
+        let http_version: String = self
+            .config
+            .read()
+            .map_or(HttpVersion::default().to_string(), |config| {
+                config.http_version.to_string()
+            });
         let http_version_bytes: Vec<u8> = http_version.to_lowercase().into_bytes();
         let location_sign_key: Vec<u8> = format!("{}:", LOCATION.to_lowercase()).into_bytes();
         'read_loop: while let Ok(n) = stream.read(&mut buffer) {
@@ -336,12 +351,22 @@ impl HttpRequest {
                 break 'read_loop;
             }
         }
-        self.response = <HttpResponseBinary as ResponseTrait>::from(&response_bytes);
-        if !self.config.redirect || redirect_url.is_none() {
-            if self.config.decode {
-                self.response = self.response.decode(self.config.buffer);
+        self.response = Arc::new(RwLock::new(<HttpResponseBinary as ResponseTrait>::from(
+            &response_bytes,
+        )));
+        if let Ok(config) = self.config.read() {
+            if !config.redirect || redirect_url.is_none() {
+                if config.decode {
+                    if let Ok(mut response) = self.response.write() {
+                        *response = response.decode(config.buffer);
+                    }
+                }
+                return Ok(Box::new(
+                    self.response
+                        .read()
+                        .map_or(HttpResponseBinary::default(), |response| response.clone()),
+                ));
             }
-            return Ok(Box::new(self.response.clone()));
         }
         let url: String =
             String::from_utf8(redirect_url.unwrap()).map_err(|_| RequestError::InvalidUrl)?;
@@ -436,17 +461,21 @@ impl HttpRequest {
     ///
     /// Returns `Ok(HttpResponseBinary)` if the redirection is successful, or `Err(RequestError)` otherwise.
     fn handle_redirect(&mut self, url: String) -> Result<BoxResponseTrait, RequestError> {
-        if !self.config.redirect {
-            return Err(RequestError::NeedOpenRedirect);
+        if let Ok(mut config) = self.config.write() {
+            if !config.redirect {
+                return Err(RequestError::NeedOpenRedirect);
+            }
+            if let Ok(mut tmp) = self.tmp.clone().write() {
+                if tmp.visit_url.contains(&url) {
+                    return Err(RequestError::RedirectUrlDeadLoop);
+                }
+                tmp.visit_url.insert(url.clone());
+                if config.redirect_times >= config.max_redirect_times {
+                    return Err(RequestError::MaxRedirectTimes);
+                }
+                config.redirect_times = config.redirect_times + 1;
+            }
         }
-        if self.tmp.visit_url.contains(&url) {
-            return Err(RequestError::RedirectUrlDeadLoop);
-        }
-        self.tmp.visit_url.insert(url.clone());
-        if self.config.redirect_times >= self.config.max_redirect_times {
-            return Err(RequestError::MaxRedirectTimes);
-        }
-        self.config.redirect_times = self.config.redirect_times + 1;
         self.url(url.clone());
         self.send()
     }
@@ -456,13 +485,14 @@ impl HttpRequest {
     /// # Parameters
     ///
     /// - `port`: The default port (if any).
+    /// - `config`: Config
     ///
     /// Returns the resolved port.
-    fn get_port(&self, port: u16) -> u16 {
+    fn get_port(&self, port: u16, config: &Config) -> u16 {
         if port != 0 {
             return port;
         }
-        let protocol: Protocol = self.get_protocol();
+        let protocol: Protocol = Self::get_protocol(config);
         protocol.get_port()
     }
 
@@ -497,7 +527,11 @@ impl HttpRequest {
         port: u16,
     ) -> Result<Box<dyn ReadWrite>, RequestError> {
         let host_port: (String, u16) = (host.clone(), port);
-        let timeout: Duration = Duration::from_millis(self.config.timeout);
+        let timeout: Duration = Duration::from_millis(
+            self.config
+                .read()
+                .map_or(DEFAULT_TIMEOUT, |config| config.timeout),
+        );
         let tcp_stream: TcpStream = TcpStream::connect(host_port.clone())
             .map_err(|_| RequestError::TcpStreamConnectError)?;
         tcp_stream
@@ -506,21 +540,29 @@ impl HttpRequest {
         tcp_stream
             .set_write_timeout(Some(timeout))
             .map_err(|_| RequestError::SetWriteTimeoutError)?;
-        let stream: Result<Box<dyn ReadWrite>, RequestError> = if self.get_protocol().is_https() {
-            let roots: RootCertStore = self.tmp.root_cert.clone();
-            let config: ClientConfig = ClientConfig::builder()
-                .with_root_certificates(roots)
-                .with_no_client_auth();
-            let client_config = Arc::new(config);
-            let dns_name = ServerName::try_from(host.clone())
-                .map_err(|_| RequestError::TlsConnectorBuildError)?;
-            let session = ClientConnection::new(Arc::clone(&client_config), dns_name)
-                .map_err(|_| RequestError::TlsConnectorBuildError)?;
-            let tls_stream = StreamOwned::new(session, tcp_stream);
-            Ok(Box::new(tls_stream))
-        } else {
-            Ok(Box::new(tcp_stream))
-        };
+        let config: Config = self
+            .config
+            .read()
+            .map_or(Config::default(), |config| config.clone());
+        let stream: Result<Box<dyn ReadWrite>, RequestError> =
+            if Self::get_protocol(&config).is_https() {
+                if let Ok(tmp) = self.tmp.clone().read() {
+                    let roots: RootCertStore = tmp.root_cert.clone();
+                    let config: ClientConfig = ClientConfig::builder()
+                        .with_root_certificates(roots)
+                        .with_no_client_auth();
+                    let client_config = Arc::new(config);
+                    let dns_name = ServerName::try_from(host.clone())
+                        .map_err(|_| RequestError::TlsConnectorBuildError)?;
+                    let session = ClientConnection::new(Arc::clone(&client_config), dns_name)
+                        .map_err(|_| RequestError::TlsConnectorBuildError)?;
+                    let tls_stream = StreamOwned::new(session, tcp_stream);
+                    return Ok(Box::new(tls_stream));
+                }
+                Err(RequestError::TlsConnectorBuildError)
+            } else {
+                Ok(Box::new(tcp_stream))
+            };
         stream
     }
 }
@@ -528,10 +570,14 @@ impl HttpRequest {
 impl RequestTrait for HttpRequest {
     type RequestResult = RequestResult;
     fn send(&mut self) -> Self::RequestResult {
-        self.config.url_obj = self.parse_url().map_err(|_| RequestError::InvalidUrl)?;
         let methods: Methods = self.get_methods();
-        let host: String = self.config.url_obj.host.clone().unwrap_or_default();
-        let port: u16 = self.get_port(self.config.url_obj.port.clone().unwrap_or_default());
+        let mut host: String = String::new();
+        let mut port: u16 = u16::default();
+        if let Ok(mut config) = self.config.write() {
+            config.url_obj = self.parse_url().map_err(|_| RequestError::InvalidUrl)?;
+            host = config.url_obj.host.clone().unwrap_or_default();
+            port = self.get_port(config.url_obj.port.clone().unwrap_or_default(), &config);
+        }
         let mut stream: Box<dyn ReadWrite> = self
             .get_connection_stream(host, port)
             .map_err(|_| RequestError::TcpStreamConnectError)?;
@@ -540,7 +586,7 @@ impl RequestTrait for HttpRequest {
             m if m.is_post() => self.send_post_request(&mut stream),
             _ => Err(RequestError::RequestError),
         };
-        res
+        return res;
     }
 }
 
@@ -551,9 +597,9 @@ impl Default for HttpRequest {
             url: Arc::new(String::new()),
             header: Arc::new(HashMap::new()),
             body: Arc::new(Body::default()),
-            config: Config::default(),
-            tmp: Tmp::default(),
-            response: HttpResponseBinary::default(),
+            config: Arc::new(RwLock::new(Config::default())),
+            tmp: Arc::new(RwLock::new(Tmp::default())),
+            response: Arc::new(RwLock::new(HttpResponseBinary::default())),
         }
     }
 }

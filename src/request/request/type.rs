@@ -9,25 +9,25 @@ use std::sync::Arc;
 /// Represents an HTTP request, encapsulating various components such as the method, URL, protocol,
 /// headers, body, and additional metadata.
 #[derive(Debug, Clone)]
-pub struct HttpRequest {
+pub(crate) struct HttpRequest {
     /// The HTTP method of the request (e.g., GET, POST, etc.).
-    pub methods: Arc<Methods>,
+    pub(crate) methods: Arc<Methods>,
 
     /// The target URL of the request.
-    pub url: Arc<String>,
+    pub(crate) url: Arc<String>,
 
     /// The headers included in the request.
-    pub header: Arc<HttpHeaderSliceMap>,
+    pub(crate) header: Arc<HttpHeaderSliceMap>,
 
     /// The type of the body, specifying whether it is text or JSON.
-    pub body: Arc<Body>,
+    pub(crate) body: Arc<Body>,
 
     /// Represents the configuration settings for the HTTP request.
-    pub config: Config,
+    pub(crate) config: ArcRwLock<Config>,
 
     /// Stores temporary data during the HTTP request process.
-    pub tmp: Tmp,
+    pub(crate) tmp: ArcRwLock<Tmp>,
 
     /// Http response
-    pub response: HttpResponseBinary,
+    pub(crate) response: ArcRwLock<HttpResponseBinary>,
 }

@@ -1,10 +1,11 @@
 use super::r#type::Body;
+use http_type::*;
 use serde::{Serialize, Serializer};
 use std::fmt::{self, Display};
 
 impl Default for Body {
     fn default() -> Self {
-        Self::Text("")
+        Self::Text(EMPTY_STR)
     }
 }
 
@@ -14,7 +15,7 @@ impl Display for Body {
             Self::Text(text) => write!(f, "{}", text.to_string()),
             Self::Json(json) => write!(
                 f,
-                "{:?}",
+                "{}",
                 serde_json::to_string(json).unwrap_or_else(|_| String::from("{}"))
             ),
             Self::Binary(binary) => write!(f, "{:?}", binary),

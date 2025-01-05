@@ -83,7 +83,9 @@ impl RequestBuilder {
     /// # Returns
     /// Returns a mutable reference to `self` to allow method chaining.
     pub fn http1_1_only(&mut self) -> &mut Self {
-        self.http_request.config.http_version = HttpVersion::HTTP1_1;
+        if let Ok(mut config) = self.http_request.config.write() {
+            config.http_version = HttpVersion::HTTP1_1;
+        }
         self
     }
 
@@ -97,7 +99,9 @@ impl RequestBuilder {
     /// # Returns
     /// Returns a mutable reference to `self` to allow method chaining.
     pub fn http2_only(&mut self) -> &mut Self {
-        self.http_request.config.http_version = HttpVersion::HTTP2;
+        if let Ok(mut config) = self.http_request.config.write() {
+            config.http_version = HttpVersion::HTTP2;
+        }
         self
     }
 
@@ -192,7 +196,9 @@ impl RequestBuilder {
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
     pub fn timeout(&mut self, timeout: u64) -> &mut Self {
-        self.http_request.config.timeout = timeout;
+        if let Ok(mut config) = self.http_request.config.write() {
+            config.timeout = timeout;
+        }
         self
     }
 
@@ -201,7 +207,9 @@ impl RequestBuilder {
     /// This method sets the `redirect` property of the `http_request` to `true`.
     /// It returns a mutable reference to the current instance, allowing method chaining.
     pub fn redirect(&mut self) -> &mut Self {
-        self.http_request.config.redirect = true;
+        if let Ok(mut config) = self.http_request.config.write() {
+            config.redirect = true;
+        }
         self
     }
 
@@ -210,7 +218,9 @@ impl RequestBuilder {
     /// This method sets the `redirect` property of the `http_request` to `false`.
     /// It returns a mutable reference to the current instance, allowing method chaining.
     pub fn unredirect(&mut self) -> &mut Self {
-        self.http_request.config.redirect = false;
+        if let Ok(mut config) = self.http_request.config.write() {
+            config.redirect = false;
+        };
         self
     }
 
@@ -232,7 +242,9 @@ impl RequestBuilder {
     /// Ensure that the value provided to `num` is within a valid range. Excessively high values
     /// may lead to performance issues or unintended behavior.
     pub fn max_redirect_times(&mut self, num: usize) -> &mut Self {
-        self.http_request.config.max_redirect_times = num;
+        if let Ok(mut config) = self.http_request.config.write() {
+            config.max_redirect_times = num;
+        }
         self
     }
 
@@ -248,7 +260,9 @@ impl RequestBuilder {
     /// # Returns
     /// Returns a mutable reference to `self`, allowing for method chaining.
     pub fn buffer(&mut self, buffer: usize) -> &mut Self {
-        self.http_request.config.buffer = buffer;
+        if let Ok(mut config) = self.http_request.config.write() {
+            config.buffer = buffer;
+        }
         self
     }
 
@@ -260,7 +274,9 @@ impl RequestBuilder {
     /// # Returns
     /// A mutable reference to the current instance, allowing for method chaining.
     pub fn decode(&mut self) -> &mut Self {
-        self.http_request.config.decode = true;
+        if let Ok(mut config) = self.http_request.config.write() {
+            config.decode = true;
+        }
         self
     }
 
@@ -272,7 +288,9 @@ impl RequestBuilder {
     /// # Returns
     /// A mutable reference to the current instance, allowing for method chaining.
     pub fn undecode(&mut self) -> &mut Self {
-        self.http_request.config.decode = false;
+        if let Ok(mut config) = self.http_request.config.write() {
+            config.decode = false;
+        }
         self
     }
 

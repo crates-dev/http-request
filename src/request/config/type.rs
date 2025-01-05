@@ -46,28 +46,28 @@ use http_type::*;
 /// - Adjust the `buffer` size depending on your application’s memory usage and the size of the responses
 ///   you expect to receive. A larger buffer can help improve performance when handling large responses.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Config {
+pub(crate) struct Config {
     /// The timeout duration for the request in milliseconds.
-    pub timeout: u64,
+    pub(crate) timeout: u64,
 
     /// The parsed URL object containing the details of the request destination.
-    pub url_obj: HttpUrlComponents,
+    pub(crate) url_obj: HttpUrlComponents,
 
     /// A flag indicating whether redirection is enabled for the request.
-    pub redirect: bool,
+    pub(crate) redirect: bool,
 
     /// The maximum number of allowed redirections.
-    pub max_redirect_times: usize,
+    pub(crate) max_redirect_times: usize,
 
     /// The current count of redirections followed during this request.
-    pub redirect_times: usize,
+    pub(crate) redirect_times: usize,
 
     /// The type of this field is `HttpVersion`.
-    pub http_version: HttpVersion,
+    pub(crate) http_version: HttpVersion,
 
     /// The buffer size for reading the HTTP response and decode.
-    pub buffer: usize,
+    pub(crate) buffer: usize,
 
     /// Auto decode response data
-    pub decode: bool,
+    pub(crate) decode: bool,
 }

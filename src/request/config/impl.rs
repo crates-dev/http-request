@@ -1,5 +1,4 @@
 use super::r#type::Config;
-use crate::constant::r#type::DEFAULT_TIMEOUT;
 use http_type::*;
 
 impl Default for Config {
@@ -8,10 +7,10 @@ impl Default for Config {
             timeout: DEFAULT_TIMEOUT,
             url_obj: HttpUrlComponents::default(),
             redirect: false,
-            max_redirect_times: 8,
+            max_redirect_times: DEFAULT_MAX_REDIRECT_TIMES,
             redirect_times: 0,
             http_version: HttpVersion::default(),
-            buffer: 1024,
+            buffer: DEFAULT_BUFFER_SIZE,
             decode: true,
         }
     }

@@ -9,7 +9,7 @@
 /// # Associated Types
 /// - `OutputText`: The type returned by the `text` method, typically a text-based HTTP response.
 /// - `OutputBinary`: The type returned by the `binary` method, typically a binary-based HTTP response.
-pub trait ResponseTrait {
+pub trait ResponseTrait: Send {
     type OutputText;
     type OutputBinary;
 

@@ -5,7 +5,11 @@ use crate::{
 };
 use http_compress::Compress;
 use http_type::*;
-use std::{collections::HashMap, vec::IntoIter};
+use std::{
+    collections::HashMap,
+    sync::{Arc, RwLock},
+    vec::IntoIter,
+};
 
 /// Implements the `ResponseTrait` trait for `HttpResponseBinary`.
 ///
@@ -57,11 +61,11 @@ impl ResponseTrait for HttpResponseBinary {
         }
         let body: Vec<u8> = lines.clone().collect::<Vec<&[u8]>>().join(BR_BYTES);
         HttpResponseBinary {
-            http_version,
+            http_version: Arc::new(RwLock::new(http_version)),
             status_code,
-            status_text,
-            headers,
-            body,
+            status_text: Arc::new(RwLock::new(status_text)),
+            headers: Arc::new(RwLock::new(headers)),
+            body: Arc::new(RwLock::new(body)),
         }
     }
 
@@ -71,25 +75,38 @@ impl ResponseTrait for HttpResponseBinary {
 
     fn text(&self) -> HttpResponseText {
         let http_response: HttpResponseBinary = self.clone();
-        let body: String = String::from_utf8_lossy(&http_response.body).to_string();
+        let body_bin: Vec<u8> = http_response
+            .body
+            .read()
+            .map_or(Vec::new(), |body| body.clone());
+        let body: String = String::from_utf8_lossy(&body_bin).to_string();
         HttpResponseText {
             http_version: http_response.http_version,
             status_code: http_response.status_code,
             status_text: http_response.status_text,
             headers: http_response.headers,
-            body,
+            body: Arc::new(RwLock::new(body)),
         }
     }
 
     fn decode(&self, buffer_size: usize) -> HttpResponseBinary {
         let http_response: HttpResponseBinary = self.clone();
-        let body: Vec<u8> = Compress::from(&self.headers).decode(&self.body, buffer_size);
+        let body: Vec<u8> = Compress::from(
+            &self
+                .headers
+                .read()
+                .map_or(HashMap::new(), |headers| headers.clone()),
+        )
+        .decode(
+            &self.body.read().map_or(Vec::new(), |body| body.clone()),
+            buffer_size,
+        );
         HttpResponseBinary {
             http_version: http_response.http_version,
             status_code: http_response.status_code,
             status_text: http_response.status_text,
             headers: http_response.headers,
-            body,
+            body: Arc::new(RwLock::new(body)),
         }
     }
 }
@@ -97,11 +114,11 @@ impl ResponseTrait for HttpResponseBinary {
 impl Default for HttpResponseBinary {
     fn default() -> Self {
         Self {
-            http_version: HttpVersion::Unknown(String::new()).to_string(),
+            http_version: Arc::new(RwLock::new(HttpVersion::Unknown(String::new()).to_string())),
             status_code: StatusCode::Unknown.code(),
-            status_text: StatusCode::Unknown.to_string(),
-            headers: HashMap::new(),
-            body: Vec::new(),
+            status_text: Arc::new(RwLock::new(StatusCode::Unknown.to_string())),
+            headers: Arc::new(RwLock::new(HashMap::new())),
+            body: Arc::new(RwLock::new(Vec::new())),
         }
     }
 }
