@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.25.0"
+version = "8.26.0"
 edition = "2021"
 authors = ["ltpp-universe <root@ltpp.vip>"] 
 license = "MIT"
@@ -33,3 +33,14 @@ webpki-roots = "0.26.7"
 [dev-dependencies]
 color-output = "6.1.4"
 std-macro-extensions = "0.17.6"
+
+[profile.dev]
+incremental = true
+opt-level = 3
+lto = true
+panic = "abort"
+
+[profile.release]
+opt-level = 3
+lto = true
+panic = "abort"

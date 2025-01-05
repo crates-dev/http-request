@@ -337,3 +337,58 @@ fn test_thread_https_get_request() {
         handle.join().unwrap();
     }
 }
+
+#[test]
+fn test_thread_http_get_request() {
+    use std::thread;
+    use std::time::Instant;
+    let num_threads: i32 = 1;
+    let mut handles: Vec<thread::JoinHandle<()>> = Vec::new();
+    let request_builder: ArcMutex<BoxRequestTrait> = Arc::new(Mutex::new(
+        RequestBuilder::new()
+            .get("http://127.0.0.1:8080/")
+            .timeout(10)
+            .redirect()
+            .buffer(100)
+            .max_redirect_times(0)
+            .http2_only()
+            .build(),
+    ));
+    for _ in 0..num_threads {
+        let request_builder = Arc::clone(&request_builder);
+        let handle = thread::spawn(move || {
+            let mut request_builder = request_builder.lock().unwrap();
+            let start_time: Instant = Instant::now();
+            match request_builder.send() {
+                Ok(response) => {
+                    let duration: std::time::Duration = start_time.elapsed();
+                    let response_text: HttpResponseText = response.text();
+                    output(
+                        "Thread finished in: ",
+                        &format!("{:?}", duration),
+                        Color::Blue,
+                    );
+                    output(
+                        "ResponseTrait => ",
+                        &format!("{:?}", response_text),
+                        Color::Green,
+                    );
+                }
+                Err(e) => {
+                    let duration: std::time::Duration = start_time.elapsed();
+                    output(
+                        "Thread finished in: ",
+                        &format!("{:?}", duration),
+                        Color::Blue,
+                    );
+                    output("Error => ", &format!("{:?}", e), Color::Red);
+                }
+            }
+        });
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+}

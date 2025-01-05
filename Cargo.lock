@@ -283,7 +283,7 @@ dependencies = [
 
 [[package]]
 name = "http-request"
-version = "8.25.0"
+version = "8.26.0"
 dependencies = [
  "brotli",
  "color-output",
