@@ -16,17 +16,17 @@ use http_type::*;
 #[derive(Debug, Clone)]
 pub struct HttpResponseBinary {
     /// The HTTP version of the response (e.g., "HTTP/1.1").
-    pub http_version: ArcRwLock<String>,
+    pub(crate) http_version: ArcRwLock<HttpVersion>,
 
     /// The HTTP status code (e.g., 200, 404).
-    pub status_code: u16,
+    pub(crate) status_code: StatusCodeUsize,
 
     /// The status text associated with the status code (e.g., "OK", "Not Found").
-    pub status_text: ArcRwLock<String>,
+    pub(crate) status_text: ArcRwLock<String>,
 
     /// A `HashMap` of headers, where the key is the header name and the value is the header value.
-    pub headers: ArcRwLock<HttpHeaderMap>,
+    pub(crate) headers: ArcRwLock<HttpHeaderMap>,
 
     /// The body of the response, which contains the content being returned.
-    pub body: ArcRwLock<Vec<u8>>,
+    pub(crate) body: ArcRwLock<HttpBodyVec>,
 }

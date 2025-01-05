@@ -31,13 +31,15 @@ impl ResponseTrait for HttpResponseBinary {
         let mut lines: IntoIter<&[u8]> = split_lines.into_iter();
         let status_line: &[u8] = lines.next().unwrap_or(&[]);
         let status_parts: Vec<&[u8]> = split_whitespace(&status_line);
-        let http_version: String = String::from_utf8_lossy(
+        let http_version: HttpVersion = String::from_utf8_lossy(
             status_parts
                 .get(0)
                 .unwrap_or(&HttpVersion::Unknown(String::new()).to_string().as_bytes()),
         )
-        .to_string();
-        let status_code: u16 = status_parts
+        .to_string()
+        .parse::<HttpVersion>()
+        .unwrap_or_default();
+        let status_code: StatusCodeUsize = status_parts
             .get(1)
             .and_then(|part| std::str::from_utf8(part).ok())
             .unwrap_or(&StatusCode::Ok.to_string())
@@ -111,10 +113,67 @@ impl ResponseTrait for HttpResponseBinary {
     }
 }
 
+impl HttpResponseBinary {
+    /// Retrieves the HTTP version associated with this response.
+    ///
+    /// # Returns
+    /// - `HttpVersion`: The HTTP version (e.g., HTTP/1.1, HTTP/2, etc.) used for the response.
+    pub fn get_http_version(&self) -> HttpVersion {
+        if let Ok(http_version) = self.http_version.read() {
+            return http_version
+                .to_string()
+                .parse::<HttpVersion>()
+                .unwrap_or_default();
+        }
+        return HttpVersion::default();
+    }
+
+    /// Retrieves the HTTP status code associated with this response.
+    ///
+    /// # Returns
+    /// - `StatusCodeUsize`: The HTTP status code as a usize (e.g., 200 for OK, 404 for Not Found).
+    pub fn get_status_code(&self) -> StatusCodeUsize {
+        self.status_code
+    }
+
+    /// Retrieves the status text associated with the HTTP status code.
+    ///
+    /// # Returns
+    /// - `String`: The human-readable status text (e.g., "OK" for status code 200, "Not Found" for status code 404).
+    pub fn get_status_text(&self) -> String {
+        if let Ok(status_text) = self.status_text.read() {
+            return status_text.to_string();
+        }
+        return StatusCode::default().to_string();
+    }
+
+    /// Retrieves the headers of the HTTP response.
+    ///
+    /// # Returns
+    /// - `HttpHeaderMap`: A map of header names and their corresponding values as key-value pairs.
+    pub fn get_headers(&self) -> HttpHeaderMap {
+        if let Ok(headers) = self.headers.read() {
+            return headers.clone();
+        }
+        return HttpHeaderMap::new();
+    }
+
+    /// Retrieves the body content of the HTTP response.
+    ///
+    /// # Returns
+    /// - `HttpBodyVec`: The body of the response in binary form (could be raw bytes, a stream, etc.).
+    pub fn get_body(&self) -> HttpBodyVec {
+        if let Ok(body) = self.body.read() {
+            return body.clone();
+        }
+        return HttpBodyVec::new();
+    }
+}
+
 impl Default for HttpResponseBinary {
     fn default() -> Self {
         Self {
-            http_version: Arc::new(RwLock::new(HttpVersion::Unknown(String::new()).to_string())),
+            http_version: Arc::new(RwLock::new(HttpVersion::Unknown(String::new()))),
             status_code: StatusCode::Unknown.code(),
             status_text: Arc::new(RwLock::new(StatusCode::Unknown.to_string())),
             headers: Arc::new(RwLock::new(HashMap::new())),
