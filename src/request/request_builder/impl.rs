@@ -284,7 +284,7 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a fully constructed `BoxRequestTrait` instance based on the current builder state.
-    pub fn builder(&mut self) -> BoxRequestTrait {
+    pub fn build(&mut self) -> BoxRequestTrait {
         self.builder = self.http_request.clone();
         self.http_request = HttpRequest::default();
         Box::new(self.builder.clone())

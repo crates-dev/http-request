@@ -43,7 +43,7 @@ fn test_http_post_request() {
         .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
-        .builder();
+        .build();
     _request_builder
         .send()
         .and_then(|response| {
@@ -71,7 +71,7 @@ fn test_http_get_request() {
         .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
-        .builder();
+        .build();
     _request_builder
         .send()
         .and_then(|response| {
@@ -105,7 +105,7 @@ fn test_https_post_request() {
         .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
-        .builder();
+        .build();
     _request_builder
         .send()
         .and_then(|response| {
@@ -133,7 +133,7 @@ fn test_https_get_request() {
         .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
-        .builder();
+        .build();
     _request_builder
         .send()
         .and_then(|response| {
@@ -161,7 +161,7 @@ fn test_http_post_text_request() {
         .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
-        .builder();
+        .build();
     _request_builder
         .send()
         .and_then(|response| {
@@ -189,7 +189,7 @@ fn test_http_post_binary_request() {
         .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
-        .builder();
+        .build();
     _request_builder
         .send()
         .and_then(|response| {
@@ -213,7 +213,7 @@ fn test_auto_gzip_get() {
         .decode()
         .buffer(4096)
         .http1_1_only()
-        .builder();
+        .build();
     _request_builder
         .send()
         .and_then(|response| {
@@ -236,7 +236,7 @@ fn test_gzip_get() {
         .max_redirect_times(8)
         .buffer(4096)
         .http1_1_only()
-        .builder();
+        .build();
     _request_builder
         .send()
         .and_then(|response| {
@@ -259,7 +259,7 @@ fn test_unredirect_get() {
         .buffer(4096)
         .unredirect()
         .http1_1_only()
-        .builder();
+        .build();
     _request_builder
         .send()
         .and_then(|response| {
