@@ -310,7 +310,7 @@ impl HttpRequest {
             .read()
             .map_or(DEFAULT_BUFFER_SIZE, |config| config.buffer);
         let mut buffer: Vec<u8> = vec![0; buffer_size];
-        let mut response_bytes: Vec<u8> = Vec::new();
+        let mut response_bytes: Vec<u8> = Vec::with_capacity(buffer_size);
         let mut headers_done: bool = false;
         let mut content_length: usize = 0;
         let mut redirect_url: Option<Vec<u8>> = None;
