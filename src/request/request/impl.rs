@@ -31,26 +31,31 @@ use std::{
 /// - Parsing responses and handling redirects.
 impl HttpRequest {
     /// Returns the protocol of the HTTP request.
+    #[inline]
     fn get_protocol(config: &Config) -> Protocol {
         config.url_obj.protocol.clone()
     }
 
     /// Returns the HTTP method used for the request.
+    #[inline]
     fn get_methods(&self) -> Methods {
         self.methods.as_ref().clone()
     }
 
     /// Returns the URL of the HTTP request.
+    #[inline]
     fn get_url(&self) -> String {
         self.url.as_ref().clone()
     }
 
     /// Returns the headers of the HTTP request.
+    #[inline]
     fn get_header(&self) -> HttpHeaderSliceMap {
         self.header.as_ref().clone()
     }
 
     /// Returns the body of the HTTP request.
+    #[inline]
     fn get_body(&self) -> Body {
         self.body.as_ref().clone()
     }
@@ -60,6 +65,7 @@ impl HttpRequest {
     /// # Parameters
     ///
     /// - `url`: The new URL to set.
+    #[inline]
     fn url(&mut self, url: String) {
         self.url = Arc::new(url);
     }
@@ -67,6 +73,7 @@ impl HttpRequest {
     /// Parses the current URL into a `HttpUrlComponents` object.
     ///
     /// Returns `Ok(HttpUrlComponents)` if the parsing succeeds, or `Err(RequestError::InvalidUrl)` otherwise.
+    #[inline]
     fn parse_url(&self) -> Result<HttpUrlComponents, RequestError> {
         if let Ok(parse_res) = HttpUrlComponents::parse(&self.get_url()) {
             Ok(parse_res)
@@ -99,6 +106,7 @@ impl HttpRequest {
     ///
     /// This function ensures that all necessary headers are present and correctly formatted
     /// before constructing the HTTP request.
+    #[inline]
     fn get_header_bytes(&self) -> Vec<u8> {
         let mut header: HttpHeaderSliceMap = self.get_header();
         let mut header_string: String = String::new();
@@ -145,6 +153,7 @@ impl HttpRequest {
     /// The `Content-Type` header is matched case-insensitively. If no matching `Content-Type`
     /// is found or the parsing fails, the method defaults to returning an empty byte vector.
     /// The body processing relies on the implementation of the `ContentType` parsing logic.
+    #[inline]
     fn get_body_bytes(&self) -> Vec<u8> {
         let content_type_key: String = CONTENT_TYPE.to_lowercase();
         let header: HttpHeaderSliceMap = self.get_header();
@@ -179,6 +188,7 @@ impl HttpRequest {
     ///
     /// - `String` - The full path, including the query string if available, or just the
     ///   path if no query string is present.
+    #[inline]
     fn get_path(&self) -> String {
         let path: String = self.config.read().map_or(String::new(), |config| {
             let query: String = config.url_obj.query.clone().unwrap_or_default();
@@ -215,6 +225,7 @@ impl HttpRequest {
     /// Returns a `Result<HttpResponseBinary, RequestError>`, where:
     /// - `Ok(HttpResponseBinary)` contains the HTTP response received from the server.
     /// - `Err(RequestError)` indicates that an error occurred while sending the request or reading the response.
+    #[inline]
     fn send_get_request(
         &mut self,
         stream: &mut Box<dyn ReadWrite>,
@@ -250,6 +261,7 @@ impl HttpRequest {
     /// Returns a `Result<HttpResponseBinary, RequestError>`, where:
     /// - `Ok(HttpResponseBinary)` contains the HTTP response received from the server.
     /// - `Err(RequestError)` indicates that an error occurred while sending the request or reading the response.
+    #[inline]
     fn send_post_request(
         &mut self,
         stream: &mut Box<dyn ReadWrite>,
@@ -288,6 +300,7 @@ impl HttpRequest {
     /// Returns a `Result<HttpResponseBinary, RequestError>`, where:
     /// - `Ok(HttpResponseBinary)` contains the complete HTTP response after processing headers and body.
     /// - `Err(RequestError)` indicates that an error occurred while reading the response.
+    #[inline]
     fn read_response(
         &mut self,
         stream: &mut Box<dyn ReadWrite>,
@@ -383,6 +396,7 @@ impl HttpRequest {
     ///
     /// # Returns
     /// Returns the parsed content length as `usize`. If not found or invalid, returns `0`.
+    #[inline]
     fn get_content_length(response_bytes: &[u8]) -> usize {
         let content_length_key: Vec<u8> =
             format!("{}:", CONTENT_LENGTH.to_lowercase()).into_bytes();
@@ -407,6 +421,7 @@ impl HttpRequest {
     ///
     /// # Returns
     /// Returns an `Option<usize>` containing the starting position if the key is found, otherwise `None`.
+    #[inline]
     fn find_case_insensitive_key(response_bytes: &[u8], key: &[u8]) -> Option<usize> {
         response_bytes
             .windows(key.len())
@@ -425,6 +440,7 @@ impl HttpRequest {
     ///
     /// # Returns
     /// Returns an `Option<&str>` containing the extracted value. If not found or invalid, returns `None`.
+    #[inline]
     fn extract_value_from_position<'a>(
         response_bytes: &'a [u8],
         key_pos: usize,
@@ -448,6 +464,7 @@ impl HttpRequest {
     ///
     /// # Returns
     /// Returns the parsed status code as `usize`. If parsing fails, returns `0`.
+    #[inline]
     fn parse_status_code(status_bytes: &[u8]) -> usize {
         let status_str: &str = std::str::from_utf8(status_bytes).unwrap_or_default();
         status_str.trim().parse::<usize>().unwrap_or_default()
@@ -460,6 +477,7 @@ impl HttpRequest {
     /// - `url`: The redirection URL to follow.
     ///
     /// Returns `Ok(HttpResponseBinary)` if the redirection is successful, or `Err(RequestError)` otherwise.
+    #[inline]
     fn handle_redirect(&mut self, url: String) -> Result<BoxResponseTrait, RequestError> {
         if let Ok(mut config) = self.config.write() {
             if !config.redirect {
@@ -488,6 +506,7 @@ impl HttpRequest {
     /// - `config`: Config
     ///
     /// Returns the resolved port.
+    #[inline]
     fn get_port(&self, port: u16, config: &Config) -> u16 {
         if port != 0 {
             return port;
@@ -521,6 +540,7 @@ impl HttpRequest {
     /// - `RequestError::TcpStreamConnectError`: If the TCP connection could not be established.
     /// - `RequestError::SetReadTimeoutError`: If setting the read timeout failed.
     /// - `RequestError::TlsStreamConnectError`: If the TLS stream could not be established.
+    #[inline]
     fn get_connection_stream(
         &self,
         host: String,
@@ -569,6 +589,7 @@ impl HttpRequest {
 
 impl RequestTrait for HttpRequest {
     type RequestResult = RequestResult;
+    #[inline]
     fn send(&mut self) -> Self::RequestResult {
         let methods: Methods = self.get_methods();
         let mut host: String = String::new();
@@ -591,6 +612,7 @@ impl RequestTrait for HttpRequest {
 }
 
 impl Default for HttpRequest {
+    #[inline]
     fn default() -> Self {
         Self {
             methods: Arc::new(Methods::new()),

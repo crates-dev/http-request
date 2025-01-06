@@ -2,6 +2,7 @@ use super::r#type::Config;
 use http_type::*;
 
 impl Default for Config {
+    #[inline]
     fn default() -> Self {
         Self {
             timeout: DEFAULT_TIMEOUT,

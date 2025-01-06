@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 /// A trait representing common behaviors for HTTP response types.
 ///
 /// This trait provides methods for transforming an HTTP response into
@@ -9,9 +11,9 @@
 /// # Associated Types
 /// - `OutputText`: The type returned by the `text` method, typically a text-based HTTP response.
 /// - `OutputBinary`: The type returned by the `binary` method, typically a binary-based HTTP response.
-pub trait ResponseTrait: Send {
-    type OutputText;
-    type OutputBinary;
+pub trait ResponseTrait: Send + Debug {
+    type OutputText: Clone + Sized;
+    type OutputBinary: Clone + Sized;
 
     /// Transforms the HTTP response into a text representation.
     ///

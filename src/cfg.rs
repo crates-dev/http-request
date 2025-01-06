@@ -266,7 +266,7 @@ fn test_unredirect_get() {
         .and_then(|response| {
             output(
                 "ResponseTrait => ",
-                &format!("{:?}", response.decode(4096).text()),
+                &format!("{:?}", response),
                 Color::Green,
             );
             Ok(())
@@ -278,10 +278,10 @@ fn test_unredirect_get() {
 fn test_thread_https_get_request() {
     use std::thread;
     use std::time::Instant;
-    let header_key = "header-key";
-    let header_value = "header-value";
-    let body_key = "body-key";
-    let body_value = "body-value";
+    let header_key: &str = "header-key";
+    let header_value: &str = "header-value";
+    let body_key: &str = "body-key";
+    let body_value: &str = "body-value";
     let mut body: HashMap<&str, &str> = HashMap::new();
     body.insert(body_key, body_value);
     let num_threads: i32 = 10;
@@ -301,7 +301,7 @@ fn test_thread_https_get_request() {
     ));
     for _ in 0..num_threads {
         let request_builder = Arc::clone(&request_builder);
-        let handle = thread::spawn(move || {
+        let handle: thread::JoinHandle<()> = thread::spawn(move || {
             let mut request_builder = request_builder.lock().unwrap();
             let start_time: Instant = Instant::now();
             match request_builder.send() {
@@ -332,7 +332,6 @@ fn test_thread_https_get_request() {
         });
         handles.push(handle);
     }
-
     for handle in handles {
         handle.join().unwrap();
     }
@@ -342,7 +341,7 @@ fn test_thread_https_get_request() {
 fn test_thread_http_get_request() {
     use std::thread;
     use std::time::Instant;
-    let num_threads: i32 = 1;
+    let num_threads: i32 = 10;
     let mut handles: Vec<thread::JoinHandle<()>> = Vec::new();
     let request_builder: ArcMutex<BoxRequestTrait> = Arc::new(Mutex::new(
         RequestBuilder::new()
@@ -356,18 +355,18 @@ fn test_thread_http_get_request() {
     ));
     for _ in 0..num_threads {
         let request_builder = Arc::clone(&request_builder);
-        let handle = thread::spawn(move || {
+        let handle: thread::JoinHandle<()> = thread::spawn(move || {
             let mut request_builder = request_builder.lock().unwrap();
             let start_time: Instant = Instant::now();
             match request_builder.send() {
                 Ok(response) => {
                     let duration: std::time::Duration = start_time.elapsed();
-                    let response_text: HttpResponseText = response.text();
                     output(
                         "Thread finished in: ",
                         &format!("{:?}", duration),
                         Color::Blue,
                     );
+                    let response_text: HttpResponseText = response.text();
                     output(
                         "ResponseTrait => ",
                         &format!("{:?}", response_text),
@@ -387,7 +386,6 @@ fn test_thread_http_get_request() {
         });
         handles.push(handle);
     }
-
     for handle in handles {
         handle.join().unwrap();
     }

@@ -23,6 +23,7 @@ impl ResponseTrait for HttpResponseBinary {
     type OutputText = HttpResponseText;
     type OutputBinary = HttpResponseBinary;
 
+    #[inline]
     fn from(response: &[u8]) -> Self
     where
         Self: Sized,
@@ -71,10 +72,12 @@ impl ResponseTrait for HttpResponseBinary {
         }
     }
 
+    #[inline]
     fn binary(&self) -> Self::OutputBinary {
         self.clone()
     }
 
+    #[inline]
     fn text(&self) -> HttpResponseText {
         let http_response: HttpResponseBinary = self.clone();
         let body_bin: Vec<u8> = http_response
@@ -91,6 +94,7 @@ impl ResponseTrait for HttpResponseBinary {
         }
     }
 
+    #[inline]
     fn decode(&self, buffer_size: usize) -> HttpResponseBinary {
         let http_response: HttpResponseBinary = self.clone();
         let body: Vec<u8> = Compress::from(
@@ -118,6 +122,7 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `HttpVersion`: The HTTP version (e.g., HTTP/1.1, HTTP/2, etc.) used for the response.
+    #[inline]
     pub fn get_http_version(&self) -> HttpVersion {
         if let Ok(http_version) = self.http_version.read() {
             return http_version
@@ -132,6 +137,7 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `StatusCodeUsize`: The HTTP status code as a usize (e.g., 200 for OK, 404 for Not Found).
+    #[inline]
     pub fn get_status_code(&self) -> StatusCodeUsize {
         self.status_code
     }
@@ -140,6 +146,7 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `String`: The human-readable status text (e.g., "OK" for status code 200, "Not Found" for status code 404).
+    #[inline]
     pub fn get_status_text(&self) -> String {
         if let Ok(status_text) = self.status_text.read() {
             return status_text.to_string();
@@ -151,6 +158,7 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `HttpHeaderMap`: A map of header names and their corresponding values as key-value pairs.
+    #[inline]
     pub fn get_headers(&self) -> HttpHeaderMap {
         if let Ok(headers) = self.headers.read() {
             return headers.clone();
@@ -162,6 +170,7 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `HttpBodyVec`: The body of the response in binary form (could be raw bytes, a stream, etc.).
+    #[inline]
     pub fn get_body(&self) -> HttpBodyVec {
         if let Ok(body) = self.body.read() {
             return body.clone();
@@ -171,6 +180,7 @@ impl HttpResponseBinary {
 }
 
 impl Default for HttpResponseBinary {
+    #[inline]
     fn default() -> Self {
         Self {
             http_version: Arc::new(RwLock::new(HttpVersion::Unknown(String::new()))),
