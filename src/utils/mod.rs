@@ -1,1 +1,1 @@
-pub mod r#vec;
+pub(crate) mod r#vec;

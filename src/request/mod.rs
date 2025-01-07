@@ -1,6 +1,6 @@
-pub mod config;
-pub mod request;
-pub mod request_builder;
-pub mod tmp;
-pub mod r#trait;
-pub mod r#type;
+pub(crate) mod config;
+pub(crate) mod request;
+pub(crate) mod request_builder;
+pub(crate) mod tmp;
+pub(crate) mod r#trait;
+pub(crate) mod r#type;
