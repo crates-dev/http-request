@@ -261,9 +261,9 @@ dependencies = [
 
 [[package]]
 name = "http-compress"
-version = "1.13.0"
+version = "1.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "01617bce6abe7320a403fbb06025fe5e52f229cb5e13f5bc66fd7b430edff366"
+checksum = "11c3cc34cca2446f41a105b17cb7ef8dcb3103931313da19d4810e13a2ac027d"
 dependencies = [
  "brotli",
  "flate2",
@@ -273,13 +273,13 @@ dependencies = [
 
 [[package]]
 name = "http-constant"
-version = "1.25.0"
+version = "1.25.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb37523f40fe53d5ae3171dc23673f86e51b8aa0384f25ee50aad427b52eb637"
+checksum = "b7e2991db9cba1223b35dcf186f4a5bf9ff5fdb44abfe346d424fe9107cd4c90"
 
 [[package]]
 name = "http-request"
-version = "8.34.0"
+version = "8.35.0"
 dependencies = [
  "brotli",
  "color-output",
@@ -300,9 +300,9 @@ dependencies = [
 
 [[package]]
 name = "http-type"
-version = "2.27.0"
+version = "2.27.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2562e79880a281b908e89a62c933f1ef21d11622c22ef0193014a801697a56d5"
+checksum = "57c2ed8ff3224a582c00eee2d947a80f23e2694acd609c3af972c597fdc94a5a"
 dependencies = [
  "hex",
  "http-constant",
