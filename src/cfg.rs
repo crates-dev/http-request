@@ -276,8 +276,6 @@ fn test_unredirect_get() {
 
 #[test]
 fn test_thread_https_get_request() {
-    use std::thread;
-    use std::time::Instant;
     let header_key: &str = "header-key";
     let header_value: &str = "header-value";
     let body_key: &str = "body-key";
@@ -285,7 +283,7 @@ fn test_thread_https_get_request() {
     let mut body: HashMap<&str, &str> = HashMap::new();
     body.insert(body_key, body_value);
     let num_threads: i32 = 10;
-    let mut handles: Vec<thread::JoinHandle<()>> = Vec::new();
+    let mut handles: Vec<JoinHandle<()>> = Vec::new();
     let mut header: HashMap<&str, &str> = HashMap::new();
     header.insert(header_key, header_value);
     let request_builder: ArcMutex<BoxRequestTrait> = Arc::new(Mutex::new(
@@ -301,7 +299,7 @@ fn test_thread_https_get_request() {
     ));
     for _ in 0..num_threads {
         let request_builder = Arc::clone(&request_builder);
-        let handle: thread::JoinHandle<()> = thread::spawn(move || {
+        let handle: JoinHandle<()> = spawn(move || {
             let mut request_builder = request_builder.lock().unwrap();
             let start_time: Instant = Instant::now();
             match request_builder.send() {
@@ -339,10 +337,8 @@ fn test_thread_https_get_request() {
 
 #[test]
 fn test_thread_http_get_request() {
-    use std::thread;
-    use std::time::Instant;
     let num_threads: i32 = 10;
-    let mut handles: Vec<thread::JoinHandle<()>> = Vec::new();
+    let mut handles: Vec<JoinHandle<()>> = Vec::new();
     let request_builder: ArcMutex<BoxRequestTrait> = Arc::new(Mutex::new(
         RequestBuilder::new()
             .get("http://127.0.0.1:8080/")
@@ -355,7 +351,7 @@ fn test_thread_http_get_request() {
     ));
     for _ in 0..num_threads {
         let request_builder = Arc::clone(&request_builder);
-        let handle: thread::JoinHandle<()> = thread::spawn(move || {
+        let handle: JoinHandle<()> = spawn(move || {
             let mut request_builder = request_builder.lock().unwrap();
             let start_time: Instant = Instant::now();
             match request_builder.send() {
