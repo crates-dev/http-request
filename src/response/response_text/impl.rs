@@ -62,7 +62,8 @@ impl ResponseTrait for HttpResponseText {
                 .read()
                 .map_or(HashMap::new(), |headers| headers.clone()),
         )
-        .decode(&tmp_body, buffer_size);
+        .decode(&tmp_body, buffer_size)
+        .into_owned();
         HttpResponseBinary {
             http_version: http_response.http_version,
             status_code: http_response.status_code,

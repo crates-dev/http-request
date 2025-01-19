@@ -106,7 +106,8 @@ impl ResponseTrait for HttpResponseBinary {
         .decode(
             &self.body.read().map_or(Vec::new(), |body| body.clone()),
             buffer_size,
-        );
+        )
+        .into_owned();
         HttpResponseBinary {
             http_version: http_response.http_version,
             status_code: http_response.status_code,
