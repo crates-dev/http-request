@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.35.6"
+version = "8.35.9"
 edition = "2021"
 authors = ["ltpp-universe <root@ltpp.vip>"] 
 license = "MIT"
@@ -39,8 +39,11 @@ incremental = true
 opt-level = 3
 lto = true
 panic = "abort"
+debug = false
 
 [profile.release]
+incremental = false
 opt-level = 3
 lto = true
 panic = "abort"
+debug = false
