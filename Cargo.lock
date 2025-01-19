@@ -303,9 +303,9 @@ dependencies = [
 
 [[package]]
 name = "http-compress"
-version = "1.13.2"
+version = "1.13.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b44570f84d8d63080359cdf6111d4430688ccd00ca81c6bbf99707e899137af7"
+checksum = "15f0552f4e196c7f8363fbc522c197729d3ea25131b46af29fc369daaf88859b"
 dependencies = [
  "brotli",
  "flate2",
@@ -321,7 +321,7 @@ checksum = "b7e2991db9cba1223b35dcf186f4a5bf9ff5fdb44abfe346d424fe9107cd4c90"
 
 [[package]]
 name = "http-request"
-version = "8.35.4"
+version = "8.35.5"
 dependencies = [
  "brotli",
  "color-output",
@@ -342,9 +342,9 @@ dependencies = [
 
 [[package]]
 name = "http-type"
-version = "2.29.0"
+version = "2.30.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f62d46f0d2f1e5f6ee6edd869f5fc934557e9b1a42957a574cc98a90c8d12d20"
+checksum = "426e0b4ad34b592d99f61af6053727f63001b7982e77396336945df4cff0e650"
 dependencies = [
  "hex",
  "http-constant",
@@ -870,9 +870,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.135"
+version = "1.0.136"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b0d7ba2887406110130a978386c4e1befb98c674b4fba677954e4db976630d9"
+checksum = "336a0c23cf42a38d9eaa7cd22c7040d04e1228a19a933890805ffd00a16437d2"
 dependencies = [
  "itoa",
  "memchr",
