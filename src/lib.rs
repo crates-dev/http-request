@@ -7,7 +7,8 @@ pub(crate) mod request;
 pub(crate) mod response;
 pub(crate) mod utils;
 
-pub use http_type::RequestError;
+pub use http_compress::*;
+pub use http_type::*;
 pub use request::{
     r#trait::RequestTrait, r#type::BoxRequestTrait, request_builder::r#type::RequestBuilder,
 };
