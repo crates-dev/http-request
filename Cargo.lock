@@ -319,7 +319,7 @@ checksum = "7c55fae5d1478014c77ea58dd6248f13dfc17222a969c5f335be2f244d7c3497"
 
 [[package]]
 name = "http-request"
-version = "8.37.2"
+version = "8.37.3"
 dependencies = [
  "brotli",
  "color-output",
@@ -340,9 +340,9 @@ dependencies = [
 
 [[package]]
 name = "http-type"
-version = "2.30.10"
+version = "2.31.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1936b881fca9f3b7838c48aeaacd1c9cc930ced22f57f39daada2dba9372069"
+checksum = "7552bfa009c18901fc92aff7d7081a63c62a33259980bea8e649db9cc7bbebda"
 dependencies = [
  "hex",
  "http-compress",
