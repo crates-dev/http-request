@@ -1,9 +1,13 @@
+<center>
+
 ## http-request
 
 [![](https://img.shields.io/crates/v/http-request.svg)](https://crates.io/crates/http-request)
 [![](https://docs.rs/http-request/badge.svg)](https://docs.rs/http-request)
-[![](https://img.shields.io/crates/l/http-request.svg)](./LICENSE)
 [![](https://github.com/ltpp-universe/http-request/workflows/Rust/badge.svg)](https://github.com/ltpp-universe/http-request/actions?query=workflow:Rust)
+[![](https://img.shields.io/crates/l/http-request.svg)](./LICENSE)
+
+</center>
 
 [Official Documentation](https://docs.ltpp.vip/HTTP-REQUEST/)
 

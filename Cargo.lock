@@ -191,9 +191,9 @@ dependencies = [
 
 [[package]]
 name = "color-output"
-version = "6.1.7"
+version = "6.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24f0c747d1a569b61d8739deec45f884380f5f95a00ba6076c13c4cbfc80bee0"
+checksum = "d641a3a8617977a6612e52206fa673bae5e248f2764868453cf1eb0ed8d4e98a"
 
 [[package]]
 name = "crc32fast"
@@ -302,9 +302,9 @@ dependencies = [
 
 [[package]]
 name = "http-compress"
-version = "2.2.2"
+version = "2.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32559685cb661bd2c3f592f31cf3e7de0e9cb4f0a0276962d99444f7f6748b42"
+checksum = "f06c6ee63a39ec767d40fceb501078192737f8d96452af9453447510bde31229"
 dependencies = [
  "brotli",
  "flate2",
@@ -313,13 +313,13 @@ dependencies = [
 
 [[package]]
 name = "http-constant"
-version = "1.27.0"
+version = "1.27.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10848ec913e96f2ce1450f85469d0bdc352129be261eec684c2a1ae97db1ae18"
+checksum = "d4f65c1d734142034b3e28ee07df50974f6adc2fb2eeb877963181e826d2aa6a"
 
 [[package]]
 name = "http-request"
-version = "8.38.0"
+version = "8.38.1"
 dependencies = [
  "brotli",
  "color-output",
@@ -340,9 +340,9 @@ dependencies = [
 
 [[package]]
 name = "http-type"
-version = "2.33.0"
+version = "2.33.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a5ab0797b0b686eba3413bf14c4d1a6f28a27278f02e11cacf6cec62c54a36d"
+checksum = "043765ac0f819f400f152fef3535f6dc63fcf083d10485e1e0388a61cb2a0ac4"
 dependencies = [
  "hex",
  "http-compress",
@@ -577,9 +577,9 @@ checksum = "04cbf5b083de1c7e0222a7a51dbfdba1cbe1c6ab0b15e29fff3f6c077fd9cd9f"
 
 [[package]]
 name = "lombok-macros"
-version = "1.7.2"
+version = "1.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac3a1f457ea8b03ddd966d80d3ff5642a440fc6293252e47777e22517ab4dbbc"
+checksum = "09ef4d1374d56438de85a648837714144c55b8d50c7ed0aeb1ff53269228fa54"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -936,9 +936,9 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 
 [[package]]
 name = "std-macro-extensions"
-version = "0.21.0"
+version = "0.21.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "154a164a9901fa9fc9db90f614215320d0e3ea8a7cab79be94d3004878adcecb"
+checksum = "723e95168fe3231183f108f3f3418afe93b182bab9d39b907594c013e5e9fa02"
 
 [[package]]
 name = "subtle"
