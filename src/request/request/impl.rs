@@ -155,12 +155,11 @@ impl HttpRequest {
     /// The body processing relies on the implementation of the `ContentType` parsing logic.
     #[inline]
     fn get_body_bytes(&self) -> Vec<u8> {
-        let content_type_key: String = CONTENT_TYPE.to_lowercase();
         let header: HttpHeaderSliceMap = self.get_header();
         let body: Body = self.get_body();
         let mut res: String = String::new();
         for (key, value) in header {
-            if key.to_lowercase() == content_type_key {
+            if key.eq_ignore_ascii_case(CONTENT_TYPE) {
                 res = value
                     .to_lowercase()
                     .parse::<ContentType>()
