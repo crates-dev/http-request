@@ -25,7 +25,8 @@ pub(crate) use http_type::{
     HttpVersion, Methods, Protocol, RequestError, StatusCode, StatusCodeUsize, ACCEPT, ACCEPT_ANY,
     BR_BYTES, COLON_SPACE_BYTES, CONTENT_LENGTH, CONTENT_TYPE, DEFAULT_BUFFER_SIZE,
     DEFAULT_HTTP_PATH, DEFAULT_MAX_REDIRECT_TIMES, DEFAULT_TIMEOUT, EMPTY_STR, HOST, HTTP_BR,
-    HTTP_BR_BYTES, HTTP_DOUBLE_BR_BYTES, LOCATION, QUERY_SYMBOL, USER_AGENT, ZERO_STR,
+    HTTP_BR_BYTES, HTTP_DOUBLE_BR_BYTES, LOCATION, QUERY_SYMBOL, SPACE_U8, TAB_U8, USER_AGENT,
+    ZERO_STR,
 };
 pub(crate) use request::{config::r#type::*, r#type::*, request::r#type::*, tmp::r#type::*};
 pub(crate) use rustls::{
