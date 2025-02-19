@@ -1,6 +1,4 @@
-use super::r#trait::RequestTrait;
-use crate::response::r#type::BoxResponseTrait;
-use http_type::*;
+use crate::*;
 
 /// Type alias for `Result<BoxResponseTrait, RequestError>`
 pub type RequestResult = Result<BoxResponseTrait, RequestError>;

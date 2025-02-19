@@ -1,10 +1,4 @@
-use crate::{
-    body::r#type::Body,
-    request::{config::r#type::Config, tmp::r#type::Tmp},
-    response::response_binary::r#type::HttpResponseBinary,
-};
-use http_type::*;
-use std::sync::Arc;
+use crate::*;
 
 /// Represents an HTTP request, encapsulating various components such as the method, URL, protocol,
 /// headers, body, and additional metadata.

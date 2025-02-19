@@ -1,7 +1,5 @@
-use super::r#type::Body;
-use http_type::*;
+use crate::*;
 use serde::{Serialize, Serializer};
-use std::fmt::{self, Display};
 
 impl Default for Body {
     fn default() -> Self {

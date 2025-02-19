@@ -1,7 +1,4 @@
-use super::{
-    r#trait::ResponseTrait, response_binary::r#type::HttpResponseBinary,
-    response_text::r#type::HttpResponseText,
-};
+use crate::*;
 
 /// A type alias for a boxed dynamic trait object implementing the `ResponseTrait` trait.
 ///

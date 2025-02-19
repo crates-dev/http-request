@@ -1,5 +1,4 @@
-use super::r#type::Config;
-use http_type::*;
+use crate::*;
 
 impl Default for Config {
     #[inline]

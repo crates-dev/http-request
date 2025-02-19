@@ -1,10 +1,4 @@
-use super::r#type::RequestBuilder;
-use crate::{
-    body::r#type::{Body, BodyBinary, BodyJson, BodyText},
-    request::{r#type::BoxRequestTrait, request::r#type::HttpRequest},
-};
-use http_type::*;
-use std::sync::Arc;
+use crate::*;
 
 impl Default for RequestBuilder {
     fn default() -> Self {

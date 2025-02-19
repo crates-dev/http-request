@@ -1,15 +1,4 @@
-use super::r#type::HttpResponseBinary;
-use crate::{
-    response::{r#trait::ResponseTrait, response_text::r#type::HttpResponseText},
-    utils::vec::{split_multi_byte, split_whitespace},
-};
-use http_compress::Compress;
-use http_type::*;
-use std::{
-    collections::HashMap,
-    sync::{Arc, RwLock},
-    vec::IntoIter,
-};
+use crate::*;
 
 /// Implements the `ResponseTrait` trait for `HttpResponseBinary`.
 ///

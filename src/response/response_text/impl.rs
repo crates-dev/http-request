@@ -1,11 +1,4 @@
-use super::r#type::HttpResponseText;
-use crate::response::{r#trait::ResponseTrait, response_binary::r#type::HttpResponseBinary};
-use http_compress::Compress;
-use http_type::*;
-use std::{
-    collections::HashMap,
-    sync::{Arc, RwLock},
-};
+use crate::*;
 
 /// Implements the `ResponseTrait` trait for `HttpResponseText`.
 ///

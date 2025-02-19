@@ -1,27 +1,4 @@
-use super::r#type::HttpRequest;
-use crate::constant::r#type::APP_NAME;
-use crate::global_trait::r#trait::ReadWrite;
-use crate::request::r#trait::RequestTrait;
-use crate::{
-    body::r#type::Body,
-    request::{config::r#type::Config, r#type::RequestResult, tmp::r#type::Tmp},
-    response::{
-        r#trait::ResponseTrait, r#type::BoxResponseTrait,
-        response_binary::r#type::HttpResponseBinary,
-    },
-    utils::vec::case_insensitive_match,
-};
-use http_type::*;
-use rustls::pki_types::ServerName;
-use rustls::{ClientConfig, ClientConnection, RootCertStore, StreamOwned};
-use std::sync::RwLock;
-use std::{
-    collections::HashMap,
-    io::{Read, Write},
-    net::TcpStream,
-    sync::Arc,
-    time::Duration,
-};
+use crate::*;
 
 /// Implements methods for the `HttpRequest` struct.
 ///
@@ -570,12 +547,14 @@ impl HttpRequest {
                     let config: ClientConfig = ClientConfig::builder()
                         .with_root_certificates(roots)
                         .with_no_client_auth();
-                    let client_config = Arc::new(config);
-                    let dns_name = ServerName::try_from(host.clone())
+                    let client_config: Arc<ClientConfig> = Arc::new(config);
+                    let dns_name: ServerName<'_> = ServerName::try_from(host.clone())
                         .map_err(|_| RequestError::TlsConnectorBuildError)?;
-                    let session = ClientConnection::new(Arc::clone(&client_config), dns_name)
-                        .map_err(|_| RequestError::TlsConnectorBuildError)?;
-                    let tls_stream = StreamOwned::new(session, tcp_stream);
+                    let session: ClientConnection =
+                        ClientConnection::new(Arc::clone(&client_config), dns_name)
+                            .map_err(|_| RequestError::TlsConnectorBuildError)?;
+                    let tls_stream: StreamOwned<ClientConnection, TcpStream> =
+                        StreamOwned::new(session, tcp_stream);
                     return Ok(Box::new(tls_stream));
                 }
                 Err(RequestError::TlsConnectorBuildError)

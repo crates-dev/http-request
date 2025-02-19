@@ -1,4 +1,4 @@
-use http_type::*;
+use crate::*;
 
 /// Configuration for HTTP requests.
 ///

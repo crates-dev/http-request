@@ -1,4 +1,4 @@
-use http_type::*;
+use crate::*;
 
 /// A struct representing an HTTP response.
 ///

@@ -1,4 +1,4 @@
-use super::r#trait::ReadWrite;
+use crate::*;
 
 /// Provides a blanket implementation for the `ReadWrite` trait.
 ///
