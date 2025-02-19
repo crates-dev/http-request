@@ -190,12 +190,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "color-output"
-version = "6.1.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d641a3a8617977a6612e52206fa673bae5e248f2764868453cf1eb0ed8d4e98a"
-
-[[package]]
 name = "crc32fast"
 version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -319,10 +313,9 @@ checksum = "b7b4c33e9eccb247e9deb2b644a2e77fd03f71e6233e6c810d063d498822351d"
 
 [[package]]
 name = "http-request"
-version = "8.40.3"
+version = "8.40.4"
 dependencies = [
  "brotli",
- "color-output",
  "flate2",
  "hex",
  "http-compress",
@@ -332,7 +325,6 @@ dependencies = [
  "serde-xml-rs",
  "serde_json",
  "serde_urlencoded",
- "std-macro-extensions",
  "url",
  "urlencoding",
  "webpki-roots",
@@ -933,12 +925,6 @@ name = "stable_deref_trait"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
-
-[[package]]
-name = "std-macro-extensions"
-version = "0.21.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "723e95168fe3231183f108f3f3418afe93b182bab9d39b907594c013e5e9fa02"
 
 [[package]]
 name = "subtle"

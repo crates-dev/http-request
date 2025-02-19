@@ -1,31 +1,9 @@
 use crate::*;
-use color_output::*;
 use std::{
     sync::Mutex,
     thread::{spawn, JoinHandle},
     time::Instant,
 };
-
-#[allow(dead_code)]
-fn output(title: &str, msg: &str, color: Color) {
-    OutputListBuilder::new()
-        .add(
-            OutputBuilder::new()
-                .text(title)
-                .bg_color(ColorType::Use(Color::Cyan))
-                .blod(true)
-                .build(),
-        )
-        .add(
-            OutputBuilder::new()
-                .text(msg)
-                .bg_color(ColorType::Use(color))
-                .blod(true)
-                .endl(true)
-                .build(),
-        )
-        .run();
-}
 
 #[test]
 fn test_http_post_request() {
@@ -51,14 +29,10 @@ fn test_http_post_request() {
     _request_builder
         .send()
         .and_then(|response| {
-            output(
-                "ResponseTrait => ",
-                &format!("{:?}", response.text()),
-                Color::Green,
-            );
+            println!("ResponseTrait => {:?}", response.text());
             Ok(())
         })
-        .unwrap_or_else(|e| output("Error => ", &format!("{:?}", e), Color::Red));
+        .unwrap_or_else(|e| println!("Error => {}", e));
 }
 
 #[test]
@@ -79,14 +53,10 @@ fn test_http_get_request() {
     _request_builder
         .send()
         .and_then(|response| {
-            output(
-                "ResponseTrait => ",
-                &format!("{:?}", response.text()),
-                Color::Green,
-            );
+            println!("ResponseTrait => {:?}", response.text());
             Ok(())
         })
-        .unwrap_or_else(|e| output("Error => ", &format!("{:?}", e), Color::Red));
+        .unwrap_or_else(|e| println!("Error => {}", e));
 }
 
 #[test]
@@ -113,14 +83,10 @@ fn test_https_post_request() {
     _request_builder
         .send()
         .and_then(|response| {
-            output(
-                "ResponseTrait => ",
-                &format!("{:?}", response.text()),
-                Color::Green,
-            );
+            println!("ResponseTrait => {:?}", response.text());
             Ok(())
         })
-        .unwrap_or_else(|e| output("Error => ", &format!("{:?}", e), Color::Red));
+        .unwrap_or_else(|e| println!("Error => {}", e));
 }
 
 #[test]
@@ -141,14 +107,10 @@ fn test_https_get_request() {
     _request_builder
         .send()
         .and_then(|response| {
-            output(
-                "ResponseTrait => ",
-                &format!("{:?}", response.text()),
-                Color::Green,
-            );
+            println!("ResponseTrait => {:?}", response.text());
             Ok(())
         })
-        .unwrap_or_else(|e| output("Error => ", &format!("{:?}", e), Color::Red));
+        .unwrap_or_else(|e| println!("Error => {}", e));
 }
 
 #[test]
@@ -169,14 +131,10 @@ fn test_http_post_text_request() {
     _request_builder
         .send()
         .and_then(|response| {
-            output(
-                "ResponseTrait => ",
-                &format!("{:?}", response.text()),
-                Color::Green,
-            );
+            println!("ResponseTrait => {:?}", response.text());
             Ok(())
         })
-        .unwrap_or_else(|e| output("Error => ", &format!("{:?}", e), Color::Red));
+        .unwrap_or_else(|e| println!("Error => {}", e));
 }
 
 #[test]
@@ -197,14 +155,10 @@ fn test_http_post_binary_request() {
     _request_builder
         .send()
         .and_then(|response| {
-            output(
-                "ResponseTrait => ",
-                &format!("{:?}", response.text()),
-                Color::Green,
-            );
+            println!("ResponseTrait => {:?}", response.text());
             Ok(())
         })
-        .unwrap_or_else(|e| output("Error => ", &format!("{:?}", e), Color::Red));
+        .unwrap_or_else(|e| println!("Error => {}", e));
 }
 
 #[test]
@@ -221,14 +175,10 @@ fn test_auto_gzip_get() {
     _request_builder
         .send()
         .and_then(|response| {
-            output(
-                "ResponseTrait => ",
-                &format!("{:?}", response.text()),
-                Color::Green,
-            );
+            println!("ResponseTrait => {:?}", response.text());
             Ok(())
         })
-        .unwrap_or_else(|e| output("Error => ", &format!("{:?}", e), Color::Red));
+        .unwrap_or_else(|e| println!("Error => {}", e));
 }
 
 #[test]
@@ -244,14 +194,10 @@ fn test_gzip_get() {
     _request_builder
         .send()
         .and_then(|response| {
-            output(
-                "ResponseTrait => ",
-                &format!("{:?}", response.decode(4096).text()),
-                Color::Green,
-            );
+            println!("ResponseTrait => {:?}", response.decode(4096).text());
             Ok(())
         })
-        .unwrap_or_else(|e| output("Error => ", &format!("{:?}", e), Color::Red));
+        .unwrap_or_else(|e| println!("Error => {}", e));
 }
 
 #[test]
@@ -267,14 +213,10 @@ fn test_unredirect_get() {
     _request_builder
         .send()
         .and_then(|response| {
-            output(
-                "ResponseTrait => ",
-                &format!("{:?}", response),
-                Color::Green,
-            );
+            println!("ResponseTrait => {:?}", response);
             Ok(())
         })
-        .unwrap_or_else(|e| output("Error => ", &format!("{:?}", e), Color::Red));
+        .unwrap_or_else(|e| println!("Error => {}", e));
 }
 
 #[test]
@@ -340,25 +282,13 @@ fn test_thread_https_get_request() {
                 Ok(response) => {
                     let duration: std::time::Duration = start_time.elapsed();
                     let response_text: HttpResponseText = response.text();
-                    output(
-                        "Thread finished in: ",
-                        &format!("{:?}", duration),
-                        Color::Blue,
-                    );
-                    output(
-                        "ResponseTrait => ",
-                        &format!("{:?}", response_text),
-                        Color::Green,
-                    );
+                    println!("Thread finished in: {:?}", duration);
+                    println!("ResponseTrait => {:?}", response_text);
                 }
                 Err(e) => {
                     let duration: std::time::Duration = start_time.elapsed();
-                    output(
-                        "Thread finished in: ",
-                        &format!("{:?}", duration),
-                        Color::Blue,
-                    );
-                    output("Error => ", &format!("{:?}", e), Color::Red);
+                    println!("Thread finished in: {:?}", duration);
+                    println!("Error => {}", e);
                 }
             }
         });
@@ -407,26 +337,14 @@ fn test_thread_http_get_request() {
             match request_builder.send() {
                 Ok(response) => {
                     let duration: std::time::Duration = start_time.elapsed();
-                    output(
-                        "Thread finished in: ",
-                        &format!("{:?}", duration),
-                        Color::Blue,
-                    );
+                    println!("Thread finished in: {:?}", duration);
                     let response_text: HttpResponseText = response.text();
-                    output(
-                        "ResponseTrait => ",
-                        &format!("{:?}", response_text),
-                        Color::Green,
-                    );
+                    println!("ResponseTrait => {:?}", response_text);
                 }
                 Err(e) => {
                     let duration: std::time::Duration = start_time.elapsed();
-                    output(
-                        "Thread finished in: ",
-                        &format!("{:?}", duration),
-                        Color::Blue,
-                    );
-                    output("Error => ", &format!("{:?}", e), Color::Red);
+                    println!("Thread finished in: {:?}", duration);
+                    println!("Error => {}", e);
                 }
             }
         });

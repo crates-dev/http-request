@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.40.3"
+version = "8.40.4"
 edition = "2021"
 authors = ["ltpp-universe <root@ltpp.vip>"] 
 license = "MIT"
@@ -29,10 +29,6 @@ serde_urlencoded = "0.7.1"
 url = "2.5.4"
 urlencoding = "2.1.3"
 webpki-roots = "0.26.8"
-
-[dev-dependencies]
-color-output = "6.1.8"
-std-macro-extensions = "0.21.1"
 
 [profile.dev]
 incremental = true
