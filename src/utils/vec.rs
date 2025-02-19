@@ -1,4 +1,4 @@
-use http_type::*;
+use crate::*;
 
 /// Splits a byte slice into parts based on whitespace characters (space or tab).
 ///

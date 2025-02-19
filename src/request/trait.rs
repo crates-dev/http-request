@@ -1,4 +1,4 @@
-use std::fmt::Debug;
+use crate::*;
 
 /// Trait representing an HTTP request.
 ///
