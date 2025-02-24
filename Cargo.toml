@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.41.0"
+version = "8.41.1"
 edition = "2021"
 authors = ["ltpp-universe <root@ltpp.vip>"] 
 license = "MIT"
@@ -17,7 +17,7 @@ exclude = [
 
 [dependencies]
 brotli = "7.0.0"
-flate2 = "1.0.35"
+flate2 = "1.1.0"
 hex = "0.4.3"
 http-compress = "2.2.4"
 http-type = "3.6.0"
