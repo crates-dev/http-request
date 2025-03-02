@@ -296,9 +296,9 @@ dependencies = [
 
 [[package]]
 name = "http-compress"
-version = "2.2.4"
+version = "2.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28b4861cd885310158502fec3b5b77476473429a2ebfa32d736414b46e48213a"
+checksum = "4f27da543d4dd3e0dddcb291d3ba93ac330d98ef2ca062a5b5eb935999c53d5e"
 dependencies = [
  "brotli",
  "flate2",
@@ -307,13 +307,13 @@ dependencies = [
 
 [[package]]
 name = "http-constant"
-version = "1.29.0"
+version = "1.29.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e12cb1453c646f80c681382a4e3da4b7345e1f6d4ff6ffd6f12909f5d00740d"
+checksum = "590d21ec88bcc3a54fd43344c452f59a1908ead7fdf6a9d4f22dcf514efb843a"
 
 [[package]]
 name = "http-request"
-version = "8.42.1"
+version = "8.42.2"
 dependencies = [
  "brotli",
  "flate2",
@@ -332,9 +332,9 @@ dependencies = [
 
 [[package]]
 name = "http-type"
-version = "3.7.1"
+version = "3.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f20fe781056fd2f8320c689c608522130a364b68eb0c5c4601398a894eb0b780"
+checksum = "12788bb780b8c435b82a26f859e3c7a79334aa97e629ca4479cfe1c87e6ecbee"
 dependencies = [
  "hex",
  "http-compress",
@@ -569,9 +569,9 @@ checksum = "04cbf5b083de1c7e0222a7a51dbfdba1cbe1c6ab0b15e29fff3f6c077fd9cd9f"
 
 [[package]]
 name = "lombok-macros"
-version = "1.7.3"
+version = "1.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09ef4d1374d56438de85a648837714144c55b8d50c7ed0aeb1ff53269228fa54"
+checksum = "d9203d7ef929978612d2c71f5e7ed13529d00e4e9b6a683a2c59713148ab574b"
 dependencies = [
  "proc-macro2",
  "quote",
