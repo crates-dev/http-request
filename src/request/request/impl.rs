@@ -577,9 +577,7 @@ impl RequestTrait for HttpRequest {
             host = config.url_obj.host.clone().unwrap_or_default();
             port = self.get_port(config.url_obj.port.clone().unwrap_or_default(), &config);
         }
-        let mut stream: Box<dyn ReadWrite> = self
-            .get_connection_stream(host, port)
-            .map_err(|_| RequestError::TcpStreamConnectError)?;
+        let mut stream: BoxReadWrite = self.get_connection_stream(host, port)?;
         let res: Result<BoxResponseTrait, RequestError> = match methods {
             m if m.is_get() => self.send_get_request(&mut stream),
             m if m.is_post() => self.send_post_request(&mut stream),

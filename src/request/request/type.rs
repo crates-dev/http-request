@@ -1,5 +1,7 @@
 use crate::*;
 
+pub type BoxReadWrite = Box<dyn ReadWrite>;
+
 /// Represents an HTTP request, encapsulating various components such as the method, URL, protocol,
 /// headers, body, and additional metadata.
 #[derive(Debug, Clone)]

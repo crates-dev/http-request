@@ -313,7 +313,7 @@ checksum = "590d21ec88bcc3a54fd43344c452f59a1908ead7fdf6a9d4f22dcf514efb843a"
 
 [[package]]
 name = "http-request"
-version = "8.42.2"
+version = "8.42.3"
 dependencies = [
  "brotli",
  "flate2",
