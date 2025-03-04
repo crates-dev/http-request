@@ -45,6 +45,7 @@ cargo add http-request
 ```rs
 use http_request::*;
 use std::collections::HashMap;
+
 let mut header: HashMap<&str, &str> = HashMap::new();
 header.insert("header-key", "header-value");
 let mut _request_builder = RequestBuilder::new()
@@ -73,6 +74,7 @@ _request_builder
 ```rs
 use http_request::*;
 use std::collections::HashMap;
+
 let mut header: HashMap<&str, &str> = HashMap::new();
 header.insert("header-key", "header-value");
 let mut body: HashMap<&str, &str> = HashMap::new();
@@ -101,6 +103,7 @@ _request_builder
 ```rs
 use http_request::*;
 use std::collections::HashMap;
+
 let mut header: HashMap<&str, &str> = HashMap::new();
 header.insert("header-key", "header-value");
 let mut _request_builder = RequestBuilder::new()
@@ -128,6 +131,7 @@ _request_builder
 ```rs
 use http_request::*;
 use std::collections::HashMap;
+
 let mut header: HashMap<&str, &str> = HashMap::new();
 header.insert("header-key", "header-value");
 let mut _request_builder = RequestBuilder::new()
