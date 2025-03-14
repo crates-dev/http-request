@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.50.0"
+version = "8.51.0"
 edition = "2021"
 authors = ["ltpp-universe <root@ltpp.vip>"] 
 license = "MIT"
@@ -19,8 +19,8 @@ exclude = [
 brotli = "7.0.0"
 flate2 = "1.1.0"
 hex = "0.4.3"
-http-compress = "2.3.3"
-http-type = "3.21.0"
+http-compress = "2.3.5"
+http-type = "3.23.0"
 rustls = "0.23.23"
 serde = { version = "1.0.219", features = ["derive"] }
 serde-xml-rs = "0.6.0"
