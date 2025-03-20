@@ -29,14 +29,14 @@ impl ResponseTrait for HttpResponseBinary {
         .to_string()
         .parse::<HttpVersion>()
         .unwrap_or_default();
-        let status_code: StatusCodeUsize = status_parts
+        let status_code: ResponseStatusCode = status_parts
             .get(1)
             .and_then(|part| std::str::from_utf8(part).ok())
-            .unwrap_or(&StatusCode::Ok.to_string())
+            .unwrap_or(&HttpStatus::Ok.to_string())
             .parse()
-            .unwrap_or(StatusCode::Unknown.code());
+            .unwrap_or(HttpStatus::Unknown.code());
         let status_text: String = status_parts.get(2..).map_or_else(
-            || StatusCode::Unknown.to_string(),
+            || HttpStatus::Unknown.to_string(),
             |parts| String::from_utf8_lossy(&parts.concat()).to_string(),
         );
         let mut headers: HashMap<String, String> = HashMap::new();
@@ -126,9 +126,9 @@ impl HttpResponseBinary {
     /// Retrieves the HTTP status code associated with this response.
     ///
     /// # Returns
-    /// - `StatusCodeUsize`: The HTTP status code as a usize (e.g., 200 for OK, 404 for Not Found).
+    /// - `ResponseStatusCode`: The HTTP status code as a usize (e.g., 200 for OK, 404 for Not Found).
     #[inline]
-    pub fn get_status_code(&self) -> StatusCodeUsize {
+    pub fn get_status_code(&self) -> ResponseStatusCode {
         self.status_code
     }
 
@@ -141,7 +141,7 @@ impl HttpResponseBinary {
         if let Ok(status_text) = self.status_text.read() {
             return status_text.to_string();
         }
-        return StatusCode::default().to_string();
+        return HttpStatus::default().to_string();
     }
 
     /// Retrieves the headers of the HTTP response.
@@ -159,13 +159,13 @@ impl HttpResponseBinary {
     /// Retrieves the body content of the HTTP response.
     ///
     /// # Returns
-    /// - `HttpBodyVec`: The body of the response in binary form (could be raw bytes, a stream, etc.).
+    /// - `RequestBody`: The body of the response in binary form (could be raw bytes, a stream, etc.).
     #[inline]
-    pub fn get_body(&self) -> HttpBodyVec {
+    pub fn get_body(&self) -> RequestBody {
         if let Ok(body) = self.body.read() {
             return body.clone();
         }
-        return HttpBodyVec::new();
+        return RequestBody::new();
     }
 }
 
@@ -174,8 +174,8 @@ impl Default for HttpResponseBinary {
     fn default() -> Self {
         Self {
             http_version: Arc::new(RwLock::new(HttpVersion::Unknown(String::new()))),
-            status_code: StatusCode::Unknown.code(),
-            status_text: Arc::new(RwLock::new(StatusCode::Unknown.to_string())),
+            status_code: HttpStatus::Unknown.code(),
+            status_text: Arc::new(RwLock::new(HttpStatus::Unknown.to_string())),
             headers: Arc::new(RwLock::new(HashMap::new())),
             body: Arc::new(RwLock::new(Vec::new())),
         }

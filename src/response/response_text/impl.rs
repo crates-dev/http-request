@@ -86,9 +86,9 @@ impl HttpResponseText {
     /// Retrieves the HTTP status code associated with this response.
     ///
     /// # Returns
-    /// - `StatusCodeUsize`: The HTTP status code as a usize (e.g., 200 for OK, 404 for Not Found).
+    /// - `ResponseStatusCode`: The HTTP status code as a usize (e.g., 200 for OK, 404 for Not Found).
     #[inline]
-    pub fn get_status_code(&self) -> StatusCodeUsize {
+    pub fn get_status_code(&self) -> ResponseStatusCode {
         self.status_code
     }
 
@@ -101,7 +101,7 @@ impl HttpResponseText {
         if let Ok(status_text) = self.status_text.read() {
             return status_text.to_string();
         }
-        return StatusCode::default().to_string();
+        return HttpStatus::default().to_string();
     }
 
     /// Retrieves the headers of the HTTP response.
@@ -122,14 +122,14 @@ impl HttpResponseText {
     /// it is converted into a `String` and returned. If reading the body fails, an empty string is returned.
     ///
     /// # Returns
-    /// - `HttpBodyString`: The body of the response as a string. If the body could not be read,
+    /// - `RequestBodyString`: The body of the response as a string. If the body could not be read,
     ///   an empty string is returned.
     #[inline]
-    pub fn get_body(&self) -> HttpBodyString {
+    pub fn get_body(&self) -> RequestBodyString {
         if let Ok(body) = self.body.read() {
             return body.to_string();
         }
-        return HttpBodyString::new();
+        return RequestBodyString::new();
     }
 }
 
@@ -138,8 +138,8 @@ impl Default for HttpResponseText {
     fn default() -> Self {
         Self {
             http_version: Arc::new(RwLock::new(HttpVersion::Unknown(String::new()))),
-            status_code: StatusCode::Unknown.code(),
-            status_text: Arc::new(RwLock::new(StatusCode::Unknown.to_string())),
+            status_code: HttpStatus::Unknown.code(),
+            status_text: Arc::new(RwLock::new(HttpStatus::Unknown.to_string())),
             headers: Arc::new(RwLock::new(HashMap::new())),
             body: Arc::new(RwLock::new(String::new())),
         }

@@ -19,7 +19,7 @@ pub struct HttpResponseText {
     pub(crate) http_version: ArcRwLock<HttpVersion>,
 
     /// The HTTP status code (e.g., 200, 404).
-    pub(crate) status_code: StatusCodeUsize,
+    pub(crate) status_code: ResponseStatusCode,
 
     /// The status text associated with the status code (e.g., "OK", "Not Found").
     pub(crate) status_text: ArcRwLock<String>,
@@ -28,5 +28,5 @@ pub struct HttpResponseText {
     pub(crate) headers: ArcRwLock<HttpHeaderMap>,
 
     /// The body of the response, which contains the content being returned.
-    pub(crate) body: ArcRwLock<HttpBodyString>,
+    pub(crate) body: ArcRwLock<RequestBodyString>,
 }

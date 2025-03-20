@@ -21,9 +21,9 @@ pub(crate) use body::r#type::*;
 pub(crate) use constant::r#type::*;
 pub(crate) use global_trait::r#trait::*;
 pub(crate) use http_type::{
-    ContentType, HttpBodyString, HttpBodyVec, HttpHeaderMap, HttpHeaderSliceMap, HttpUrlComponents,
-    HttpVersion, Methods, Protocol, RequestError, StatusCode, StatusCodeUsize, ACCEPT, ACCEPT_ANY,
-    BR_BYTES, COLON_SPACE_BYTES, CONTENT_LENGTH, CONTENT_TYPE, DEFAULT_BUFFER_SIZE,
+    ContentType, HttpHeaderMap, HttpHeaderSliceMap, HttpStatus, HttpUrlComponents, HttpVersion,
+    Methods, Protocol, RequestBody, RequestBodyString, RequestError, ResponseStatusCode, ACCEPT,
+    ACCEPT_ANY, BR_BYTES, COLON_SPACE_BYTES, CONTENT_LENGTH, CONTENT_TYPE, DEFAULT_BUFFER_SIZE,
     DEFAULT_HTTP_PATH, DEFAULT_MAX_REDIRECT_TIMES, DEFAULT_TIMEOUT, EMPTY_STR, HOST, HTTP_BR,
     HTTP_BR_BYTES, HTTP_DOUBLE_BR_BYTES, LOCATION, QUERY_SYMBOL, SPACE_U8, TAB_U8, USER_AGENT,
     ZERO_STR,
