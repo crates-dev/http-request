@@ -1,7 +1,7 @@
 use crate::*;
 use std::{
     sync::Mutex,
-    thread::{spawn, JoinHandle},
+    thread::{JoinHandle, spawn},
     time::Instant,
 };
 
@@ -250,9 +250,9 @@ fn test_thread_https_get_request() {
                         RequestResult = Result<
                             Box<
                                 dyn ResponseTrait<
-                                    OutputText = HttpResponseText,
-                                    OutputBinary = HttpResponseBinary,
-                                >,
+                                        OutputText = HttpResponseText,
+                                        OutputBinary = HttpResponseBinary,
+                                    >,
                             >,
                             RequestError,
                         >,
@@ -268,9 +268,9 @@ fn test_thread_https_get_request() {
                         RequestResult = Result<
                             Box<
                                 dyn ResponseTrait<
-                                    OutputText = HttpResponseText,
-                                    OutputBinary = HttpResponseBinary,
-                                >,
+                                        OutputText = HttpResponseText,
+                                        OutputBinary = HttpResponseBinary,
+                                    >,
                             >,
                             RequestError,
                         >,
@@ -321,9 +321,9 @@ fn test_thread_http_get_request() {
                         RequestResult = Result<
                             Box<
                                 dyn ResponseTrait<
-                                    OutputText = HttpResponseText,
-                                    OutputBinary = HttpResponseBinary,
-                                >,
+                                        OutputText = HttpResponseText,
+                                        OutputBinary = HttpResponseBinary,
+                                    >,
                             >,
                             RequestError,
                         >,
