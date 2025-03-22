@@ -107,13 +107,13 @@ impl HttpResponseText {
     /// Retrieves the headers of the HTTP response.
     ///
     /// # Returns
-    /// - `HttpHeaderMap`: A map of header names and their corresponding values as key-value pairs.
+    /// - `ResponseHeaders`: A map of header names and their corresponding values as key-value pairs.
     #[inline]
-    pub fn get_headers(&self) -> HttpHeaderMap {
+    pub fn get_headers(&self) -> ResponseHeaders {
         if let Ok(headers) = self.headers.read() {
             return headers.clone();
         }
-        return HttpHeaderMap::new();
+        return ResponseHeaders::new();
     }
 
     /// Retrieves the body content of the HTTP response as a `String`.

@@ -27,7 +27,7 @@ pub struct HttpResponseBinary {
     pub(crate) status_text: ArcRwLock<String>,
 
     /// A `HashMap` of headers, where the key is the header name and the value is the header value.
-    pub(crate) headers: ArcRwLock<HttpHeaderMap>,
+    pub(crate) headers: ArcRwLock<ResponseHeaders>,
 
     /// The body of the response, which contains the content being returned.
     pub(crate) body: ArcRwLock<RequestBody>,

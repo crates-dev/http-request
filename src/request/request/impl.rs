@@ -27,7 +27,7 @@ impl HttpRequest {
 
     /// Returns the headers of the HTTP request.
     #[inline]
-    fn get_header(&self) -> HttpHeaderSliceMap {
+    fn get_header(&self) -> RequestHeaders {
         self.header.as_ref().clone()
     }
 
@@ -85,7 +85,7 @@ impl HttpRequest {
     /// before constructing the HTTP request.
     #[inline]
     fn get_header_bytes(&self) -> Vec<u8> {
-        let mut header: HttpHeaderSliceMap = self.get_header();
+        let mut header: RequestHeaders = self.get_header();
         let mut header_string: String = String::new();
         if let Ok(config) = self.config.read() {
             let required_headers = [
@@ -132,7 +132,7 @@ impl HttpRequest {
     /// The body processing relies on the implementation of the `ContentType` parsing logic.
     #[inline]
     fn get_body_bytes(&self) -> Vec<u8> {
-        let header: HttpHeaderSliceMap = self.get_header();
+        let header: RequestHeaders = self.get_header();
         let body: Body = self.get_body();
         let mut res: String = String::new();
         for (key, value) in header {
