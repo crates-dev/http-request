@@ -12,7 +12,6 @@ impl ResponseTrait for HttpResponseBinary {
     type OutputText = HttpResponseText;
     type OutputBinary = HttpResponseBinary;
 
-    #[inline]
     fn from(response: &[u8]) -> Self
     where
         Self: Sized,
@@ -39,7 +38,7 @@ impl ResponseTrait for HttpResponseBinary {
             || HttpStatus::Unknown.to_string(),
             |parts| String::from_utf8_lossy(&parts.concat()).to_string(),
         );
-        let mut headers: HashMap<String, String> = HashMap::new();
+        let mut headers: HashMapXxHash3_64<String, String> = hash_map_xxhash3_64();
         while let Some(line) = lines.next() {
             if line.is_empty() {
                 break;
@@ -61,12 +60,10 @@ impl ResponseTrait for HttpResponseBinary {
         }
     }
 
-    #[inline]
     fn binary(&self) -> Self::OutputBinary {
         self.clone()
     }
 
-    #[inline]
     fn text(&self) -> HttpResponseText {
         let http_response: HttpResponseBinary = self.clone();
         let body_bin: Vec<u8> = http_response
@@ -83,14 +80,13 @@ impl ResponseTrait for HttpResponseBinary {
         }
     }
 
-    #[inline]
     fn decode(&self, buffer_size: usize) -> HttpResponseBinary {
         let http_response: HttpResponseBinary = self.clone();
         let body: Vec<u8> = Compress::from(
             &self
                 .headers
                 .read()
-                .map_or(HashMap::new(), |headers| headers.clone()),
+                .map_or(hash_map_xxhash3_64(), |headers| headers.clone()),
         )
         .decode(
             &self.body.read().map_or(Vec::new(), |body| body.clone()),
@@ -112,7 +108,6 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `HttpVersion`: The HTTP version (e.g., HTTP/1.1, HTTP/2, etc.) used for the response.
-    #[inline]
     pub fn get_http_version(&self) -> HttpVersion {
         if let Ok(http_version) = self.http_version.read() {
             return http_version
@@ -127,7 +122,6 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `ResponseStatusCode`: The HTTP status code as a usize (e.g., 200 for OK, 404 for Not Found).
-    #[inline]
     pub fn get_status_code(&self) -> ResponseStatusCode {
         self.status_code
     }
@@ -136,7 +130,6 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `String`: The human-readable status text (e.g., "OK" for status code 200, "Not Found" for status code 404).
-    #[inline]
     pub fn get_status_text(&self) -> String {
         if let Ok(status_text) = self.status_text.read() {
             return status_text.to_string();
@@ -148,19 +141,17 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `ResponseHeaders`: A map of header names and their corresponding values as key-value pairs.
-    #[inline]
     pub fn get_headers(&self) -> ResponseHeaders {
         if let Ok(headers) = self.headers.read() {
             return headers.clone();
         }
-        return ResponseHeaders::new();
+        return hash_map_xxhash3_64();
     }
 
     /// Retrieves the body content of the HTTP response.
     ///
     /// # Returns
     /// - `RequestBody`: The body of the response in binary form (could be raw bytes, a stream, etc.).
-    #[inline]
     pub fn get_body(&self) -> RequestBody {
         if let Ok(body) = self.body.read() {
             return body.clone();
@@ -170,13 +161,12 @@ impl HttpResponseBinary {
 }
 
 impl Default for HttpResponseBinary {
-    #[inline]
     fn default() -> Self {
         Self {
             http_version: Arc::new(RwLock::new(HttpVersion::Unknown(String::new()))),
             status_code: HttpStatus::Unknown.code(),
             status_text: Arc::new(RwLock::new(HttpStatus::Unknown.to_string())),
-            headers: Arc::new(RwLock::new(HashMap::new())),
+            headers: Arc::new(RwLock::new(hash_map_xxhash3_64())),
             body: Arc::new(RwLock::new(Vec::new())),
         }
     }

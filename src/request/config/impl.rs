@@ -1,7 +1,6 @@
 use crate::*;
 
 impl Default for Config {
-    #[inline]
     fn default() -> Self {
         Self {
             timeout: DEFAULT_TIMEOUT,

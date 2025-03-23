@@ -17,7 +17,6 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a new instance of `RequestBuilder`.
-    #[inline]
     pub fn new() -> Self {
         Self::default()
     }
@@ -32,7 +31,6 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
-    #[inline]
     pub fn post(&mut self, url: &str) -> &mut Self {
         self.http_request.methods = Arc::new(Methods::POST);
         self.url(url);
@@ -49,7 +47,6 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
-    #[inline]
     pub fn get(&mut self, url: &str) -> &mut Self {
         self.http_request.methods = Arc::new(Methods::GET);
         self.url(url);
@@ -65,7 +62,6 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
-    #[inline]
     fn url(&mut self, url: &str) -> &mut Self {
         self.http_request.url = Arc::new(url.to_owned());
         self
@@ -80,7 +76,6 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to `self` to allow method chaining.
-    #[inline]
     pub fn http1_1_only(&mut self) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.http_version = HttpVersion::HTTP1_1;
@@ -97,7 +92,6 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to `self` to allow method chaining.
-    #[inline]
     pub fn http2_only(&mut self) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.http_version = HttpVersion::HTTP2;
@@ -115,7 +109,6 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
-    #[inline]
     pub fn headers<K, V, T>(&mut self, header: T) -> &mut Self
     where
         T: IntoIterator<Item = (K, V)>,
@@ -140,7 +133,6 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
-    #[inline]
     pub fn json(&mut self, body: BodyJson) -> &mut Self {
         self.http_request.body = Arc::new(Body::Json(body));
         self
@@ -156,7 +148,6 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
-    #[inline]
     pub fn text(&mut self, body: BodyText) -> &mut Self {
         self.http_request.body = Arc::new(Body::Text(body));
         self
@@ -179,7 +170,6 @@ impl RequestBuilder {
     ///
     /// This method overrides any previously set body. Use it when you want to assign binary content
     /// specifically as the body of the HTTP request.
-    #[inline]
     pub fn body(&mut self, body: BodyBinary) -> &mut Self {
         self.http_request.body = Arc::new(Body::Binary(body));
         self
@@ -199,7 +189,6 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
-    #[inline]
     pub fn timeout(&mut self, timeout: u64) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.timeout = timeout;
@@ -211,7 +200,6 @@ impl RequestBuilder {
     ///
     /// This method sets the `redirect` property of the `http_request` to `true`.
     /// It returns a mutable reference to the current instance, allowing method chaining.
-    #[inline]
     pub fn redirect(&mut self) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.redirect = true;
@@ -223,7 +211,6 @@ impl RequestBuilder {
     ///
     /// This method sets the `redirect` property of the `http_request` to `false`.
     /// It returns a mutable reference to the current instance, allowing method chaining.
-    #[inline]
     pub fn unredirect(&mut self) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.redirect = false;
@@ -248,7 +235,6 @@ impl RequestBuilder {
     ///
     /// Ensure that the value provided to `num` is within a valid range. Excessively high values
     /// may lead to performance issues or unintended behavior.
-    #[inline]
     pub fn max_redirect_times(&mut self, num: usize) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.max_redirect_times = num;
@@ -267,7 +253,6 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to `self`, allowing for method chaining.
-    #[inline]
     pub fn buffer(&mut self, buffer: usize) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.buffer = buffer;
@@ -282,7 +267,6 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// A mutable reference to the current instance, allowing for method chaining.
-    #[inline]
     pub fn decode(&mut self) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.decode = true;
@@ -297,7 +281,6 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// A mutable reference to the current instance, allowing for method chaining.
-    #[inline]
     pub fn undecode(&mut self) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.decode = false;
@@ -313,7 +296,6 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a fully constructed `BoxRequestTrait` instance based on the current builder state.
-    #[inline]
     pub fn build(&mut self) -> BoxRequestTrait {
         self.builder = self.http_request.clone();
         self.http_request = HttpRequest::default();

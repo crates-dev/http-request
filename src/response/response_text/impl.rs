@@ -13,7 +13,6 @@ impl ResponseTrait for HttpResponseText {
     type OutputText = HttpResponseText;
     type OutputBinary = HttpResponseBinary;
 
-    #[inline]
     fn from(response: &[u8]) -> Self::OutputText
     where
         Self: Sized,
@@ -21,12 +20,10 @@ impl ResponseTrait for HttpResponseText {
         <HttpResponseBinary as ResponseTrait>::from(response).text()
     }
 
-    #[inline]
     fn text(&self) -> Self::OutputText {
         self.clone()
     }
 
-    #[inline]
     fn binary(&self) -> HttpResponseBinary {
         let body: Vec<u8> = self
             .body
@@ -41,7 +38,6 @@ impl ResponseTrait for HttpResponseText {
         }
     }
 
-    #[inline]
     fn decode(&self, buffer_size: usize) -> HttpResponseBinary {
         let http_response: HttpResponseText = self.clone();
         let tmp_body: Vec<u8> = self
@@ -49,14 +45,13 @@ impl ResponseTrait for HttpResponseText {
             .read()
             .map_or(Vec::new(), |body| body.as_bytes().to_vec())
             .to_vec();
-        let body: Vec<u8> = Compress::from(
-            &self
-                .headers
-                .read()
-                .map_or(HashMap::new(), |headers| headers.clone()),
-        )
-        .decode(&tmp_body, buffer_size)
-        .into_owned();
+        let headers: HashMapXxHash3_64<String, String> = self
+            .headers
+            .read()
+            .map_or(hash_map_xxhash3_64(), |headers| headers.clone());
+        let body: Vec<u8> = Compress::from(&headers)
+            .decode(&tmp_body, buffer_size)
+            .into_owned();
         HttpResponseBinary {
             http_version: http_response.http_version,
             status_code: http_response.status_code,
@@ -72,7 +67,6 @@ impl HttpResponseText {
     ///
     /// # Returns
     /// - `HttpVersion`: The HTTP version (e.g., HTTP/1.1, HTTP/2, etc.) used for the response.
-    #[inline]
     pub fn get_http_version(&self) -> HttpVersion {
         if let Ok(http_version) = self.http_version.read() {
             return http_version
@@ -87,7 +81,6 @@ impl HttpResponseText {
     ///
     /// # Returns
     /// - `ResponseStatusCode`: The HTTP status code as a usize (e.g., 200 for OK, 404 for Not Found).
-    #[inline]
     pub fn get_status_code(&self) -> ResponseStatusCode {
         self.status_code
     }
@@ -96,7 +89,6 @@ impl HttpResponseText {
     ///
     /// # Returns
     /// - `String`: The human-readable status text (e.g., "OK" for status code 200, "Not Found" for status code 404).
-    #[inline]
     pub fn get_status_text(&self) -> String {
         if let Ok(status_text) = self.status_text.read() {
             return status_text.to_string();
@@ -108,12 +100,11 @@ impl HttpResponseText {
     ///
     /// # Returns
     /// - `ResponseHeaders`: A map of header names and their corresponding values as key-value pairs.
-    #[inline]
     pub fn get_headers(&self) -> ResponseHeaders {
         if let Ok(headers) = self.headers.read() {
             return headers.clone();
         }
-        return ResponseHeaders::new();
+        return hash_map_xxhash3_64();
     }
 
     /// Retrieves the body content of the HTTP response as a `String`.
@@ -124,7 +115,6 @@ impl HttpResponseText {
     /// # Returns
     /// - `RequestBodyString`: The body of the response as a string. If the body could not be read,
     ///   an empty string is returned.
-    #[inline]
     pub fn get_body(&self) -> RequestBodyString {
         if let Ok(body) = self.body.read() {
             return body.to_string();
@@ -134,13 +124,12 @@ impl HttpResponseText {
 }
 
 impl Default for HttpResponseText {
-    #[inline]
     fn default() -> Self {
         Self {
             http_version: Arc::new(RwLock::new(HttpVersion::Unknown(String::new()))),
             status_code: HttpStatus::Unknown.code(),
             status_text: Arc::new(RwLock::new(HttpStatus::Unknown.to_string())),
-            headers: Arc::new(RwLock::new(HashMap::new())),
+            headers: Arc::new(RwLock::new(hash_map_xxhash3_64())),
             body: Arc::new(RwLock::new(String::new())),
         }
     }

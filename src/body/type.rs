@@ -1,9 +1,9 @@
-use std::collections::HashMap;
+use crate::*;
 
-/// Represents the body of an HTTP request as a JSON object, stored as a `HashMap`
+/// Represents the body of an HTTP request as a JSON object, stored as a `HashMapXxHash3_64`
 /// with static string keys and values. This type is typically used for structured data
 /// in the body of the request.
-pub type BodyJson = HashMap<&'static str, &'static str>;
+pub type BodyJson = HashMapXxHash3_64<&'static str, &'static str>;
 
 /// Represents the body of an HTTP request as plain text. This type is used for requests
 /// where the body contains raw string content, such as simple text data or form submissions.
@@ -24,7 +24,7 @@ pub enum Body {
 
     /// The JSON variant of the body, containing structured JSON data.
     ///
-    /// This variant holds a `BodyJson`, which is a `HashMap` with static string keys
+    /// This variant holds a `BodyJson`, which is a `HashMapXxHash3_64` with static string keys
     /// and values. It is useful for sending data in JSON format, typically for APIs
     /// that require structured data in the request body.
     Json(BodyJson),

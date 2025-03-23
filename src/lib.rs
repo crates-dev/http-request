@@ -8,7 +8,9 @@ pub(crate) mod request;
 pub(crate) mod response;
 pub(crate) mod utils;
 
-pub use http_type::{serde, serde_json, serde_urlencoded, serde_xml_rs};
+pub use http_type::{
+    HashMapXxHash3_64, hash_map_xxhash3_64, serde, serde_json, serde_urlencoded, serde_xml_rs,
+};
 pub use request::{
     request_builder::r#type::RequestBuilder, r#trait::RequestTrait, r#type::BoxRequestTrait,
 };
@@ -35,7 +37,6 @@ pub(crate) use rustls::{
 
 pub(crate) use common::r#type::*;
 pub(crate) use std::{
-    collections::HashMap,
     fmt::{self, Debug, Display},
     net::TcpStream,
     sync::{Arc, RwLock},
