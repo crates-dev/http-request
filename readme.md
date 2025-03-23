@@ -72,7 +72,6 @@ _request_builder
 
 ```rs
 use http_request::*;
-use std::collections::HashMapXxHash3_64;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
 header.insert("header-key", "header-value");
@@ -101,7 +100,6 @@ _request_builder
 
 ```rs
 use http_request::*;
-use std::collections::HashMapXxHash3_64;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
 header.insert("header-key", "header-value");
@@ -129,7 +127,6 @@ _request_builder
 
 ```rs
 use http_request::*;
-use std::collections::HashMapXxHash3_64;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
 header.insert("header-key", "header-value");
