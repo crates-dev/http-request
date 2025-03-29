@@ -9,7 +9,8 @@ pub(crate) mod response;
 pub(crate) mod utils;
 
 pub use http_type::{
-    HashMapXxHash3_64, hash_map_xxhash3_64, serde, serde_json, serde_urlencoded, serde_xml_rs,
+    HashMapXxHash3_64, OptionStr, OptionUsize, OptionVecU8, hash_map_xxhash3_64, serde, serde_json,
+    serde_urlencoded, serde_xml_rs,
 };
 pub use request::{
     request_builder::r#type::RequestBuilder, r#trait::RequestTrait, r#type::BoxRequestTrait,

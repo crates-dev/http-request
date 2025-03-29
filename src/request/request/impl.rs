@@ -276,7 +276,7 @@ impl HttpRequest {
         let mut response_bytes: Vec<u8> = Vec::with_capacity(buffer_size);
         let mut headers_done: bool = false;
         let mut content_length: usize = 0;
-        let mut redirect_url: Option<Vec<u8>> = None;
+        let mut redirect_url: OptionVecU8 = None;
         let http_version: String = self
             .config
             .read()
@@ -382,8 +382,8 @@ impl HttpRequest {
     /// - `key`: The byte sequence to search for.
     ///
     /// # Returns
-    /// Returns an `Option<usize>` containing the starting position if the key is found, otherwise `None`.
-    fn find_case_insensitive_key(response_bytes: &[u8], key: &[u8]) -> Option<usize> {
+    /// Returns an `OptionUsize` containing the starting position if the key is found, otherwise `None`.
+    fn find_case_insensitive_key(response_bytes: &[u8], key: &[u8]) -> OptionUsize {
         response_bytes
             .windows(key.len())
             .position(|window| case_insensitive_match(window, key))
@@ -400,12 +400,12 @@ impl HttpRequest {
     /// - `delimiter`: The byte sequence representing the end of the value.
     ///
     /// # Returns
-    /// Returns an `Option<&str>` containing the extracted value. If not found or invalid, returns `None`.
+    /// Returns an `OptionStr` containing the extracted value. If not found or invalid, returns `None`.
     fn extract_value_from_position<'a>(
         response_bytes: &'a [u8],
         key_pos: usize,
         delimiter: &'a [u8],
-    ) -> Option<&'a str> {
+    ) -> OptionStr<'a> {
         let start: usize = key_pos + delimiter.len();
         response_bytes[start..]
             .windows(delimiter.len())
