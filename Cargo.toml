@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.67.1"
+version = "8.67.2"
 edition = "2024"
 authors = ["ltpp-universe <root@ltpp.vip>"] 
 license = "MIT"
@@ -16,7 +16,7 @@ exclude = [
 ]
 
 [dependencies]
-http-type = "3.61.1"
+http-type = "3.61.2"
 rustls = "0.23.25"
 webpki-roots = "0.26.8"
 
