@@ -1,8 +1,9 @@
-pub(crate) mod body;
 #[cfg(test)]
 mod cfg;
+
+pub(crate) mod body;
 pub(crate) mod common;
-pub(crate) mod constant;
+pub(crate) mod r#const;
 pub(crate) mod global_trait;
 pub(crate) mod request;
 pub(crate) mod response;
@@ -21,7 +22,7 @@ pub use response::{
 };
 
 pub(crate) use body::r#type::*;
-pub(crate) use constant::r#type::*;
+pub(crate) use r#const::r#const::*;
 pub(crate) use global_trait::r#trait::*;
 pub(crate) use http_type::{
     ACCEPT, ACCEPT_ANY, BR_BYTES, COLON_SPACE_BYTES, CONTENT_LENGTH, CONTENT_TYPE, Compress,
