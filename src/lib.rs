@@ -9,6 +9,13 @@ pub(crate) mod request;
 pub(crate) mod response;
 pub(crate) mod utils;
 
+pub use http_type::{
+    HashMapXxHash3_64, OptionStr, OptionUsize, OptionVecU8, hash_map_xxhash3_64, serde, serde_json,
+    serde_urlencoded, serde_xml_rs,
+};
+pub use request::*;
+pub use response::*;
+
 pub(crate) use body::*;
 pub(crate) use common::*;
 pub(crate) use r#const::*;
@@ -34,10 +41,3 @@ pub(crate) use std::{
     time::Duration,
     vec::IntoIter,
 };
-
-pub use http_type::{
-    HashMapXxHash3_64, OptionStr, OptionUsize, OptionVecU8, hash_map_xxhash3_64, serde, serde_json,
-    serde_urlencoded, serde_xml_rs,
-};
-pub use request::*;
-pub use response::*;
