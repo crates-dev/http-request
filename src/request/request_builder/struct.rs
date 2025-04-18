@@ -1,4 +1,4 @@
-use crate::request::request::r#type::HttpRequest;
+use crate::*;
 
 /// Builder pattern for constructing `HttpRequest` instances.
 ///

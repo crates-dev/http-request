@@ -1,5 +1,3 @@
-use http_type::RequestBody;
-
 use crate::*;
 
 /// A struct representing an HTTP response.

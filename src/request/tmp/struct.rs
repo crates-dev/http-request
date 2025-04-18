@@ -1,6 +1,4 @@
-use std::collections::HashSet;
-
-use rustls::RootCertStore;
+use crate::*;
 
 #[derive(Debug, Clone)]
 /// Represents a structure that stores visited URLs.
