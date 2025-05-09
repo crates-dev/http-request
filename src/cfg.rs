@@ -42,7 +42,7 @@ fn test_http_get_request() {
     let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     body.insert("body-key", "body-value");
     let mut _request_builder = RequestBuilder::new()
-        .get("http://localhost:80")
+        .get("http://localhost")
         .headers(header)
         .timeout(6000)
         .redirect()
