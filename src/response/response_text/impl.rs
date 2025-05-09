@@ -48,7 +48,7 @@ impl ResponseTrait for HttpResponseText {
         let headers: HashMapXxHash3_64<String, String> = self
             .headers
             .read()
-            .map_or(hash_map_xxhash3_64(), |headers| headers.clone());
+            .map_or(hash_map_xx_hash3_64(), |headers| headers.clone());
         let body: Vec<u8> = Compress::from(&headers)
             .decode(&tmp_body, buffer_size)
             .into_owned();
@@ -104,7 +104,7 @@ impl HttpResponseText {
         if let Ok(headers) = self.headers.read() {
             return headers.clone();
         }
-        return hash_map_xxhash3_64();
+        return hash_map_xx_hash3_64();
     }
 
     /// Retrieves the body content of the HTTP response as a `String`.
@@ -129,7 +129,7 @@ impl Default for HttpResponseText {
             http_version: Arc::new(RwLock::new(HttpVersion::Unknown(String::new()))),
             status_code: HttpStatus::Unknown.code(),
             status_text: Arc::new(RwLock::new(HttpStatus::Unknown.to_string())),
-            headers: Arc::new(RwLock::new(hash_map_xxhash3_64())),
+            headers: Arc::new(RwLock::new(hash_map_xx_hash3_64())),
             body: Arc::new(RwLock::new(String::new())),
         }
     }

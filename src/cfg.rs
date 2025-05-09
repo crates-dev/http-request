@@ -7,12 +7,12 @@ use std::{
 
 #[test]
 fn test_http_post_request() {
-    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("Accept", "*/*");
     header.insert("Content-Type", "application/json");
     header.insert("Connection", "keep-alive");
     header.insert("Accept-Encoding", "gzip, deflate");
-    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     body.insert("code", "hello");
     body.insert("language", "rust");
     body.insert("testin", "");
@@ -37,9 +37,9 @@ fn test_http_post_request() {
 
 #[test]
 fn test_http_get_request() {
-    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("header-key", "header-value");
-    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     body.insert("body-key", "body-value");
     let mut _request_builder = RequestBuilder::new()
         .get("http://localhost:80")
@@ -61,12 +61,12 @@ fn test_http_get_request() {
 
 #[test]
 fn test_https_post_request() {
-    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("Accept", "*/*");
     header.insert("Content-Type", "application/json");
     header.insert("Connection", "keep-alive");
     header.insert("Accept-Encoding", "gzip, deflate");
-    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     body.insert("code", "fn main() {\r\n    println!(\"hello world\");\r\n}");
     body.insert("language", "rust");
     body.insert("testin", "");
@@ -91,9 +91,9 @@ fn test_https_post_request() {
 
 #[test]
 fn test_https_get_request() {
-    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("header-key", "header-value");
-    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     body.insert("body-key", "body-value");
     let mut _request_builder = RequestBuilder::new()
         .get("https://code.ltpp.vip/")
@@ -115,7 +115,7 @@ fn test_https_get_request() {
 
 #[test]
 fn test_http_post_text_request() {
-    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("Accept", "*/*");
     header.insert("Content-Type", "application/json");
     let mut _request_builder = RequestBuilder::new()
@@ -139,7 +139,7 @@ fn test_http_post_text_request() {
 
 #[test]
 fn test_http_post_binary_request() {
-    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("Accept", "*/*");
     header.insert("Content-Type", "application/json");
     let mut _request_builder = RequestBuilder::new()
@@ -225,11 +225,11 @@ fn test_thread_https_get_request() {
     let header_value: &str = "header-value";
     let body_key: &str = "body-key";
     let body_value: &str = "body-value";
-    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     body.insert(body_key, body_value);
     let num_threads: i32 = 10;
     let mut handles: Vec<JoinHandle<()>> = Vec::new();
-    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert(header_key, header_value);
     let request_builder: Arc<Mutex<BoxRequestTrait>> = Arc::new(Mutex::new(
         RequestBuilder::new()

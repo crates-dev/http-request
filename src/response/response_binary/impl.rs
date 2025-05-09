@@ -38,7 +38,7 @@ impl ResponseTrait for HttpResponseBinary {
             || HttpStatus::Unknown.to_string(),
             |parts| String::from_utf8_lossy(&parts.concat()).to_string(),
         );
-        let mut headers: HashMapXxHash3_64<String, String> = hash_map_xxhash3_64();
+        let mut headers: HashMapXxHash3_64<String, String> = hash_map_xx_hash3_64();
         while let Some(line) = lines.next() {
             if line.is_empty() {
                 break;
@@ -86,7 +86,7 @@ impl ResponseTrait for HttpResponseBinary {
             &self
                 .headers
                 .read()
-                .map_or(hash_map_xxhash3_64(), |headers| headers.clone()),
+                .map_or(hash_map_xx_hash3_64(), |headers| headers.clone()),
         )
         .decode(
             &self.body.read().map_or(Vec::new(), |body| body.clone()),
@@ -145,7 +145,7 @@ impl HttpResponseBinary {
         if let Ok(headers) = self.headers.read() {
             return headers.clone();
         }
-        return hash_map_xxhash3_64();
+        return hash_map_xx_hash3_64();
     }
 
     /// Retrieves the body content of the HTTP response.
@@ -166,7 +166,7 @@ impl Default for HttpResponseBinary {
             http_version: Arc::new(RwLock::new(HttpVersion::Unknown(String::new()))),
             status_code: HttpStatus::Unknown.code(),
             status_text: Arc::new(RwLock::new(HttpStatus::Unknown.to_string())),
-            headers: Arc::new(RwLock::new(hash_map_xxhash3_64())),
+            headers: Arc::new(RwLock::new(hash_map_xx_hash3_64())),
             body: Arc::new(RwLock::new(Vec::new())),
         }
     }

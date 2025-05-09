@@ -45,7 +45,7 @@ cargo add http-request
 ```rs
 use http_request::*;
 
-let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
 let mut _request_builder = RequestBuilder::new()
     .get("https://ltpp.vip/")
@@ -73,9 +73,9 @@ _request_builder
 ```rs
 use http_request::*;
 
-let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
-let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 body.insert("body-key", "body-value");
 let mut _request_builder = RequestBuilder::new()
     .post("http://localhost:80")
@@ -101,7 +101,7 @@ _request_builder
 ```rs
 use http_request::*;
 
-let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
 let mut _request_builder = RequestBuilder::new()
     .post("http://localhost")
@@ -128,7 +128,7 @@ _request_builder
 ```rs
 use http_request::*;
 
-let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xxhash3_64();
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
 let mut _request_builder = RequestBuilder::new()
     .post("http://localhost")

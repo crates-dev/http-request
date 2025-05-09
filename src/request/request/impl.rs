@@ -571,7 +571,7 @@ impl Default for HttpRequest {
         Self {
             methods: Arc::new(Methods::new()),
             url: Arc::new(String::new()),
-            header: Arc::new(hash_map_xxhash3_64()),
+            header: Arc::new(hash_map_xx_hash3_64()),
             body: Arc::new(Body::default()),
             config: Arc::new(RwLock::new(Config::default())),
             tmp: Arc::new(RwLock::new(Tmp::default())),
