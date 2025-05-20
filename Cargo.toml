@@ -1,12 +1,12 @@
 [package]
 name = "http-request"
-version = "8.73.2"
+version = "8.73.3"
 edition = "2024"
-authors = ["ltpp-universe <root@ltpp.vip>"] 
+authors = ["eastspire <root@ltpp.vip>"] 
 license = "MIT"
 description = """http-request is a lightweight, efficient library for building, sending, and handling HTTP/HTTPS requests in Rust applications. It provides a simple and intuitive API, allowing developers to easily interact with web services, whether they use the "HTTP" or "HTTPS" protocol. The library supports various HTTP methods, custom headers, request bodies, timeout, automatic handling of redirects (including detecting redirect loops), and enhanced response body decoding (both automatic and manual), enabling fast and secure communication. Whether working with secure "HTTPS" connections or standard "HTTP" requests, the library is optimized for performance, minimal resource usage, and easy integration into Rust projects."""
 keywords = ["http", "request", "response", "tcp", "redirect"]
-repository = "https://github.com/ltpp-universe/http-request.git"
+repository = "https://github.com/eastspire/http-request.git"
 categories = ["network-programming", "web-programming"]
 exclude = [
     "target",    
@@ -16,7 +16,7 @@ exclude = [
 ]
 
 [dependencies]
-http-type = "3.69.1"
+http-type = "3.69.2"
 rustls = "0.23.27"
 webpki-roots = "1.0.0"
 
