@@ -1,5 +1,4 @@
 use crate::*;
-use serde::{Serialize, Serializer};
 
 impl Default for Body {
     fn default() -> Self {

@@ -9,10 +9,7 @@ pub(crate) mod request;
 pub(crate) mod response;
 pub(crate) mod utils;
 
-pub use http_type::{
-    HashMapXxHash3_64, OptionStr, OptionUsize, OptionVecU8, hash_map_xx_hash3_64, serde,
-    serde_json, serde_urlencoded, serde_xml_rs,
-};
+pub use http_type::{HashMapXxHash3_64, OptionStr, OptionUsize, OptionVecU8, hash_map_xx_hash3_64};
 pub use request::*;
 pub use response::*;
 
@@ -20,6 +17,8 @@ pub(crate) use body::*;
 pub(crate) use common::*;
 pub(crate) use r#const::*;
 pub(crate) use global_trait::*;
+pub(crate) use serde::{Serialize, Serializer};
+pub(crate) use serde_json;
 pub(crate) use utils::vec::*;
 
 pub(crate) use http_type::{
