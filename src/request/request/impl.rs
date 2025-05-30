@@ -208,7 +208,7 @@ impl HttpRequest {
         stream
             .write_all(&request)
             .and_then(|_| stream.flush())
-            .map_err(|_| RequestError::RequestError)?;
+            .map_err(|_| RequestError::Request)?;
         self.read_response(stream)
     }
 
@@ -245,7 +245,7 @@ impl HttpRequest {
         stream
             .write_all(&request)
             .and_then(|_| stream.flush())
-            .map_err(|_| RequestError::RequestError)?;
+            .map_err(|_| RequestError::Request)?;
         self.read_response(stream)
     }
 
@@ -508,14 +508,14 @@ impl HttpRequest {
                 .read()
                 .map_or(DEFAULT_TIMEOUT, |config| config.timeout),
         );
-        let tcp_stream: TcpStream = TcpStream::connect(host_port.clone())
-            .map_err(|_| RequestError::TcpStreamConnectError)?;
+        let tcp_stream: TcpStream =
+            TcpStream::connect(host_port.clone()).map_err(|_| RequestError::TcpStreamConnect)?;
         tcp_stream
             .set_read_timeout(Some(timeout))
-            .map_err(|_| RequestError::SetReadTimeoutError)?;
+            .map_err(|_| RequestError::SetReadTimeout)?;
         tcp_stream
             .set_write_timeout(Some(timeout))
-            .map_err(|_| RequestError::SetWriteTimeoutError)?;
+            .map_err(|_| RequestError::SetWriteTimeout)?;
         let config: Config = self
             .config
             .read()
@@ -529,15 +529,15 @@ impl HttpRequest {
                         .with_no_client_auth();
                     let client_config: Arc<ClientConfig> = Arc::new(config);
                     let dns_name: ServerName<'_> = ServerName::try_from(host.clone())
-                        .map_err(|_| RequestError::TlsConnectorBuildError)?;
+                        .map_err(|_| RequestError::TlsConnectorBuild)?;
                     let session: ClientConnection =
                         ClientConnection::new(Arc::clone(&client_config), dns_name)
-                            .map_err(|_| RequestError::TlsConnectorBuildError)?;
+                            .map_err(|_| RequestError::TlsConnectorBuild)?;
                     let tls_stream: StreamOwned<ClientConnection, TcpStream> =
                         StreamOwned::new(session, tcp_stream);
                     return Ok(Box::new(tls_stream));
                 }
-                Err(RequestError::TlsConnectorBuildError)
+                Err(RequestError::TlsConnectorBuild)
             } else {
                 Ok(Box::new(tcp_stream))
             };
@@ -560,7 +560,7 @@ impl RequestTrait for HttpRequest {
         let res: Result<BoxResponseTrait, RequestError> = match methods {
             m if m.is_get() => self.send_get_request(&mut stream),
             m if m.is_post() => self.send_post_request(&mut stream),
-            _ => Err(RequestError::RequestError),
+            _ => Err(RequestError::Request),
         };
         return res;
     }
