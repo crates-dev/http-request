@@ -45,10 +45,9 @@ impl HttpRequest {
     ///
     /// Returns `Ok(HttpUrlComponents)` if the parsing succeeds, or `Err(RequestError::InvalidUrl)` otherwise.
     fn parse_url(&self) -> Result<HttpUrlComponents, RequestError> {
-        if let Ok(parse_res) = HttpUrlComponents::parse(&self.get_url()) {
-            Ok(parse_res)
-        } else {
-            Err(RequestError::InvalidUrl)
+        match HttpUrlComponents::parse(&self.get_url()) {
+            Ok(parse_res) => Ok(parse_res),
+            Err(err) => Err(RequestError::InvalidUrl(err.to_string())),
         }
     }
 
@@ -208,7 +207,7 @@ impl HttpRequest {
         stream
             .write_all(&request)
             .and_then(|_| stream.flush())
-            .map_err(|_| RequestError::Request)?;
+            .map_err(|err| RequestError::Request(err.to_string()))?;
         self.read_response(stream)
     }
 
@@ -245,7 +244,7 @@ impl HttpRequest {
         stream
             .write_all(&request)
             .and_then(|_| stream.flush())
-            .map_err(|_| RequestError::Request)?;
+            .map_err(|err| RequestError::Request(err.to_string()))?;
         self.read_response(stream)
     }
 
@@ -344,8 +343,8 @@ impl HttpRequest {
                 ));
             }
         }
-        let url: String =
-            String::from_utf8(redirect_url.unwrap()).map_err(|_| RequestError::InvalidUrl)?;
+        let url: String = String::from_utf8(redirect_url.unwrap())
+            .map_err(|err| RequestError::InvalidUrl(err.to_string()))?;
         self.handle_redirect(url)
     }
 
@@ -490,13 +489,6 @@ impl HttpRequest {
     /// - `Ok(Box<dyn ReadWrite>)`: A boxed stream that implements the `ReadWrite` trait,
     ///   representing the established connection.
     /// - `Err(RequestError)`: An error indicating what went wrong during the connection process.
-    ///
-    /// # Errors
-    ///
-    /// - `RequestError::TlsConnectorBuildError`: If the TLS connector could not be built.
-    /// - `RequestError::TcpStreamConnectError`: If the TCP connection could not be established.
-    /// - `RequestError::SetReadTimeoutError`: If setting the read timeout failed.
-    /// - `RequestError::TlsStreamConnectError`: If the TLS stream could not be established.
     fn get_connection_stream(
         &self,
         host: String,
@@ -508,36 +500,41 @@ impl HttpRequest {
                 .read()
                 .map_or(DEFAULT_TIMEOUT, |config| config.timeout),
         );
-        let tcp_stream: TcpStream =
-            TcpStream::connect(host_port.clone()).map_err(|_| RequestError::TcpStreamConnect)?;
+        let tcp_stream: TcpStream = TcpStream::connect(host_port.clone())
+            .map_err(|err| RequestError::TcpStreamConnect(err.to_string()))?;
         tcp_stream
             .set_read_timeout(Some(timeout))
-            .map_err(|_| RequestError::SetReadTimeout)?;
+            .map_err(|err| RequestError::SetReadTimeout(err.to_string()))?;
         tcp_stream
             .set_write_timeout(Some(timeout))
-            .map_err(|_| RequestError::SetWriteTimeout)?;
+            .map_err(|err| RequestError::SetWriteTimeout(err.to_string()))?;
         let config: Config = self
             .config
             .read()
             .map_or(Config::default(), |config| config.clone());
         let stream: Result<Box<dyn ReadWrite>, RequestError> =
             if Self::get_protocol(&config).is_https() {
-                if let Ok(tmp) = self.tmp.clone().read() {
-                    let roots: RootCertStore = tmp.root_cert.clone();
-                    let config: ClientConfig = ClientConfig::builder()
-                        .with_root_certificates(roots)
-                        .with_no_client_auth();
-                    let client_config: Arc<ClientConfig> = Arc::new(config);
-                    let dns_name: ServerName<'_> = ServerName::try_from(host.clone())
-                        .map_err(|_| RequestError::TlsConnectorBuild)?;
-                    let session: ClientConnection =
-                        ClientConnection::new(Arc::clone(&client_config), dns_name)
-                            .map_err(|_| RequestError::TlsConnectorBuild)?;
-                    let tls_stream: StreamOwned<ClientConnection, TcpStream> =
-                        StreamOwned::new(session, tcp_stream);
-                    return Ok(Box::new(tls_stream));
+                match self.tmp.clone().read() {
+                    Ok(tmp) => {
+                        let roots: RootCertStore = tmp.root_cert.clone();
+                        let config: ClientConfig = ClientConfig::builder()
+                            .with_root_certificates(roots)
+                            .with_no_client_auth();
+                        let client_config: Arc<ClientConfig> = Arc::new(config);
+                        let dns_name: ServerName<'_> = ServerName::try_from(host.clone())
+                            .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
+                        let session: ClientConnection =
+                            ClientConnection::new(Arc::clone(&client_config), dns_name)
+                                .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
+                        let tls_stream: StreamOwned<ClientConnection, TcpStream> =
+                            StreamOwned::new(session, tcp_stream);
+                        return Ok(Box::new(tls_stream));
+                    }
+                    Err(err) => Err(RequestError::Unknown(format!(
+                        "error reading temporary configuration: {}",
+                        err
+                    ))),
                 }
-                Err(RequestError::TlsConnectorBuild)
             } else {
                 Ok(Box::new(tcp_stream))
             };
@@ -552,7 +549,9 @@ impl RequestTrait for HttpRequest {
         let mut host: String = String::new();
         let mut port: u16 = u16::default();
         if let Ok(mut config) = self.config.write() {
-            config.url_obj = self.parse_url().map_err(|_| RequestError::InvalidUrl)?;
+            config.url_obj = self
+                .parse_url()
+                .map_err(|err| RequestError::InvalidUrl(err.to_string()))?;
             host = config.url_obj.host.clone().unwrap_or_default();
             port = self.get_port(config.url_obj.port.clone().unwrap_or_default(), &config);
         }
@@ -560,7 +559,10 @@ impl RequestTrait for HttpRequest {
         let res: Result<BoxResponseTrait, RequestError> = match methods {
             m if m.is_get() => self.send_get_request(&mut stream),
             m if m.is_post() => self.send_post_request(&mut stream),
-            _ => Err(RequestError::Request),
+            err => Err(RequestError::Request(format!(
+                "do not support {} method",
+                err
+            ))),
         };
         return res;
     }
