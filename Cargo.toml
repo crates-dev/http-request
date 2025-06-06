@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.81.6"
+version = "8.81.7"
 edition = "2024"
 authors = ["root@ltpp.vip"] 
 license = "MIT"
@@ -9,7 +9,7 @@ keywords = ["http", "request", "response", "tcp", "redirect"]
 repository = "https://github.com/eastspire/http-request.git"
 categories = ["network-programming", "web-programming"]
 exclude = [
-    "target",    
+    "target",
     "Cargo.lock",
     "sh",
     ".github"
