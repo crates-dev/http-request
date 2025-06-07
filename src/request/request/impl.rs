@@ -13,7 +13,7 @@ impl HttpRequest {
     }
 
     /// Returns the HTTP method used for the request.
-    fn get_methods(&self) -> Methods {
+    fn get_methods(&self) -> Method {
         self.methods.as_ref().clone()
     }
 
@@ -197,7 +197,7 @@ impl HttpRequest {
         let mut request: Vec<u8> = Vec::new();
         let path: String = self.get_path();
         let request_line_string: String = self.config.read().map_or(String::new(), |config| {
-            format!("{} {} {}", Methods::GET, path, config.http_version)
+            format!("{} {} {}", Method::GET, path, config.http_version)
         });
         let request_line: &[u8] = request_line_string.as_bytes();
         request.extend_from_slice(request_line);
@@ -232,7 +232,7 @@ impl HttpRequest {
         let mut request: Vec<u8> = Vec::new();
         let path: String = self.get_path();
         let request_line_string: String = self.config.read().map_or(String::new(), |config| {
-            format!("{} {} {}", Methods::POST, path, config.http_version)
+            format!("{} {} {}", Method::POST, path, config.http_version)
         });
         let request_line: &[u8] = request_line_string.as_bytes();
         request.extend_from_slice(request_line);
@@ -545,7 +545,7 @@ impl HttpRequest {
 impl RequestTrait for HttpRequest {
     type RequestResult = RequestResult;
     fn send(&mut self) -> Self::RequestResult {
-        let methods: Methods = self.get_methods();
+        let methods: Method = self.get_methods();
         let mut host: String = String::new();
         let mut port: u16 = u16::default();
         if let Ok(mut config) = self.config.write() {
@@ -571,7 +571,7 @@ impl RequestTrait for HttpRequest {
 impl Default for HttpRequest {
     fn default() -> Self {
         Self {
-            methods: Arc::new(Methods::new()),
+            methods: Arc::new(Method::new()),
             url: Arc::new(String::new()),
             header: Arc::new(hash_map_xx_hash3_64()),
             body: Arc::new(Body::default()),

@@ -25,7 +25,7 @@ pub(crate) use http_type::{
     ACCEPT, ACCEPT_ANY, BR_BYTES, COLON_SPACE_BYTES, CONTENT_LENGTH, CONTENT_TYPE, Compress,
     ContentType, DEFAULT_BUFFER_SIZE, DEFAULT_HTTP_PATH, DEFAULT_MAX_REDIRECT_TIMES,
     DEFAULT_TIMEOUT, EMPTY_STR, HOST, HTTP_BR, HTTP_BR_BYTES, HTTP_DOUBLE_BR_BYTES, HttpStatus,
-    HttpUrlComponents, HttpVersion, LOCATION, Methods, Protocol, QUERY_SYMBOL, RequestBody,
+    HttpUrlComponents, HttpVersion, LOCATION, Method, Protocol, QUERY_SYMBOL, RequestBody,
     RequestBodyString, RequestError, RequestHeaders, ResponseHeaders, ResponseStatusCode, SPACE_U8,
     TAB_U8, USER_AGENT, ZERO_STR,
 };

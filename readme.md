@@ -20,7 +20,7 @@
 
 - **Support for HTTP/HTTPS**: Supports both HTTP and HTTPS protocols.
 - **Lightweight Design**: The `http_request` crate provides a simple and efficient API for building, sending, and handling HTTP requests while minimizing resource consumption.
-- **Supports Common HTTP Methods**: Supports common HTTP methods such as GET and POST.
+- **Supports Common HTTP Method**: Supports common HTTP methods such as GET and POST.
 - **Flexible Request Building**: Offers rich configuration options through `RequestBuilder` to set request headers, bodies, and URLs.
 - **Simple Error Handling**: Utilizes the `Result` type to handle errors in requests and responses, making error handling straightforward.
 - **Custom Headers and Request Bodies**: Easily add custom headers and request bodies.

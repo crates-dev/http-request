@@ -5,7 +5,7 @@ use crate::*;
 #[derive(Debug, Clone)]
 pub(crate) struct HttpRequest {
     /// The HTTP method of the request (e.g., GET, POST, etc.).
-    pub(crate) methods: Arc<Methods>,
+    pub(crate) methods: Arc<Method>,
 
     /// The target URL of the request.
     pub(crate) url: Arc<String>,

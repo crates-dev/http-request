@@ -32,7 +32,7 @@ impl RequestBuilder {
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
     pub fn post(&mut self, url: &str) -> &mut Self {
-        self.http_request.methods = Arc::new(Methods::POST);
+        self.http_request.methods = Arc::new(Method::POST);
         self.url(url);
         self
     }
@@ -48,7 +48,7 @@ impl RequestBuilder {
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
     pub fn get(&mut self, url: &str) -> &mut Self {
-        self.http_request.methods = Arc::new(Methods::GET);
+        self.http_request.methods = Arc::new(Method::GET);
         self.url(url);
         self
     }
