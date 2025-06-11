@@ -17,8 +17,6 @@ pub(crate) use body::*;
 pub(crate) use common::*;
 pub(crate) use r#const::*;
 pub(crate) use global_trait::*;
-pub(crate) use serde::{Serialize, Serializer};
-pub(crate) use serde_json;
 pub(crate) use utils::vec::*;
 
 pub(crate) use http_type::{
@@ -32,6 +30,8 @@ pub(crate) use http_type::{
 pub(crate) use rustls::{
     ClientConfig, ClientConnection, RootCertStore, StreamOwned, pki_types::ServerName,
 };
+pub(crate) use serde::{Serialize, Serializer};
+pub(crate) use serde_json;
 pub(crate) use std::{
     collections::HashSet,
     fmt::{self, Debug, Display},
