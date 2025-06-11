@@ -132,12 +132,14 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
-    pub fn json<K: ToString, V: ToString>(&mut self, body: HashMapXxHash3_64<K, V>) -> &mut Self {
-        let mut res_body: HashMapXxHash3_64<String, String> = hash_map_xx_hash3_64();
-        for (k, v) in body.iter() {
-            res_body.insert(k.to_string(), v.to_string());
+    pub fn json(&mut self, body: JsonValue) -> &mut Self {
+        if let JsonValue::Object(map) = body {
+            let mut res_body: HashMapXxHash3_64<String, JsonValue> = hash_map_xx_hash3_64();
+            for (k, v) in map.iter() {
+                res_body.insert(k.to_string(), v.clone());
+            }
+            self.http_request.body = Arc::new(Body::Json(res_body));
         }
-        self.http_request.body = Arc::new(Body::Json(res_body));
         self
     }
 

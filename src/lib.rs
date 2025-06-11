@@ -9,7 +9,13 @@ pub(crate) mod request;
 pub(crate) mod response;
 pub(crate) mod utils;
 
-pub use http_type::{HashMapXxHash3_64, hash_map_xx_hash3_64};
+pub use http_type::{
+    HashMapXxHash3_64, JsonDeserializer, JsonError, JsonMap, JsonNumber, JsonResult,
+    JsonSerializer, JsonStreamDeserializer, JsonValue, hash_map_xx_hash3_64, json_from_reader,
+    json_from_slice, json_from_str, json_from_value, json_to_string, json_to_string_pretty,
+    json_to_value, json_to_vec, json_to_vec_pretty, json_to_writer, json_to_writer_pretty,
+    json_value,
+};
 pub use request::*;
 pub use response::*;
 
@@ -31,7 +37,6 @@ pub(crate) use rustls::{
     ClientConfig, ClientConnection, RootCertStore, StreamOwned, pki_types::ServerName,
 };
 pub(crate) use serde::{Serialize, Serializer};
-pub(crate) use serde_json;
 pub(crate) use std::{
     collections::HashSet,
     fmt::{self, Debug, Display},

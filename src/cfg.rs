@@ -12,10 +12,11 @@ fn test_http_post_request() {
     header.insert("Content-Type", "application/json");
     header.insert("Connection", "keep-alive");
     header.insert("Accept-Encoding", "gzip, deflate");
-    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-    body.insert("code", "hello");
-    body.insert("language", "rust");
-    body.insert("testin", "");
+    let body: JsonValue = json_value!({
+        "code": "fn main() {\r\n    println!(\"hello world\");\r\n}",
+        "language": "rust",
+        "testin": ""
+    });
     let mut request_builder = RequestBuilder::new()
         .post("http://localhost:80/rust?hello=rust")
         .json(body)
@@ -66,10 +67,11 @@ fn test_https_post_request() {
     header.insert("Content-Type", "application/json");
     header.insert("Connection", "keep-alive");
     header.insert("Accept-Encoding", "gzip, deflate");
-    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-    body.insert("code", "fn main() {\r\n    println!(\"hello world\");\r\n}");
-    body.insert("language", "rust");
-    body.insert("testin", "");
+    let body: JsonValue = json_value!({
+        "code": "fn main() {\r\n    println!(\"hello world\");\r\n}",
+        "language": "rust",
+        "testin": ""
+    });
     let mut request_builder = RequestBuilder::new()
         .post("https://code.ltpp.vip/")
         .json(body)
