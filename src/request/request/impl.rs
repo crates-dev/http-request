@@ -23,7 +23,7 @@ impl HttpRequest {
     }
 
     /// Returns the headers of the HTTP request.
-    fn get_header(&self) -> RequestHeaders {
+    fn get_header(&self) -> Header {
         self.header.as_ref().clone()
     }
 
@@ -76,7 +76,7 @@ impl HttpRequest {
     /// This function ensures that all necessary headers are present and correctly formatted
     /// before constructing the HTTP request.
     fn get_header_bytes(&self) -> Vec<u8> {
-        let mut header: RequestHeaders = self.get_header();
+        let mut header: Header = self.get_header();
         let mut header_string: String = String::new();
         if let Ok(config) = self.config.read() {
             let required_headers = [
@@ -93,8 +93,9 @@ impl HttpRequest {
                 (USER_AGENT, APP_NAME.to_owned()),
             ];
             for (key, default_value) in required_headers {
-                if !header.contains_key(key) {
-                    header.insert(key.to_owned(), default_value.to_owned());
+                let key_value: JsonValue = JsonValue::String(key.to_owned());
+                if !header.contains_key(&key_value) {
+                    header.insert(key_value, JsonValue::String(default_value.to_owned()));
                 }
             }
         }
@@ -122,12 +123,18 @@ impl HttpRequest {
     /// is found or the parsing fails, the method defaults to returning an empty byte vector.
     /// The body processing relies on the implementation of the `ContentType` parsing logic.
     fn get_body_bytes(&self) -> Vec<u8> {
-        let header: RequestHeaders = self.get_header();
+        let header: Header = self.get_header();
         let body: Body = self.get_body();
         let mut res: String = String::new();
         for (key, value) in header {
-            if key.eq_ignore_ascii_case(CONTENT_TYPE) {
+            if key
+                .as_str()
+                .unwrap_or_default()
+                .eq_ignore_ascii_case(CONTENT_TYPE)
+            {
                 res = value
+                    .as_str()
+                    .unwrap_or_default()
                     .to_lowercase()
                     .parse::<ContentType>()
                     .unwrap_or_default()

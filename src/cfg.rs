@@ -7,16 +7,18 @@ use std::{
 
 #[test]
 fn test_http_post_request() {
-    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-    header.insert("Accept", "*/*");
-    header.insert("Content-Type", "application/json");
-    header.insert("Connection", "keep-alive");
-    header.insert("Accept-Encoding", "gzip, deflate");
-    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-    body.insert("code", "hello");
-    body.insert("language", "rust");
-    body.insert("testin", "");
-    let mut _request_builder = RequestBuilder::new()
+    let header: JsonValue = json_value!({
+        "Accept": "*/*",
+        "Content-Type": "application/json",
+        "Connection": "keep-alive",
+        "Accept-Encoding": "gzip, deflate"
+    });
+    let body: JsonValue = json_value!({
+        "code": "hello",
+        "language": "rust",
+        "testin": ""
+    });
+    let mut request_builder = RequestBuilder::new()
         .post("http://localhost:80/rust?hello=rust")
         .json(body)
         .headers(header)
@@ -26,7 +28,7 @@ fn test_http_post_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.text());
@@ -37,11 +39,13 @@ fn test_http_post_request() {
 
 #[test]
 fn test_http_get_request() {
-    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-    header.insert("header-key", "header-value");
-    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-    body.insert("body-key", "body-value");
-    let mut _request_builder = RequestBuilder::new()
+    let header: JsonValue = json_value!({
+        "Accept": "*/*",
+        "Content-Type": "application/json",
+        "Connection": "keep-alive",
+        "Accept-Encoding": "gzip, deflate"
+    });
+    let mut request_builder = RequestBuilder::new()
         .get("http://localhost")
         .headers(header)
         .timeout(6000)
@@ -50,7 +54,7 @@ fn test_http_get_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.text());
@@ -61,16 +65,18 @@ fn test_http_get_request() {
 
 #[test]
 fn test_https_post_request() {
-    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-    header.insert("Accept", "*/*");
-    header.insert("Content-Type", "application/json");
-    header.insert("Connection", "keep-alive");
-    header.insert("Accept-Encoding", "gzip, deflate");
-    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-    body.insert("code", "fn main() {\r\n    println!(\"hello world\");\r\n}");
-    body.insert("language", "rust");
-    body.insert("testin", "");
-    let mut _request_builder = RequestBuilder::new()
+    let header: JsonValue = json_value!({
+        "Accept": "*/*",
+        "Content-Type": "application/json",
+        "Connection": "keep-alive",
+        "Accept-Encoding": "gzip, deflate"
+    });
+    let body: JsonValue = json_value!({
+        "code": "fn main() {\r\n    println!(\"hello world\");\r\n}",
+        "language": "rust",
+        "testin": "",
+    });
+    let mut request_builder = RequestBuilder::new()
         .post("https://code.ltpp.vip/")
         .json(body)
         .headers(header)
@@ -80,7 +86,7 @@ fn test_https_post_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.text());
@@ -91,11 +97,13 @@ fn test_https_post_request() {
 
 #[test]
 fn test_https_get_request() {
-    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-    header.insert("header-key", "header-value");
-    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-    body.insert("body-key", "body-value");
-    let mut _request_builder = RequestBuilder::new()
+    let header: JsonValue = json_value!({
+        "Accept": "*/*",
+        "Content-Type": "application/json",
+        "Connection": "keep-alive",
+        "Accept-Encoding": "gzip, deflate"
+    });
+    let mut request_builder = RequestBuilder::new()
         .get("https://code.ltpp.vip/")
         .headers(header)
         .timeout(4000)
@@ -104,7 +112,7 @@ fn test_https_get_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.text());
@@ -115,10 +123,13 @@ fn test_https_get_request() {
 
 #[test]
 fn test_http_post_text_request() {
-    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-    header.insert("Accept", "*/*");
-    header.insert("Content-Type", "application/json");
-    let mut _request_builder = RequestBuilder::new()
+    let header: JsonValue = json_value!({
+        "Accept": "*/*",
+        "Content-Type": "application/json",
+        "Connection": "keep-alive",
+        "Accept-Encoding": "gzip, deflate"
+    });
+    let mut request_builder = RequestBuilder::new()
         .post("http://localhost:80")
         .text("hello")
         .headers(header)
@@ -128,7 +139,7 @@ fn test_http_post_text_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.text());
@@ -139,10 +150,13 @@ fn test_http_post_text_request() {
 
 #[test]
 fn test_http_post_binary_request() {
-    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-    header.insert("Accept", "*/*");
-    header.insert("Content-Type", "application/json");
-    let mut _request_builder = RequestBuilder::new()
+    let header: JsonValue = json_value!({
+        "Accept": "*/*",
+        "Content-Type": "application/json",
+        "Connection": "keep-alive",
+        "Accept-Encoding": "gzip, deflate"
+    });
+    let mut request_builder = RequestBuilder::new()
         .post("http://localhost:80")
         .body("hello".as_bytes())
         .headers(header)
@@ -152,7 +166,7 @@ fn test_http_post_binary_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.text());
@@ -163,7 +177,7 @@ fn test_http_post_binary_request() {
 
 #[test]
 fn test_auto_gzip_get() {
-    let mut _request_builder = RequestBuilder::new()
+    let mut request_builder = RequestBuilder::new()
         .get("https://proxy.ltpp.vip/visit/add?origin=https://docs.ltpp.vip/")
         .timeout(4000)
         .redirect()
@@ -172,7 +186,7 @@ fn test_auto_gzip_get() {
         .buffer(4096)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.text());
@@ -183,7 +197,7 @@ fn test_auto_gzip_get() {
 
 #[test]
 fn test_gzip_get() {
-    let mut _request_builder = RequestBuilder::new()
+    let mut request_builder = RequestBuilder::new()
         .get("https://proxy.ltpp.vip/visit/add?origin=https://docs.ltpp.vip/")
         .timeout(4000)
         .redirect()
@@ -191,7 +205,7 @@ fn test_gzip_get() {
         .buffer(4096)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.decode(4096).text());
@@ -202,7 +216,7 @@ fn test_gzip_get() {
 
 #[test]
 fn test_unredirect_get() {
-    let mut _request_builder = RequestBuilder::new()
+    let mut request_builder = RequestBuilder::new()
         .post("https://proxy.ltpp.vip/visit/add?origin=https://docs.ltpp.vip/")
         .timeout(4000)
         .max_redirect_times(8)
@@ -210,10 +224,10 @@ fn test_unredirect_get() {
         .unredirect()
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
-            println!("ResponseTrait => {:?}", response);
+            println!("ResponseTrait => {:?}", response.text());
             Ok(())
         })
         .unwrap_or_else(|e| println!("Error => {}", e));
@@ -221,16 +235,14 @@ fn test_unredirect_get() {
 
 #[test]
 fn test_thread_https_get_request() {
-    let header_key: &str = "header-key";
-    let header_value: &str = "header-value";
-    let body_key: &str = "body-key";
-    let body_value: &str = "body-value";
-    let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-    body.insert(body_key, body_value);
     let num_threads: i32 = 10;
     let mut handles: Vec<JoinHandle<()>> = Vec::new();
-    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-    header.insert(header_key, header_value);
+    let header: JsonValue = json_value!({
+        "Accept": "*/*",
+        "Content-Type": "application/json",
+        "Connection": "keep-alive",
+        "Accept-Encoding": "gzip, deflate"
+    });
     let request_builder: Arc<Mutex<BoxRequestTrait>> = Arc::new(Mutex::new(
         RequestBuilder::new()
             .get("https://code.ltpp.vip/")

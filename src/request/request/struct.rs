@@ -11,7 +11,7 @@ pub(crate) struct HttpRequest {
     pub(crate) url: Arc<String>,
 
     /// The headers included in the request.
-    pub(crate) header: Arc<RequestHeaders>,
+    pub(crate) header: Arc<Header>,
 
     /// The type of the body, specifying whether it is text or JSON.
     pub(crate) body: Arc<Body>,

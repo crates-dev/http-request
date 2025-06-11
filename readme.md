@@ -45,9 +45,13 @@ cargo add http-request
 ```rs
 use http_request::*;
 
-let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-header.insert("header-key", "header-value");
-let mut _request_builder = RequestBuilder::new()
+let header: JsonValue = json_value!({
+    "Accept": "*/*",
+    "Content-Type": "application/json",
+    "Connection": "keep-alive",
+    "Accept-Encoding": "gzip, deflate"
+});
+let mut request_builder = RequestBuilder::new()
     .get("https://ltpp.vip/")
     .headers(header)
     .timeout(6000)
@@ -57,7 +61,7 @@ let mut _request_builder = RequestBuilder::new()
     .buffer(4096)
     .decode()
     .build();
-_request_builder
+request_builder
     .send()
     .and_then(|response| {
         println!("{:?}", response.text());
@@ -73,11 +77,16 @@ _request_builder
 ```rs
 use http_request::*;
 
-let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-header.insert("header-key", "header-value");
-let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-body.insert("body-key", "body-value");
-let mut _request_builder = RequestBuilder::new()
+let header: JsonValue = json_value!({
+    "Accept": "*/*",
+    "Content-Type": "application/json",
+    "Connection": "keep-alive",
+    "Accept-Encoding": "gzip, deflate"
+});
+let body: JsonValue = json_value!({
+    "test": 1,
+});
+let mut request_builder = RequestBuilder::new()
     .post("http://localhost:80")
     .json(body)
     .headers(header)
@@ -87,7 +96,7 @@ let mut _request_builder = RequestBuilder::new()
     .http1_1_only()
     .buffer(4096)
     .build();
-_request_builder
+request_builder
     .send()
     .and_then(|response| {
         println!("{:?}", response.decode(4096).text());
@@ -101,9 +110,13 @@ _request_builder
 ```rs
 use http_request::*;
 
-let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-header.insert("header-key", "header-value");
-let mut _request_builder = RequestBuilder::new()
+let header: JsonValue = json_value!({
+    "Accept": "*/*",
+    "Content-Type": "application/json",
+    "Connection": "keep-alive",
+    "Accept-Encoding": "gzip, deflate"
+});
+let mut request_builder = RequestBuilder::new()
     .post("http://localhost")
     .text("hello")
     .headers(header)
@@ -114,7 +127,7 @@ let mut _request_builder = RequestBuilder::new()
     .buffer(4096)
     .decode()
     .build();
-_request_builder
+request_builder
     .send()
     .and_then(|response| {
         println!("{:?}", response.text());
@@ -128,11 +141,15 @@ _request_builder
 ```rs
 use http_request::*;
 
-let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
-header.insert("header-key", "header-value");
-let mut _request_builder = RequestBuilder::new()
+let header: JsonValue = json_value!({
+    "Accept": "*/*",
+    "Content-Type": "application/json",
+    "Connection": "keep-alive",
+    "Accept-Encoding": "gzip, deflate"
+});
+let mut request_builder = RequestBuilder::new()
     .post("http://localhost")
-    .body("hello".as_bytes())
+    .body("hello")
     .headers(header)
     .timeout(6000)
     .redirect()
@@ -140,7 +157,7 @@ let mut _request_builder = RequestBuilder::new()
     .http1_1_only()
     .buffer(4096)
     .build();
-_request_builder
+request_builder
     .send()
     .and_then(|response| {
         println!("{:?}", response.decode(4096).text());

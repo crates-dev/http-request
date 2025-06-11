@@ -10,9 +10,9 @@ impl Default for RequestBuilder {
 }
 
 impl RequestBuilder {
-    /// Creates a new instance of the builder with default values.
+    /// Creates a new instance of the builder with default JsonValues.
     ///
-    /// This method initializes the `RequestBuilder` with default values for all
+    /// This method initializes the `RequestBuilder` with default JsonValues for all
     /// fields.
     ///
     /// # Returns
@@ -109,15 +109,12 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
-    pub fn headers<K, V, T>(&mut self, header: T) -> &mut Self
-    where
-        T: IntoIterator<Item = (K, V)>,
-        K: Into<String>,
-        V: Into<String>,
-    {
+    pub fn headers(&mut self, header: JsonValue) -> &mut Self {
         if let Some(tmp_header) = Arc::get_mut(&mut self.http_request.header) {
-            for (key, value) in header {
-                tmp_header.insert(key.into(), value.into());
+            if let JsonValue::Object(map) = header {
+                for (k, v) in map {
+                    tmp_header.insert(JsonValue::String(k), v);
+                }
             }
         }
         self
@@ -133,10 +130,12 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
-    pub fn json<K: ToString, V: ToString>(&mut self, body: HashMapXxHash3_64<K, V>) -> &mut Self {
-        let mut res_body: HashMapXxHash3_64<String, String> = hash_map_xx_hash3_64();
-        for (k, v) in body.iter() {
-            res_body.insert(k.to_string(), v.to_string());
+    pub fn json(&mut self, body: JsonValue) -> &mut Self {
+        let mut res_body: HashMapXxHash3_64<JsonValue, JsonValue> = hash_map_xx_hash3_64();
+        if let JsonValue::Object(map) = body {
+            for (k, v) in map {
+                res_body.insert(JsonValue::String(k), v);
+            }
         }
         self.http_request.body = Arc::new(Body::Json(res_body));
         self
@@ -179,16 +178,16 @@ impl RequestBuilder {
         self
     }
 
-    /// Sets the timeout value for the current connection.
+    /// Sets the timeout JsonValue for the current connection.
     ///
     /// This method sets the timeout duration for the connection, which is used to determine
     /// how long the system should wait for a response before considering the connection attempt
-    /// as failed. The timeout value is stored in an `Arc` to allow it to be shared safely across
+    /// as failed. The timeout JsonValue is stored in an `Arc` to allow it to be shared safely across
     /// multiple threads if needed.
     ///
     /// # Parameters
     ///
-    /// - `timeout`: The timeout duration in seconds. This value will be used to configure the
+    /// - `timeout`: The timeout duration in seconds. This JsonValue will be used to configure the
     ///   connection timeout.
     ///
     /// # Returns
@@ -229,7 +228,7 @@ impl RequestBuilder {
     ///
     /// # Parameters
     ///
-    /// - `num` - The maximum number of redirections allowed. A value of `0` disables redirection.
+    /// - `num` - The maximum number of redirections allowed. A JsonValue of `0` disables redirection.
     ///
     /// # Returns
     ///
@@ -237,7 +236,7 @@ impl RequestBuilder {
     ///
     /// # Notes
     ///
-    /// Ensure that the value provided to `num` is within a valid range. Excessively high values
+    /// Ensure that the JsonValue provided to `num` is within a valid range. Excessively high JsonValues
     /// may lead to performance issues or unintended behavior.
     pub fn max_redirect_times(&mut self, num: usize) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
