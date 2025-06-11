@@ -133,8 +133,12 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
-    pub fn json(&mut self, body: BodyJson) -> &mut Self {
-        self.http_request.body = Arc::new(Body::Json(body));
+    pub fn json<K: ToString, V: ToString>(&mut self, body: HashMapXxHash3_64<K, V>) -> &mut Self {
+        let mut res_body: HashMapXxHash3_64<String, String> = hash_map_xx_hash3_64();
+        for (k, v) in body.iter() {
+            res_body.insert(k.to_string(), v.to_string());
+        }
+        self.http_request.body = Arc::new(Body::Json(res_body));
         self
     }
 
@@ -148,8 +152,8 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
-    pub fn text(&mut self, body: BodyText) -> &mut Self {
-        self.http_request.body = Arc::new(Body::Text(body));
+    pub fn text<T: ToString>(&mut self, body: T) -> &mut Self {
+        self.http_request.body = Arc::new(Body::Text(body.to_string()));
         self
     }
 
@@ -170,8 +174,8 @@ impl RequestBuilder {
     ///
     /// This method overrides any previously set body. Use it when you want to assign binary content
     /// specifically as the body of the HTTP request.
-    pub fn body(&mut self, body: BodyBinary) -> &mut Self {
-        self.http_request.body = Arc::new(Body::Binary(body));
+    pub fn body<T: Into<Vec<u8>>>(&mut self, body: T) -> &mut Self {
+        self.http_request.body = Arc::new(Body::Binary(body.into()));
         self
     }
 

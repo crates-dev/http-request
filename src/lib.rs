@@ -9,7 +9,7 @@ pub(crate) mod request;
 pub(crate) mod response;
 pub(crate) mod utils;
 
-pub use http_type::{HashMapXxHash3_64, OptionStr, OptionUsize, OptionVecU8, hash_map_xx_hash3_64};
+pub use http_type::{HashMapXxHash3_64, hash_map_xx_hash3_64};
 pub use request::*;
 pub use response::*;
 

@@ -2,7 +2,7 @@ use crate::*;
 
 impl Default for Body {
     fn default() -> Self {
-        Self::Text(EMPTY_STR)
+        Self::Text(EMPTY_STR.to_owned())
     }
 }
 
