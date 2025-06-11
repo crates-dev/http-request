@@ -90,7 +90,7 @@ let mut _request_builder = RequestBuilder::new()
 _request_builder
     .send()
     .and_then(|response| {
-        println!("{:?}", response.decode().text());
+        println!("{:?}", response.decode(4096).text());
         Ok(())
     })
     .unwrap_or_else(|e| println!("Error => {}", e));
