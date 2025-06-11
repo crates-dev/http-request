@@ -16,7 +16,7 @@ fn test_http_post_request() {
     body.insert("code", "hello");
     body.insert("language", "rust");
     body.insert("testin", "");
-    let mut _request_builder = RequestBuilder::new()
+    let mut request_builder = RequestBuilder::new()
         .post("http://localhost:80/rust?hello=rust")
         .json(body)
         .headers(header)
@@ -26,7 +26,7 @@ fn test_http_post_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.text());
@@ -41,7 +41,7 @@ fn test_http_get_request() {
     header.insert("header-key", "header-value");
     let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     body.insert("body-key", "body-value");
-    let mut _request_builder = RequestBuilder::new()
+    let mut request_builder = RequestBuilder::new()
         .get("http://localhost")
         .headers(header)
         .timeout(6000)
@@ -50,7 +50,7 @@ fn test_http_get_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.text());
@@ -70,7 +70,7 @@ fn test_https_post_request() {
     body.insert("code", "fn main() {\r\n    println!(\"hello world\");\r\n}");
     body.insert("language", "rust");
     body.insert("testin", "");
-    let mut _request_builder = RequestBuilder::new()
+    let mut request_builder = RequestBuilder::new()
         .post("https://code.ltpp.vip/")
         .json(body)
         .headers(header)
@@ -80,7 +80,7 @@ fn test_https_post_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.text());
@@ -95,7 +95,7 @@ fn test_https_get_request() {
     header.insert("header-key", "header-value");
     let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     body.insert("body-key", "body-value");
-    let mut _request_builder = RequestBuilder::new()
+    let mut request_builder = RequestBuilder::new()
         .get("https://code.ltpp.vip/")
         .headers(header)
         .timeout(4000)
@@ -104,7 +104,7 @@ fn test_https_get_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.text());
@@ -118,7 +118,7 @@ fn test_http_post_text_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("Accept", "*/*");
     header.insert("Content-Type", "application/json");
-    let mut _request_builder = RequestBuilder::new()
+    let mut request_builder = RequestBuilder::new()
         .post("http://localhost:80")
         .text("hello")
         .headers(header)
@@ -128,7 +128,7 @@ fn test_http_post_text_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.text());
@@ -142,7 +142,7 @@ fn test_http_post_binary_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("Accept", "*/*");
     header.insert("Content-Type", "application/json");
-    let mut _request_builder = RequestBuilder::new()
+    let mut request_builder = RequestBuilder::new()
         .post("http://localhost:80")
         .body("hello".as_bytes())
         .headers(header)
@@ -152,7 +152,7 @@ fn test_http_post_binary_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.text());
@@ -163,7 +163,7 @@ fn test_http_post_binary_request() {
 
 #[test]
 fn test_auto_gzip_get() {
-    let mut _request_builder = RequestBuilder::new()
+    let mut request_builder = RequestBuilder::new()
         .get("https://proxy.ltpp.vip/visit/add?origin=https://docs.ltpp.vip/")
         .timeout(4000)
         .redirect()
@@ -172,7 +172,7 @@ fn test_auto_gzip_get() {
         .buffer(4096)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.text());
@@ -183,7 +183,7 @@ fn test_auto_gzip_get() {
 
 #[test]
 fn test_gzip_get() {
-    let mut _request_builder = RequestBuilder::new()
+    let mut request_builder = RequestBuilder::new()
         .get("https://proxy.ltpp.vip/visit/add?origin=https://docs.ltpp.vip/")
         .timeout(4000)
         .redirect()
@@ -191,7 +191,7 @@ fn test_gzip_get() {
         .buffer(4096)
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response.decode(4096).text());
@@ -202,7 +202,7 @@ fn test_gzip_get() {
 
 #[test]
 fn test_unredirect_get() {
-    let mut _request_builder = RequestBuilder::new()
+    let mut request_builder = RequestBuilder::new()
         .post("https://proxy.ltpp.vip/visit/add?origin=https://docs.ltpp.vip/")
         .timeout(4000)
         .max_redirect_times(8)
@@ -210,7 +210,7 @@ fn test_unredirect_get() {
         .unredirect()
         .http1_1_only()
         .build();
-    _request_builder
+    request_builder
         .send()
         .and_then(|response| {
             println!("ResponseTrait => {:?}", response);

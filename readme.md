@@ -47,7 +47,7 @@ use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
-let mut _request_builder = RequestBuilder::new()
+let mut request_builder = RequestBuilder::new()
     .get("https://ltpp.vip/")
     .headers(header)
     .timeout(6000)
@@ -57,7 +57,7 @@ let mut _request_builder = RequestBuilder::new()
     .buffer(4096)
     .decode()
     .build();
-_request_builder
+request_builder
     .send()
     .and_then(|response| {
         println!("{:?}", response.text());
@@ -77,7 +77,7 @@ let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
 let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 body.insert("body-key", "body-value");
-let mut _request_builder = RequestBuilder::new()
+let mut request_builder = RequestBuilder::new()
     .post("http://localhost:80")
     .json(body)
     .headers(header)
@@ -87,7 +87,7 @@ let mut _request_builder = RequestBuilder::new()
     .http1_1_only()
     .buffer(4096)
     .build();
-_request_builder
+request_builder
     .send()
     .and_then(|response| {
         println!("{:?}", response.decode(4096).text());
@@ -103,7 +103,7 @@ use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
-let mut _request_builder = RequestBuilder::new()
+let mut request_builder = RequestBuilder::new()
     .post("http://localhost")
     .text("hello")
     .headers(header)
@@ -114,7 +114,7 @@ let mut _request_builder = RequestBuilder::new()
     .buffer(4096)
     .decode()
     .build();
-_request_builder
+request_builder
     .send()
     .and_then(|response| {
         println!("{:?}", response.text());
@@ -130,7 +130,7 @@ use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
-let mut _request_builder = RequestBuilder::new()
+let mut request_builder = RequestBuilder::new()
     .post("http://localhost")
     .body("hello".as_bytes())
     .headers(header)
@@ -140,7 +140,7 @@ let mut _request_builder = RequestBuilder::new()
     .http1_1_only()
     .buffer(4096)
     .build();
-_request_builder
+request_builder
     .send()
     .and_then(|response| {
         println!("{:?}", response.decode(4096).text());
