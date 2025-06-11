@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.83.0"
+version = "8.83.1"
 edition = "2024"
 authors = ["root@ltpp.vip"] 
 license = "MIT"
