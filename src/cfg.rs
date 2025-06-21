@@ -1,9 +1,34 @@
+#[cfg(test)]
 use crate::*;
+#[cfg(test)]
 use std::{
     sync::Mutex,
     thread::{JoinHandle, spawn},
     time::Instant,
 };
+
+#[tokio::test]
+async fn test_async_http_get_request() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("header-key", "header-value");
+
+    let mut request_builder = RequestBuilder::new()
+        .get("https://httpbin.org/get")
+        .headers(header)
+        .timeout(10000)
+        .redirect()
+        .buffer(4096)
+        .max_redirect_times(8)
+        .http1_1_only()
+        .build_async();
+
+    match request_builder.send().await {
+        Ok(response) => {
+            println!("Async GET ResponseTrait => {:?}", response.text());
+        }
+        Err(e) => println!("Async GET Error => {}", e),
+    }
+}
 
 #[test]
 fn test_http_post_request() {

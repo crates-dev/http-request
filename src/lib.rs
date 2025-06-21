@@ -19,12 +19,15 @@ pub use http_type::{
 pub use request::*;
 pub use response::*;
 
+pub use request::{AsyncRequestTrait, BoxAsyncRequestTrait};
+
 pub(crate) use body::*;
 pub(crate) use common::*;
 pub(crate) use r#const::*;
 pub(crate) use global_trait::*;
 pub(crate) use utils::vec::*;
 
+pub(crate) use futures::Future;
 pub(crate) use http_type::{
     ACCEPT, ACCEPT_ANY, BR_BYTES, CONTENT_LENGTH, CONTENT_TYPE, Compress, ContentType,
     DEFAULT_BUFFER_SIZE, DEFAULT_HTTP_PATH, DEFAULT_MAX_REDIRECT_TIMES, DEFAULT_TIMEOUT, EMPTY_STR,
@@ -40,7 +43,9 @@ pub(crate) use std::{
     collections::HashSet,
     fmt::{self, Debug, Display},
     net::TcpStream,
+    pin::Pin,
     sync::{Arc, RwLock},
     time::Duration,
     vec::IntoIter,
 };
+pub(crate) use tokio::io::{AsyncRead, AsyncWrite};

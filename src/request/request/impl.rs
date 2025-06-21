@@ -8,12 +8,12 @@ use crate::*;
 /// - Parsing responses and handling redirects.
 impl HttpRequest {
     /// Returns the protocol of the HTTP request.
-    fn get_protocol(config: &Config) -> Protocol {
+    pub(crate) fn get_protocol(config: &Config) -> Protocol {
         config.url_obj.protocol.clone()
     }
 
     /// Returns the HTTP method used for the request.
-    fn get_methods(&self) -> Method {
+    pub(crate) fn get_methods(&self) -> Method {
         self.methods.as_ref().clone()
     }
 
@@ -37,14 +37,14 @@ impl HttpRequest {
     /// # Parameters
     ///
     /// - `url`: The new URL to set.
-    fn url(&mut self, url: String) {
+    pub(crate) fn url(&mut self, url: String) {
         self.url = Arc::new(url);
     }
 
     /// Parses the current URL into a `HttpUrlComponents` object.
     ///
     /// Returns `Ok(HttpUrlComponents)` if the parsing succeeds, or `Err(RequestError::InvalidUrl)` otherwise.
-    fn parse_url(&self) -> Result<HttpUrlComponents, RequestError> {
+    pub(crate) fn parse_url(&self) -> Result<HttpUrlComponents, RequestError> {
         match HttpUrlComponents::parse(&self.get_url()) {
             Ok(parse_res) => Ok(parse_res),
             Err(err) => Err(RequestError::InvalidUrl(err.to_string())),
@@ -75,7 +75,7 @@ impl HttpRequest {
     ///
     /// This function ensures that all necessary headers are present and correctly formatted
     /// before constructing the HTTP request.
-    fn get_header_bytes(&self) -> Vec<u8> {
+    pub(crate) fn get_header_bytes(&self) -> Vec<u8> {
         let mut header: RequestHeaders = self.get_header();
 
         let body_length: usize = if self.get_methods().is_get() {
@@ -132,7 +132,7 @@ impl HttpRequest {
     /// The `Content-Type` header is matched case-insensitively. If no matching `Content-Type`
     /// is found or the parsing fails, the method defaults to returning an empty byte vector.
     /// The body processing relies on the implementation of the `ContentType` parsing logic.
-    fn get_body_bytes(&self) -> Vec<u8> {
+    pub(crate) fn get_body_bytes(&self) -> Vec<u8> {
         let header: RequestHeaders = self.get_header();
         let body: Body = self.get_body();
 
@@ -175,7 +175,7 @@ impl HttpRequest {
     ///
     /// - `String` - The full path, including the query string if available, or just the
     ///   path if no query string is present.
-    fn get_path(&self) -> String {
+    pub(crate) fn get_path(&self) -> String {
         let path: String = self.config.read().map_or(String::new(), |config| {
             let query: String = config.url_obj.query.clone().unwrap_or_default();
             if query.is_empty() {
@@ -395,7 +395,7 @@ impl HttpRequest {
         self.handle_redirect(url)
     }
 
-    fn parse_response_headers(
+    pub(crate) fn parse_response_headers(
         &self,
         headers_bytes: &[u8],
         http_version_bytes: &[u8],
@@ -466,7 +466,7 @@ impl HttpRequest {
         None
     }
 
-    fn find_double_crlf(data: &[u8], start: usize) -> Option<usize> {
+    pub(crate) fn find_double_crlf(data: &[u8], start: usize) -> Option<usize> {
         let search_data: &[u8] = &data[start..];
         for i in 0..search_data.len().saturating_sub(3) {
             if search_data[i] == b'\r'
@@ -568,7 +568,7 @@ impl HttpRequest {
             }
         }
         self.url(url.clone());
-        self.send()
+        self.send_sync()
     }
 
     /// Determines the appropriate port for the HTTP request.
@@ -579,7 +579,7 @@ impl HttpRequest {
     /// - `config`: Config
     ///
     /// Returns the resolved port.
-    fn get_port(&self, port: u16, config: &Config) -> u16 {
+    pub(crate) fn get_port(&self, port: u16, config: &Config) -> u16 {
         if port != 0 {
             return port;
         }
@@ -658,9 +658,9 @@ impl HttpRequest {
     }
 }
 
-impl RequestTrait for HttpRequest {
-    type RequestResult = RequestResult;
-    fn send(&mut self) -> Self::RequestResult {
+impl HttpRequest {
+    /// Sends the HTTP request synchronously.
+    pub fn send_sync(&mut self) -> RequestResult {
         let methods: Method = self.get_methods();
         let mut host: String = String::new();
         let mut port: u16 = u16::default();
@@ -680,7 +680,14 @@ impl RequestTrait for HttpRequest {
                 err
             ))),
         };
-        return res;
+        res
+    }
+}
+
+impl RequestTrait for HttpRequest {
+    type RequestResult = RequestResult;
+    fn send(&mut self) -> Self::RequestResult {
+        self.send_sync()
     }
 }
 

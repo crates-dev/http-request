@@ -1,17 +1,5 @@
 use crate::*;
 
-/// Splits a byte slice into parts based on whitespace characters (space or tab).
-///
-/// This helper function takes a byte slice and splits it into multiple parts at
-/// every whitespace character (either space or tab). It returns a `Vec` containing
-/// slices of the original byte slice, excluding the whitespace characters.
-///
-/// # Parameters
-/// - `input`: The byte slice to be split.
-///
-/// # Returns
-/// Returns a `Vec<&[u8]>`, where each element is a slice of the original input,
-/// representing a part of the input that was separated by whitespace.
 pub fn split_whitespace(input: &[u8]) -> Vec<&[u8]> {
     let mut parts: Vec<&[u8]> = Vec::new();
     let mut start: usize = 0;
@@ -29,14 +17,6 @@ pub fn split_whitespace(input: &[u8]) -> Vec<&[u8]> {
     parts
 }
 
-/// Splits a byte slice by a multi-byte delimiter.
-///
-/// # Parameters
-/// - `data` - The byte slice to split.
-/// - `delimiter` - The delimiter byte sequence.
-///
-/// # Returns
-/// A vector of byte slices split by the delimiter.
 pub fn split_multi_byte<'a>(data: &'a [u8], delimiter: &'a [u8]) -> Vec<&'a [u8]> {
     let mut result: Vec<&[u8]> = Vec::new();
     let mut start: usize = 0;
