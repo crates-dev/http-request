@@ -20,37 +20,89 @@ impl ResponseTrait for HttpResponseBinary {
         let mut lines: IntoIter<&[u8]> = split_lines.into_iter();
         let status_line: &[u8] = lines.next().unwrap_or(&[]);
         let status_parts: Vec<&[u8]> = split_whitespace(&status_line);
-        let http_version: HttpVersion = String::from_utf8_lossy(
-            status_parts
-                .get(0)
-                .unwrap_or(&HttpVersion::Unknown(String::new()).to_string().as_bytes()),
-        )
-        .to_string()
-        .parse::<HttpVersion>()
-        .unwrap_or_default();
+
+        let http_version: HttpVersion = status_parts
+            .get(0)
+            .and_then(|part: &&[u8]| std::str::from_utf8(part).ok())
+            .and_then(|version_str: &str| version_str.parse::<HttpVersion>().ok())
+            .unwrap_or_default();
+
         let status_code: ResponseStatusCode = status_parts
             .get(1)
-            .and_then(|part| std::str::from_utf8(part).ok())
-            .unwrap_or(&HttpStatus::Ok.to_string())
-            .parse()
+            .and_then(|part: &&[u8]| std::str::from_utf8(part).ok())
+            .and_then(|code_str: &str| code_str.parse().ok())
             .unwrap_or(HttpStatus::Unknown.code());
+
         let status_text: String = status_parts.get(2..).map_or_else(
             || HttpStatus::Unknown.to_string(),
-            |parts| String::from_utf8_lossy(&parts.concat()).to_string(),
+            |parts: &[&[u8]]| {
+                if parts.is_empty() {
+                    HttpStatus::Unknown.to_string()
+                } else if parts.len() == 1 {
+                    String::from_utf8_lossy(parts[0]).into_owned()
+                } else {
+                    let total_len: usize =
+                        parts.iter().map(|p: &&[u8]| p.len()).sum::<usize>() + parts.len() - 1;
+                    let mut result: String = String::with_capacity(total_len);
+                    for (i, part) in parts.iter().enumerate() {
+                        if i > 0 {
+                            result.push(' ');
+                        }
+                        result.push_str(&String::from_utf8_lossy(part));
+                    }
+                    result
+                }
+            },
         );
+
         let mut headers: HashMapXxHash3_64<String, String> = hash_map_xx_hash3_64();
-        while let Some(line) = lines.next() {
+        for line in lines.by_ref() {
             if line.is_empty() {
                 break;
             }
-            let header_parts: Vec<&[u8]> = split_multi_byte(&line, COLON_SPACE_BYTES);
-            if header_parts.len() == 2 {
-                let key: String = String::from_utf8_lossy(header_parts[0]).trim().to_string();
-                let value: String = String::from_utf8_lossy(header_parts[1]).trim().to_string();
-                headers.insert(key, value);
+
+            if let Some(colon_pos) = line.iter().position(|&b: &u8| b == b':') {
+                if colon_pos > 0 && colon_pos + 1 < line.len() {
+                    let key_bytes: &[u8] = &line[..colon_pos];
+                    let value_start: usize = if line.get(colon_pos + 1) == Some(&b' ') {
+                        colon_pos + 2
+                    } else {
+                        colon_pos + 1
+                    };
+                    let value_bytes: &[u8] = &line[value_start..];
+
+                    if let (Ok(key_str), Ok(value_str)) = (
+                        std::str::from_utf8(key_bytes),
+                        std::str::from_utf8(value_bytes),
+                    ) {
+                        headers.insert(key_str.trim().to_string(), value_str.trim().to_string());
+                    }
+                }
             }
         }
-        let body: Vec<u8> = lines.clone().collect::<Vec<&[u8]>>().join(BR_BYTES);
+
+        let body: Vec<u8> = if lines.len() == 0 {
+            Vec::new()
+        } else if lines.len() == 1 {
+            lines.next().unwrap_or(&[]).to_vec()
+        } else {
+            let total_size: usize = lines
+                .as_slice()
+                .iter()
+                .map(|line: &&[u8]| line.len())
+                .sum::<usize>()
+                + (lines.len().saturating_sub(1)) * BR_BYTES.len();
+            let mut body: Vec<u8> = Vec::with_capacity(total_size);
+
+            for (i, line) in lines.enumerate() {
+                if i > 0 {
+                    body.extend_from_slice(BR_BYTES);
+                }
+                body.extend_from_slice(line);
+            }
+            body
+        };
+
         HttpResponseBinary {
             http_version: Arc::new(RwLock::new(http_version)),
             status_code,
@@ -65,40 +117,38 @@ impl ResponseTrait for HttpResponseBinary {
     }
 
     fn text(&self) -> HttpResponseText {
-        let http_response: HttpResponseBinary = self.clone();
-        let body_bin: Vec<u8> = http_response
-            .body
-            .read()
-            .map_or(Vec::new(), |body| body.clone());
-        let body: String = String::from_utf8_lossy(&body_bin).to_string();
+        let body: String = self.body.read().map_or(String::new(), |body_ref| {
+            String::from_utf8_lossy(&body_ref).into_owned()
+        });
+
         HttpResponseText {
-            http_version: http_response.http_version,
-            status_code: http_response.status_code,
-            status_text: http_response.status_text,
-            headers: http_response.headers,
+            http_version: Arc::clone(&self.http_version),
+            status_code: self.status_code,
+            status_text: Arc::clone(&self.status_text),
+            headers: Arc::clone(&self.headers),
             body: Arc::new(RwLock::new(body)),
         }
     }
 
     fn decode(&self, buffer_size: usize) -> HttpResponseBinary {
-        let http_response: HttpResponseBinary = self.clone();
-        let body: Vec<u8> = Compress::from(
-            &self
-                .headers
-                .read()
-                .map_or(hash_map_xx_hash3_64(), |headers| headers.clone()),
-        )
-        .decode(
-            &self.body.read().map_or(Vec::new(), |body| body.clone()),
-            buffer_size,
-        )
-        .into_owned();
+        let decoded_body: Vec<u8> = {
+            let headers_guard = self.headers.read();
+            let body_guard = self.body.read();
+
+            match (headers_guard, body_guard) {
+                (Ok(headers_ref), Ok(body_ref)) => Compress::from(&*headers_ref)
+                    .decode(&*body_ref, buffer_size)
+                    .into_owned(),
+                _ => Vec::new(),
+            }
+        };
+
         HttpResponseBinary {
-            http_version: http_response.http_version,
-            status_code: http_response.status_code,
-            status_text: http_response.status_text,
-            headers: http_response.headers,
-            body: Arc::new(RwLock::new(body)),
+            http_version: Arc::clone(&self.http_version),
+            status_code: self.status_code,
+            status_text: Arc::clone(&self.status_text),
+            headers: Arc::clone(&self.headers),
+            body: Arc::new(RwLock::new(decoded_body)),
         }
     }
 }

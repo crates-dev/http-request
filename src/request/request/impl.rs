@@ -77,31 +77,38 @@ impl HttpRequest {
     /// before constructing the HTTP request.
     fn get_header_bytes(&self) -> Vec<u8> {
         let mut header: RequestHeaders = self.get_header();
-        let mut header_string: String = String::new();
+
+        let body_length: usize = if self.get_methods().is_get() {
+            0usize
+        } else {
+            self.get_body_bytes().len()
+        };
+
         if let Ok(config) = self.config.read() {
-            let required_headers = [
+            let required_headers: [(&str, String); 4] = [
                 (HOST, config.url_obj.host.clone().unwrap_or_default()),
-                (
-                    CONTENT_LENGTH,
-                    if self.get_methods().is_get() {
-                        ZERO_STR.to_string()
-                    } else {
-                        self.get_body_bytes().len().to_string()
-                    },
-                ),
+                (CONTENT_LENGTH, body_length.to_string()),
                 (ACCEPT, ACCEPT_ANY.to_owned()),
                 (USER_AGENT, APP_NAME.to_owned()),
             ];
             for (key, default_value) in required_headers {
                 if !header.contains_key(key) {
-                    header.insert(key.to_owned(), default_value.to_owned());
+                    header.insert(key.to_owned(), default_value);
                 }
             }
         }
+
+        let estimated_size: usize = header.iter().map(|(k, v)| k.len() + v.len() + 4).sum();
+        let mut header_bytes: Vec<u8> = Vec::with_capacity(estimated_size);
+
         for (key, value) in &header {
-            header_string.push_str(&format!("{}: {}{}", key, value, HTTP_BR));
+            header_bytes.extend_from_slice(key.as_bytes());
+            header_bytes.extend_from_slice(b": ");
+            header_bytes.extend_from_slice(value.as_bytes());
+            header_bytes.extend_from_slice(HTTP_BR_BYTES);
         }
-        header_string.as_bytes().to_vec()
+
+        header_bytes
     }
 
     /// Converts the HTTP body into a URL-encoded byte vector (`Vec<u8>`).
@@ -194,15 +201,24 @@ impl HttpRequest {
         &mut self,
         stream: &mut Box<dyn ReadWrite>,
     ) -> Result<BoxResponseTrait, RequestError> {
-        let mut request: Vec<u8> = Vec::new();
         let path: String = self.get_path();
-        let request_line_string: String = self.config.read().map_or(String::new(), |config| {
-            format!("{} {} {}", Method::GET, path, config.http_version)
-        });
-        let request_line: &[u8] = request_line_string.as_bytes();
-        request.extend_from_slice(request_line);
+        let header_bytes: Vec<u8> = self.get_header_bytes();
+        let method_str: &str = "GET";
+        let http_version_str: String =
+            self.config.read().map_or("HTTP/1.1".to_string(), |config| {
+                config.http_version.to_string()
+            });
+        let request_line_size: usize =
+            method_str.len() + 1 + path.len() + 1 + http_version_str.len();
+        let total_size: usize = request_line_size + 2 + header_bytes.len() + 2;
+        let mut request: Vec<u8> = Vec::with_capacity(total_size);
+        request.extend_from_slice(method_str.as_bytes());
+        request.push(b' ');
+        request.extend_from_slice(path.as_bytes());
+        request.push(b' ');
+        request.extend_from_slice(http_version_str.as_bytes());
         request.extend_from_slice(HTTP_BR_BYTES);
-        request.extend_from_slice(&self.get_header_bytes());
+        request.extend_from_slice(&header_bytes);
         request.extend_from_slice(HTTP_BR_BYTES);
         stream
             .write_all(&request)
@@ -229,18 +245,33 @@ impl HttpRequest {
         &mut self,
         stream: &mut Box<dyn ReadWrite>,
     ) -> Result<BoxResponseTrait, RequestError> {
-        let mut request: Vec<u8> = Vec::new();
         let path: String = self.get_path();
-        let request_line_string: String = self.config.read().map_or(String::new(), |config| {
-            format!("{} {} {}", Method::POST, path, config.http_version)
-        });
-        let request_line: &[u8] = request_line_string.as_bytes();
-        request.extend_from_slice(request_line);
+        let header_bytes: Vec<u8> = self.get_header_bytes();
+        let body_bytes: Vec<u8> = self.get_body_bytes();
+
+        let method_str: &str = "POST";
+        let http_version_str: String =
+            self.config.read().map_or("HTTP/1.1".to_string(), |config| {
+                config.http_version.to_string()
+            });
+
+        let request_line_size: usize =
+            method_str.len() + 1 + path.len() + 1 + http_version_str.len();
+        let total_size: usize = request_line_size + 2 + header_bytes.len() + 2 + body_bytes.len();
+
+        let mut request: Vec<u8> = Vec::with_capacity(total_size);
+
+        request.extend_from_slice(method_str.as_bytes());
+        request.push(b' ');
+        request.extend_from_slice(path.as_bytes());
+        request.push(b' ');
+        request.extend_from_slice(http_version_str.as_bytes());
         request.extend_from_slice(HTTP_BR_BYTES);
-        request.extend_from_slice(&self.get_header_bytes());
+
+        request.extend_from_slice(&header_bytes);
         request.extend_from_slice(HTTP_BR_BYTES);
-        let body_str: &Vec<u8> = &self.get_body_bytes();
-        request.extend_from_slice(body_str);
+        request.extend_from_slice(&body_bytes);
+
         stream
             .write_all(&request)
             .and_then(|_| stream.flush())
@@ -272,10 +303,15 @@ impl HttpRequest {
             .read()
             .map_or(DEFAULT_BUFFER_SIZE, |config| config.buffer);
         let mut buffer: Vec<u8> = vec![0; buffer_size];
-        let mut response_bytes: Vec<u8> = Vec::with_capacity(buffer_size);
+
+        let initial_capacity: usize = buffer_size.max(8192);
+        let mut response_bytes: Vec<u8> = Vec::with_capacity(initial_capacity);
+
         let mut headers_done: bool = false;
         let mut content_length: usize = 0;
         let mut redirect_url: Option<Vec<u8>> = None;
+        let mut headers_end_pos: usize = 0;
+
         let http_version: String = self
             .config
             .read()
@@ -284,46 +320,46 @@ impl HttpRequest {
             });
         let http_version_bytes: Vec<u8> = http_version.to_lowercase().into_bytes();
         let location_sign_key: Vec<u8> = format!("{}:", LOCATION.to_lowercase()).into_bytes();
+
         'read_loop: while let Ok(n) = stream.read(&mut buffer) {
             if n == 0 {
                 break;
             }
+
+            if response_bytes.len() + n > response_bytes.capacity() {
+                let new_capacity: usize =
+                    (response_bytes.capacity() * 2).max(response_bytes.len() + n);
+                response_bytes.reserve(new_capacity - response_bytes.capacity());
+            }
+
+            let old_len: usize = response_bytes.len();
             response_bytes.extend_from_slice(&buffer[..n]);
-            if !headers_done
-                && response_bytes
+
+            if !headers_done {
+                let search_start: usize = old_len.saturating_sub(HTTP_DOUBLE_BR_BYTES.len() - 1);
+                if let Some(pos) = response_bytes[search_start..]
                     .windows(HTTP_DOUBLE_BR_BYTES.len())
-                    .any(|window| window == HTTP_DOUBLE_BR_BYTES)
-            {
-                headers_done = true;
-                if let Some(status_pos) = response_bytes
-                    .windows(http_version_bytes.len())
-                    .position(|window| case_insensitive_match(window, &http_version_bytes))
+                    .position(|window| window == HTTP_DOUBLE_BR_BYTES)
                 {
-                    let status_code_start: usize = status_pos + http_version_bytes.len() + 1; // Skip "HTTP/1.1 "
-                    let status_code_end: usize = status_code_start + 3; // Status code is 3 digits
-                    let status_code: usize = Self::parse_status_code(
-                        &response_bytes[status_code_start..status_code_end],
-                    );
-                    if (300..=399).contains(&status_code) {
-                        if let Some(location_pos) = response_bytes
-                            .windows(location_sign_key.len())
-                            .position(|window| case_insensitive_match(window, &location_sign_key))
-                        {
-                            let start: usize = location_pos + location_sign_key.len();
-                            if let Some(end_pos) = response_bytes[start..]
-                                .windows(HTTP_BR_BYTES.len())
-                                .position(|window| window == HTTP_BR_BYTES)
-                            {
-                                redirect_url =
-                                    Some(response_bytes[start..start + end_pos].to_vec());
-                            }
-                        }
-                    }
-                    content_length = Self::get_content_length(&response_bytes);
+                    headers_done = true;
+                    headers_end_pos = search_start + pos + HTTP_DOUBLE_BR_BYTES.len();
+
+                    self.parse_response_headers(
+                        &response_bytes[..headers_end_pos],
+                        &http_version_bytes,
+                        &location_sign_key,
+                        &mut content_length,
+                        &mut redirect_url,
+                    )?;
                 }
             }
-            if headers_done && response_bytes.len() >= content_length {
-                break 'read_loop;
+
+            if headers_done {
+                let total_expected_length: usize = headers_end_pos + content_length;
+                if response_bytes.len() >= total_expected_length {
+                    response_bytes.truncate(total_expected_length);
+                    break 'read_loop;
+                }
             }
         }
         self.response = Arc::new(RwLock::new(<HttpResponseBinary as ResponseTrait>::from(
@@ -348,70 +384,77 @@ impl HttpRequest {
         self.handle_redirect(url)
     }
 
-    /// Extracts the content length from the HTTP response bytes.
-    ///
-    /// This function searches for the `Content-Length` field in a case-insensitive
-    /// manner and parses its value if found.
-    ///
-    /// # Parameters
-    /// - `response_bytes`: A byte slice containing the raw HTTP response.
-    ///
-    /// # Returns
-    /// Returns the parsed content length as `usize`. If not found or invalid, returns `0`.
+    fn parse_response_headers(
+        &self,
+        headers_bytes: &[u8],
+        http_version_bytes: &[u8],
+        location_sign_key: &[u8],
+        content_length: &mut usize,
+        redirect_url: &mut Option<Vec<u8>>,
+    ) -> Result<(), RequestError> {
+        if let Some(status_pos) = headers_bytes
+            .windows(http_version_bytes.len())
+            .position(|window: &[u8]| case_insensitive_match(window, http_version_bytes))
+        {
+            let status_code_start: usize = status_pos + http_version_bytes.len() + 1;
+            let status_code_end: usize = status_code_start + 3;
+
+            if status_code_end <= headers_bytes.len() {
+                let status_code: usize =
+                    Self::parse_status_code(&headers_bytes[status_code_start..status_code_end]);
+
+                if (300..=399).contains(&status_code) {
+                    if let Some(location_pos) = headers_bytes
+                        .windows(location_sign_key.len())
+                        .position(|window: &[u8]| case_insensitive_match(window, location_sign_key))
+                    {
+                        let start: usize = location_pos + location_sign_key.len();
+                        if let Some(end_pos) = headers_bytes[start..]
+                            .windows(HTTP_BR_BYTES.len())
+                            .position(|window: &[u8]| window == HTTP_BR_BYTES)
+                        {
+                            *redirect_url = Some(headers_bytes[start..start + end_pos].to_vec());
+                        }
+                    }
+                }
+            }
+        }
+
+        *content_length = Self::get_content_length(headers_bytes);
+        Ok(())
+    }
+
     fn get_content_length(response_bytes: &[u8]) -> usize {
-        let content_length_key: Vec<u8> =
-            format!("{}:", CONTENT_LENGTH.to_lowercase()).into_bytes();
-        if let Some(pos) = Self::find_case_insensitive_key(response_bytes, &content_length_key) {
-            if let Some(length_str) =
-                Self::extract_value_from_position(response_bytes, pos, &HTTP_BR_BYTES)
+        const CONTENT_LENGTH_LOWER: &[u8] = b"content-length:";
+        const CONTENT_LENGTH_UPPER: &[u8] = b"Content-Length:";
+
+        let header_pos: Option<usize> = response_bytes
+            .windows(CONTENT_LENGTH_LOWER.len())
+            .position(|window: &[u8]| {
+                window.eq_ignore_ascii_case(CONTENT_LENGTH_LOWER)
+                    || window.eq_ignore_ascii_case(CONTENT_LENGTH_UPPER)
+            });
+
+        if let Some(pos) = header_pos {
+            let value_start: usize = pos + CONTENT_LENGTH_LOWER.len();
+
+            let value_start: usize = if response_bytes.get(value_start) == Some(&b' ') {
+                value_start + 1
+            } else {
+                value_start
+            };
+
+            if let Some(end_pos) = response_bytes[value_start..]
+                .windows(2)
+                .position(|window: &[u8]| window == b"\r\n")
             {
-                return length_str.trim().parse::<usize>().unwrap_or(0);
+                let value_bytes: &[u8] = &response_bytes[value_start..value_start + end_pos];
+                if let Ok(value_str) = std::str::from_utf8(value_bytes) {
+                    return value_str.trim().parse::<usize>().unwrap_or(0);
+                }
             }
         }
         0
-    }
-
-    /// Finds the position of a key in the response bytes, case-insensitively.
-    ///
-    /// This function scans the `response_bytes` for the given `key` and returns
-    /// the starting position of the match, if found.
-    ///
-    /// # Parameters
-    /// - `response_bytes`: A byte slice containing the raw HTTP response.
-    /// - `key`: The byte sequence to search for.
-    ///
-    /// # Returns
-    /// Returns an `Option<usize>` containing the starting position if the key is found, otherwise `None`.
-    fn find_case_insensitive_key(response_bytes: &[u8], key: &[u8]) -> Option<usize> {
-        response_bytes
-            .windows(key.len())
-            .position(|window| case_insensitive_match(window, key))
-    }
-
-    /// Extracts the value following a key at a specific position until the end delimiter.
-    ///
-    /// This function assumes the key ends with a colon (`:`) and extracts the value
-    /// up to the specified delimiter.
-    ///
-    /// # Parameters
-    /// - `response_bytes`: A byte slice containing the raw HTTP response.
-    /// - `key_pos`: The starting position of the key in the response bytes.
-    /// - `delimiter`: The byte sequence representing the end of the value.
-    ///
-    /// # Returns
-    /// Returns an `Option<&'a str>` containing the extracted value. If not found or invalid, returns `None`.
-    fn extract_value_from_position<'a>(
-        response_bytes: &'a [u8],
-        key_pos: usize,
-        delimiter: &'a [u8],
-    ) -> Option<&'a str> {
-        let start: usize = key_pos + delimiter.len();
-        response_bytes[start..]
-            .windows(delimiter.len())
-            .position(|window| window == delimiter)
-            .map(|end_pos| {
-                std::str::from_utf8(&response_bytes[start..start + end_pos]).unwrap_or_default()
-            })
     }
 
     /// Parses the status code from a byte slice.
