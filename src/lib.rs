@@ -48,4 +48,8 @@ pub(crate) use std::{
     time::Duration,
     vec::IntoIter,
 };
-pub(crate) use tokio::io::{AsyncRead, AsyncWrite};
+pub(crate) use tokio::{
+    io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt},
+    net::TcpStream as AsyncTcpStream,
+};
+pub(crate) use tokio_rustls::{TlsConnector, client::TlsStream};

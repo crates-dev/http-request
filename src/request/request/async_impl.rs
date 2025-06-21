@@ -1,9 +1,4 @@
 use crate::*;
-use std::future::Future;
-use std::pin::Pin;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::net::TcpStream as AsyncTcpStream;
-use tokio_rustls::{TlsConnector, client::TlsStream};
 
 /// Async implementation for HttpRequest
 impl HttpRequest {
@@ -122,7 +117,7 @@ impl HttpRequest {
         let location_sign_key: Vec<u8> = format!("{}:", LOCATION.to_lowercase()).into_bytes();
 
         'read_loop: loop {
-            let n = stream
+            let n: usize = stream
                 .read(&mut buffer)
                 .await
                 .map_err(|err| RequestError::Request(err.to_string()))?;
@@ -214,7 +209,7 @@ impl HttpRequest {
                     if config.redirect_times >= config.max_redirect_times {
                         return Err(RequestError::MaxRedirectTimes);
                     }
-                    config.redirect_times = config.redirect_times + 1;
+                    config.redirect_times += 1;
                 }
             }
             self.url(url.clone());
@@ -254,7 +249,7 @@ impl HttpRequest {
             let config: ClientConfig = ClientConfig::builder()
                 .with_root_certificates(roots)
                 .with_no_client_auth();
-            let connector = TlsConnector::from(Arc::new(config));
+            let connector: TlsConnector = TlsConnector::from(Arc::new(config));
             let dns_name: ServerName<'_> = ServerName::try_from(host.clone())
                 .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
             let tls_stream: TlsStream<AsyncTcpStream> = connector

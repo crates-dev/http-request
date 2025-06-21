@@ -564,7 +564,7 @@ impl HttpRequest {
                 if config.redirect_times >= config.max_redirect_times {
                     return Err(RequestError::MaxRedirectTimes);
                 }
-                config.redirect_times = config.redirect_times + 1;
+                config.redirect_times += 1;
             }
         }
         self.url(url.clone());
