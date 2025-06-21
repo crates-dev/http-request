@@ -1,15 +1,11 @@
 pub(crate) mod body;
+pub(crate) mod cfg;
 pub(crate) mod common;
 pub(crate) mod r#const;
 pub(crate) mod global_trait;
 pub(crate) mod request;
 pub(crate) mod response;
 pub(crate) mod utils;
-
-#[cfg(test)]
-mod cfg;
-#[cfg(test)]
-mod test_https_proxy;
 
 pub use request::*;
 pub use response::*;
