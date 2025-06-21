@@ -1,11 +1,5 @@
 #[cfg(test)]
 use crate::*;
-#[cfg(test)]
-use std::{
-    sync::Mutex,
-    thread::{JoinHandle, spawn},
-    time::Instant,
-};
 
 #[tokio::test]
 async fn test_async_http_get_request() {
@@ -379,5 +373,197 @@ fn test_thread_http_get_request() {
     }
     for handle in handles {
         handle.join().unwrap();
+    }
+}
+
+// Synchronous examples from README.md
+
+#[test]
+fn test_readme_sync_get_request() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("header-key", "header-value");
+    let mut request_builder = RequestBuilder::new()
+        .get("https://ltpp.vip/")
+        .headers(header)
+        .timeout(6000)
+        .redirect()
+        .max_redirect_times(8)
+        .http1_1_only()
+        .buffer(4096)
+        .decode()
+        .build();
+    request_builder
+        .send()
+        .and_then(|response| {
+            println!("{:?}", response.text());
+            Ok(())
+        })
+        .unwrap_or_else(|e| println!("Error => {}", e));
+}
+
+#[test]
+fn test_readme_sync_post_json_request() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("header-key", "header-value");
+    let body: JsonValue = json_value!({
+        "test": 1
+    });
+    let mut request_builder = RequestBuilder::new()
+        .post("http://localhost:80")
+        .json(body)
+        .headers(header)
+        .timeout(6000)
+        .redirect()
+        .max_redirect_times(8)
+        .http1_1_only()
+        .buffer(4096)
+        .build();
+    request_builder
+        .send()
+        .and_then(|response| {
+            println!("{:?}", response.decode(4096).text());
+            Ok(())
+        })
+        .unwrap_or_else(|e| println!("Error => {}", e));
+}
+
+#[test]
+fn test_readme_sync_post_text_request() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("header-key", "header-value");
+    let mut request_builder = RequestBuilder::new()
+        .post("http://localhost")
+        .text("hello")
+        .headers(header)
+        .timeout(6000)
+        .redirect()
+        .max_redirect_times(8)
+        .http1_1_only()
+        .buffer(4096)
+        .decode()
+        .build();
+    request_builder
+        .send()
+        .and_then(|response| {
+            println!("{:?}", response.text());
+            Ok(())
+        })
+        .unwrap_or_else(|e| println!("Error => {}", e));
+}
+
+#[test]
+fn test_readme_sync_post_binary_request() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("header-key", "header-value");
+    let mut request_builder = RequestBuilder::new()
+        .post("http://localhost")
+        .body("hello".as_bytes())
+        .headers(header)
+        .timeout(6000)
+        .redirect()
+        .max_redirect_times(8)
+        .http1_1_only()
+        .buffer(4096)
+        .build();
+    request_builder
+        .send()
+        .and_then(|response| {
+            println!("{:?}", response.decode(4096).text());
+            Ok(())
+        })
+        .unwrap_or_else(|e| println!("Error => {}", e));
+}
+
+// Asynchronous examples from README.md
+
+#[tokio::test]
+async fn test_readme_async_get_request() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("header-key", "header-value");
+    let mut request_builder = RequestBuilder::new()
+        .get("https://ltpp.vip/")
+        .headers(header)
+        .timeout(6000)
+        .redirect()
+        .max_redirect_times(8)
+        .http1_1_only()
+        .buffer(4096)
+        .decode()
+        .build_async();
+    match request_builder.send().await {
+        Ok(response) => {
+            println!("{:?}", response.text());
+        }
+        Err(e) => println!("Error => {}", e),
+    }
+}
+
+#[tokio::test]
+async fn test_readme_async_post_json_request() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("header-key", "header-value");
+    let body: JsonValue = json_value!({
+        "test": 1
+    });
+    let mut request_builder = RequestBuilder::new()
+        .post("http://localhost:80")
+        .json(body)
+        .headers(header)
+        .timeout(6000)
+        .redirect()
+        .max_redirect_times(8)
+        .http1_1_only()
+        .buffer(4096)
+        .build_async();
+    match request_builder.send().await {
+        Ok(response) => {
+            println!("{:?}", response.decode(4096).text());
+        }
+        Err(e) => println!("Error => {}", e),
+    }
+}
+
+#[tokio::test]
+async fn test_readme_async_post_text_request() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("header-key", "header-value");
+    let mut request_builder = RequestBuilder::new()
+        .post("http://localhost")
+        .text("hello")
+        .headers(header)
+        .timeout(6000)
+        .redirect()
+        .max_redirect_times(8)
+        .http1_1_only()
+        .buffer(4096)
+        .decode()
+        .build_async();
+    match request_builder.send().await {
+        Ok(response) => {
+            println!("{:?}", response.text());
+        }
+        Err(e) => println!("Error => {}", e),
+    }
+}
+
+#[tokio::test]
+async fn test_readme_async_post_binary_request() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("header-key", "header-value");
+    let mut request_builder = RequestBuilder::new()
+        .post("http://localhost")
+        .body("hello".as_bytes())
+        .headers(header)
+        .timeout(6000)
+        .redirect()
+        .max_redirect_times(8)
+        .http1_1_only()
+        .buffer(4096)
+        .build_async();
+    match request_builder.send().await {
+        Ok(response) => {
+            println!("{:?}", response.decode(4096).text());
+        }
+        Err(e) => println!("Error => {}", e),
     }
 }

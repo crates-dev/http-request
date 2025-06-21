@@ -38,7 +38,7 @@ To use this crate, you can run cmd:
 cargo add http-request
 ```
 
-## Use
+## Synchronous
 
 ### Send get request
 
@@ -148,6 +148,114 @@ request_builder
         Ok(())
     })
     .unwrap_or_else(|e| println!("Error => {}", e));
+```
+
+## Asynchronous
+
+### Send get request
+
+```rs
+use http_request::*;
+
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+header.insert("header-key", "header-value");
+let mut request_builder = RequestBuilder::new()
+    .get("https://ltpp.vip/")
+    .headers(header)
+    .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
+    .http1_1_only()
+    .buffer(4096)
+    .decode()
+    .build_async();
+match request_builder.send().await {
+    Ok(response) => {
+        println!("{:?}", response.text());
+    }
+    Err(e) => println!("Error => {}", e),
+}
+```
+
+### Send post request
+
+#### Send Body Json
+
+```rs
+use http_request::*;
+
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+header.insert("header-key", "header-value");
+let body: JsonValue = json_value!({
+    "test": 1
+});
+let mut request_builder = RequestBuilder::new()
+    .post("http://localhost:80")
+    .json(body)
+    .headers(header)
+    .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
+    .http1_1_only()
+    .buffer(4096)
+    .build_async();
+match request_builder.send().await {
+    Ok(response) => {
+        println!("{:?}", response.decode(4096).text());
+    }
+    Err(e) => println!("Error => {}", e),
+}
+```
+
+#### Send Body Text
+
+```rs
+use http_request::*;
+
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+header.insert("header-key", "header-value");
+let mut request_builder = RequestBuilder::new()
+    .post("http://localhost")
+    .text("hello")
+    .headers(header)
+    .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
+    .http1_1_only()
+    .buffer(4096)
+    .decode()
+    .build_async();
+match request_builder.send().await {
+    Ok(response) => {
+        println!("{:?}", response.text());
+    }
+    Err(e) => println!("Error => {}", e),
+}
+```
+
+#### Send Body Binary
+
+```rs
+use http_request::*;
+
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+header.insert("header-key", "header-value");
+let mut request_builder = RequestBuilder::new()
+    .post("http://localhost")
+    .body("hello".as_bytes())
+    .headers(header)
+    .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
+    .http1_1_only()
+    .buffer(4096)
+    .build_async();
+match request_builder.send().await {
+    Ok(response) => {
+        println!("{:?}", response.decode(4096).text());
+    }
+    Err(e) => println!("Error => {}", e),
+}
 ```
 
 ## Help

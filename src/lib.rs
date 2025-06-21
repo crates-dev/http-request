@@ -53,3 +53,10 @@ pub(crate) use tokio::{
     net::TcpStream as AsyncTcpStream,
 };
 pub(crate) use tokio_rustls::{TlsConnector, client::TlsStream};
+
+#[cfg(test)]
+use std::{
+    sync::Mutex,
+    thread::{JoinHandle, spawn},
+    time::Instant,
+};
