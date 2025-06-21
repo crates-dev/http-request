@@ -1,8 +1,3 @@
-#[cfg(test)]
-mod cfg;
-#[cfg(test)]
-mod test_https_proxy;
-
 pub(crate) mod body;
 pub(crate) mod common;
 pub(crate) mod r#const;
@@ -11,6 +6,14 @@ pub(crate) mod request;
 pub(crate) mod response;
 pub(crate) mod utils;
 
+#[cfg(test)]
+mod cfg;
+#[cfg(test)]
+mod test_https_proxy;
+
+pub use request::*;
+pub use response::*;
+
 pub use http_type::{
     HashMapXxHash3_64, JsonDeserializer, JsonError, JsonMap, JsonNumber, JsonResult,
     JsonSerializer, JsonStreamDeserializer, JsonValue, hash_map_xx_hash3_64, json_from_reader,
@@ -18,16 +21,12 @@ pub use http_type::{
     json_to_value, json_to_vec, json_to_vec_pretty, json_to_writer, json_to_writer_pretty,
     json_value,
 };
-pub use request::*;
-pub use response::*;
-
-pub use request::{AsyncRequestTrait, BoxAsyncRequestTrait};
 
 pub(crate) use body::*;
 pub(crate) use common::*;
 pub(crate) use r#const::*;
 pub(crate) use global_trait::*;
-pub(crate) use utils::vec::*;
+pub(crate) use utils::*;
 
 pub(crate) use futures::Future;
 pub(crate) use http_type::{
@@ -50,6 +49,7 @@ pub(crate) use std::{
     pin::Pin,
     str::from_utf8,
     sync::{Arc, RwLock},
+    task::{Context, Poll},
     time::Duration,
     vec::IntoIter,
 };

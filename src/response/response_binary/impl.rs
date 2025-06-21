@@ -11,7 +11,6 @@ use crate::*;
 impl ResponseTrait for HttpResponseBinary {
     type OutputText = HttpResponseText;
     type OutputBinary = HttpResponseBinary;
-
     fn from(response: &[u8]) -> Self
     where
         Self: Sized,
@@ -20,19 +19,16 @@ impl ResponseTrait for HttpResponseBinary {
         let mut lines: IntoIter<&[u8]> = split_lines.into_iter();
         let status_line: &[u8] = lines.next().unwrap_or(&[]);
         let status_parts: Vec<&[u8]> = split_whitespace(&status_line);
-
         let http_version: HttpVersion = status_parts
             .get(0)
             .and_then(|part: &&[u8]| from_utf8(part).ok())
             .and_then(|version_str: &str| version_str.parse::<HttpVersion>().ok())
             .unwrap_or_default();
-
         let status_code: ResponseStatusCode = status_parts
             .get(1)
             .and_then(|part: &&[u8]| from_utf8(part).ok())
             .and_then(|code_str: &str| code_str.parse().ok())
             .unwrap_or(HttpStatus::Unknown.code());
-
         let status_text: String = status_parts.get(2..).map_or_else(
             || HttpStatus::Unknown.to_string(),
             |parts: &[&[u8]]| {
@@ -54,13 +50,11 @@ impl ResponseTrait for HttpResponseBinary {
                 }
             },
         );
-
         let mut headers: HashMapXxHash3_64<String, String> = hash_map_xx_hash3_64();
         for line in lines.by_ref() {
             if line.is_empty() {
                 break;
             }
-
             let mut colon_pos: Option<usize> = None;
             for (i, &byte) in line.iter().enumerate() {
                 if byte == b':' {
@@ -68,7 +62,6 @@ impl ResponseTrait for HttpResponseBinary {
                     break;
                 }
             }
-
             if let Some(pos) = colon_pos {
                 if pos > 0 && pos + 1 < line.len() {
                     let key_bytes: &[u8] = &line[..pos];
@@ -78,7 +71,6 @@ impl ResponseTrait for HttpResponseBinary {
                         pos + 1
                     };
                     let value_bytes: &[u8] = &line[value_start..];
-
                     if let (Ok(key_str), Ok(value_str)) =
                         (from_utf8(key_bytes), from_utf8(value_bytes))
                     {
@@ -87,26 +79,23 @@ impl ResponseTrait for HttpResponseBinary {
                 }
             }
         }
-
         let body: Vec<u8> = match lines.len() {
             0 => Vec::new(),
             1 => {
-                let line = lines.next().unwrap_or(&[]);
+                let line: &[u8] = lines.next().unwrap_or(&[]);
                 let mut body = Vec::with_capacity(line.len());
                 body.extend_from_slice(line);
                 body
             }
             _ => {
-                let lines_slice = lines.as_slice();
+                let lines_slice: &[&[u8]] = lines.as_slice();
                 let total_size: usize = lines_slice
                     .iter()
                     .map(|line: &&[u8]| line.len())
                     .sum::<usize>()
                     + lines_slice.len().saturating_sub(1) * BR_BYTES.len();
-
                 let mut body: Vec<u8> = Vec::with_capacity(total_size);
                 let mut first: bool = true;
-
                 for line in lines {
                     if !first {
                         body.extend_from_slice(BR_BYTES);
@@ -117,7 +106,6 @@ impl ResponseTrait for HttpResponseBinary {
                 body
             }
         };
-
         HttpResponseBinary {
             http_version: Arc::new(RwLock::new(http_version)),
             status_code,
@@ -135,7 +123,6 @@ impl ResponseTrait for HttpResponseBinary {
         let body: String = self.body.read().map_or(String::new(), |body_ref| {
             String::from_utf8_lossy(&body_ref).into_owned()
         });
-
         HttpResponseText {
             http_version: Arc::clone(&self.http_version),
             status_code: self.status_code,
@@ -149,7 +136,6 @@ impl ResponseTrait for HttpResponseBinary {
         let decoded_body: Vec<u8> = {
             let headers_guard = self.headers.read();
             let body_guard = self.body.read();
-
             match (headers_guard, body_guard) {
                 (Ok(headers_ref), Ok(body_ref)) => Compress::from(&*headers_ref)
                     .decode(&*body_ref, buffer_size)
@@ -157,7 +143,6 @@ impl ResponseTrait for HttpResponseBinary {
                 _ => Vec::new(),
             }
         };
-
         HttpResponseBinary {
             http_version: Arc::clone(&self.http_version),
             status_code: self.status_code,

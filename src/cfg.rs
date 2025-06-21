@@ -326,7 +326,7 @@ fn test_thread_http_get_request() {
     let mut handles: Vec<JoinHandle<()>> = Vec::new();
     let request_builder: Arc<Mutex<BoxRequestTrait>> = Arc::new(Mutex::new(
         RequestBuilder::new()
-            .get("http://127.0.0.1:8080/")
+            .get("http://127.0.0.1:7890/")
             .timeout(10)
             .redirect()
             .buffer(100)
@@ -375,8 +375,6 @@ fn test_thread_http_get_request() {
         handle.join().unwrap();
     }
 }
-
-// Synchronous examples from README.md
 
 #[test]
 fn test_readme_sync_get_request() {
@@ -474,8 +472,6 @@ fn test_readme_sync_post_binary_request() {
         .unwrap_or_else(|e| println!("Error => {}", e));
 }
 
-// Asynchronous examples from README.md
-
 #[tokio::test]
 async fn test_readme_async_get_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -510,7 +506,7 @@ fn test_http_proxy_get_request() {
         .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
-        .http_proxy("proxy.example.com", 8080)
+        .http_proxy("127.0.0.1", 7890)
         .build();
 
     match request_builder.send() {
@@ -533,7 +529,7 @@ fn test_http_proxy_auth_get_request() {
         .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
-        .http_proxy_auth("proxy.example.com", 8080, "username", "password")
+        .http_proxy_auth("127.0.0.1", 7890, "username", "password")
         .build();
 
     match request_builder.send() {
@@ -580,7 +576,7 @@ async fn test_async_http_proxy_get_request() {
         .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
-        .http_proxy("proxy.example.com", 8080)
+        .http_proxy("127.0.0.1", 7890)
         .build_async();
 
     match request_builder.send().await {

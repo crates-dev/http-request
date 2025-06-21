@@ -166,7 +166,7 @@ let mut request_builder = RequestBuilder::new()
     .http1_1_only()
     .buffer(4096)
     .decode()
-    .http_proxy("proxy.example.com", 8080)
+    .http_proxy("127.0.0.1", 7890)
     .build();
 request_builder
     .send()
@@ -193,7 +193,7 @@ let mut request_builder = RequestBuilder::new()
     .http1_1_only()
     .buffer(4096)
     .decode()
-    .http_proxy_auth("proxy.example.com", 8080, "username", "password")
+    .http_proxy_auth("127.0.0.1", 7890, "username", "password")
     .build();
 request_builder
     .send()
@@ -382,7 +382,7 @@ let mut request_builder = RequestBuilder::new()
     .http1_1_only()
     .buffer(4096)
     .decode()
-    .http_proxy("proxy.example.com", 8080)
+    .http_proxy("127.0.0.1", 7890)
     .build_async();
 match request_builder.send().await {
     Ok(response) => {
@@ -408,7 +408,7 @@ let mut request_builder = RequestBuilder::new()
     .http1_1_only()
     .buffer(4096)
     .decode()
-    .http_proxy_auth("proxy.example.com", 8080, "username", "password")
+    .http_proxy_auth("127.0.0.1", 7890, "username", "password")
     .build_async();
 match request_builder.send().await {
     Ok(response) => {

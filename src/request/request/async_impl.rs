@@ -9,29 +9,23 @@ impl HttpRequest {
     ) -> Result<BoxResponseTrait, RequestError> {
         let path: String = self.get_path();
         let header_bytes: Vec<u8> = self.get_header_bytes();
-
         let method_str: &str = "GET";
         let http_version_str: String =
             self.config.read().map_or("HTTP/1.1".to_string(), |config| {
                 config.http_version.to_string()
             });
-
         let request_line_size: usize =
             method_str.len() + 1 + path.len() + 1 + http_version_str.len();
         let total_size: usize = request_line_size + 2 + header_bytes.len() + 2;
-
         let mut request: Vec<u8> = Vec::with_capacity(total_size);
-
         request.extend_from_slice(method_str.as_bytes());
         request.push(b' ');
         request.extend_from_slice(path.as_bytes());
         request.push(b' ');
         request.extend_from_slice(http_version_str.as_bytes());
         request.extend_from_slice(HTTP_BR_BYTES);
-
         request.extend_from_slice(&header_bytes);
         request.extend_from_slice(HTTP_BR_BYTES);
-
         stream
             .write_all(&request)
             .await
@@ -40,7 +34,6 @@ impl HttpRequest {
             .flush()
             .await
             .map_err(|err| RequestError::Request(err.to_string()))?;
-
         self.read_response_async(stream).await
     }
 
@@ -52,30 +45,24 @@ impl HttpRequest {
         let path: String = self.get_path();
         let header_bytes: Vec<u8> = self.get_header_bytes();
         let body_bytes: Vec<u8> = self.get_body_bytes();
-
         let method_str: &str = "POST";
         let http_version_str: String =
             self.config.read().map_or("HTTP/1.1".to_string(), |config| {
                 config.http_version.to_string()
             });
-
         let request_line_size: usize =
             method_str.len() + 1 + path.len() + 1 + http_version_str.len();
         let total_size: usize = request_line_size + 2 + header_bytes.len() + 2 + body_bytes.len();
-
         let mut request: Vec<u8> = Vec::with_capacity(total_size);
-
         request.extend_from_slice(method_str.as_bytes());
         request.push(b' ');
         request.extend_from_slice(path.as_bytes());
         request.push(b' ');
         request.extend_from_slice(http_version_str.as_bytes());
         request.extend_from_slice(HTTP_BR_BYTES);
-
         request.extend_from_slice(&header_bytes);
         request.extend_from_slice(HTTP_BR_BYTES);
         request.extend_from_slice(&body_bytes);
-
         stream
             .write_all(&request)
             .await
@@ -84,7 +71,6 @@ impl HttpRequest {
             .flush()
             .await
             .map_err(|err| RequestError::Request(err.to_string()))?;
-
         self.read_response_async(stream).await
     }
 
@@ -98,15 +84,12 @@ impl HttpRequest {
             .read()
             .map_or(DEFAULT_BUFFER_SIZE, |config| config.buffer);
         let mut buffer: Vec<u8> = vec![0; buffer_size];
-
         let initial_capacity: usize = buffer_size.max(8192);
         let mut response_bytes: Vec<u8> = Vec::with_capacity(initial_capacity);
-
         let mut headers_done: bool = false;
         let mut content_length: usize = 0;
         let mut redirect_url: Option<Vec<u8>> = None;
         let mut headers_end_pos: usize = 0;
-
         let http_version: String = self
             .config
             .read()
@@ -115,17 +98,14 @@ impl HttpRequest {
             });
         let http_version_bytes: Vec<u8> = http_version.to_lowercase().into_bytes();
         let location_sign_key: Vec<u8> = format!("{}:", LOCATION.to_lowercase()).into_bytes();
-
         'read_loop: loop {
             let n: usize = stream
                 .read(&mut buffer)
                 .await
                 .map_err(|err| RequestError::Request(err.to_string()))?;
-
             if n == 0 {
                 break;
             }
-
             if response_bytes.len() + n > response_bytes.capacity() {
                 let current_cap: usize = response_bytes.capacity();
                 let needed_cap: usize = response_bytes.len() + n;
@@ -138,16 +118,13 @@ impl HttpRequest {
                 };
                 response_bytes.reserve(new_capacity - current_cap);
             }
-
             let old_len: usize = response_bytes.len();
             response_bytes.extend_from_slice(&buffer[..n]);
-
             if !headers_done {
                 let search_start: usize = old_len.saturating_sub(3);
                 if let Some(pos) = Self::find_double_crlf(&response_bytes, search_start) {
                     headers_done = true;
                     headers_end_pos = pos + 4;
-
                     self.parse_response_headers(
                         &response_bytes[..headers_end_pos],
                         &http_version_bytes,
@@ -157,7 +134,6 @@ impl HttpRequest {
                     )?;
                 }
             }
-
             if headers_done {
                 let total_expected_length: usize = headers_end_pos + content_length;
                 if response_bytes.len() >= total_expected_length {
@@ -166,11 +142,9 @@ impl HttpRequest {
                 }
             }
         }
-
         self.response = Arc::new(RwLock::new(<HttpResponseBinary as ResponseTrait>::from(
             &response_bytes,
         )));
-
         let (should_redirect, should_decode, buffer_size) = {
             if let Ok(config) = self.config.read() {
                 (config.redirect, config.decode, config.buffer)
@@ -178,7 +152,6 @@ impl HttpRequest {
                 (false, false, DEFAULT_BUFFER_SIZE)
             }
         };
-
         if !should_redirect || redirect_url.is_none() {
             if should_decode {
                 if let Ok(mut response) = self.response.write() {
@@ -244,7 +217,6 @@ impl HttpRequest {
         let tcp_stream: AsyncTcpStream = AsyncTcpStream::connect(host_port.clone())
             .await
             .map_err(|err| RequestError::TcpStreamConnect(err.to_string()))?;
-
         if Self::get_protocol(&config).is_https() {
             let roots: RootCertStore = {
                 match self.tmp.clone().read() {
@@ -257,7 +229,6 @@ impl HttpRequest {
                     }
                 }
             };
-
             let tls_config: ClientConfig = ClientConfig::builder()
                 .with_root_certificates(roots)
                 .with_no_client_auth();
@@ -304,7 +275,6 @@ impl HttpRequest {
         let tcp_stream: AsyncTcpStream = AsyncTcpStream::connect(proxy_host_port)
             .await
             .map_err(|err| RequestError::TcpStreamConnect(err.to_string()))?;
-
         let mut proxy_stream: BoxAsyncReadWrite = if proxy_config.proxy_type == ProxyType::Https {
             let roots: RootCertStore = {
                 match self.tmp.clone().read() {
@@ -317,7 +287,6 @@ impl HttpRequest {
                     }
                 }
             };
-
             let tls_config: ClientConfig = ClientConfig::builder()
                 .with_root_certificates(roots)
                 .with_no_client_auth();
@@ -332,12 +301,11 @@ impl HttpRequest {
         } else {
             Box::new(tcp_stream)
         };
-
         let connect_request: String = if let (Some(username), Some(password)) =
             (&proxy_config.username, &proxy_config.password)
         {
             let auth: String = format!("{}:{}", username, password);
-            let auth_encoded: String = Self::base64_encode(auth.as_bytes());
+            let auth_encoded: String = base64_encode(auth.as_bytes());
             format!(
                 "CONNECT {}:{} HTTP/1.1\r\nHost: {}:{}\r\nProxy-Authorization: Basic {}\r\n\r\n",
                 target_host, target_port, target_host, target_port, auth_encoded
@@ -348,7 +316,6 @@ impl HttpRequest {
                 target_host, target_port, target_host, target_port
             )
         };
-
         proxy_stream
             .write_all(connect_request.as_bytes())
             .await
@@ -358,7 +325,7 @@ impl HttpRequest {
             .await
             .map_err(|err| RequestError::Request(err.to_string()))?;
         let mut response_buffer: [u8; 1024] = [0u8; 1024];
-        let bytes_read = proxy_stream
+        let bytes_read: usize = proxy_stream
             .read(&mut response_buffer)
             .await
             .map_err(|err| RequestError::Request(err.to_string()))?;
@@ -369,12 +336,10 @@ impl HttpRequest {
                 response.lines().next().unwrap_or("Unknown error")
             )));
         }
-
         let config: Config = self
             .config
             .read()
             .map_or(Config::default(), |config| config.clone());
-
         if Self::get_protocol(&config).is_https() {
             let roots: RootCertStore = {
                 match self.tmp.clone().read() {
@@ -387,16 +352,15 @@ impl HttpRequest {
                     }
                 }
             };
-
             let tls_config: ClientConfig = ClientConfig::builder()
                 .with_root_certificates(roots)
                 .with_no_client_auth();
             let connector: TlsConnector = TlsConnector::from(Arc::new(tls_config));
             let dns_name: ServerName<'_> = ServerName::try_from(target_host.clone())
                 .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
-
-            let tunnel_stream = crate::request::proxy_tunnel::ProxyTunnelStream::new(proxy_stream);
-            let tls_stream: TlsStream<crate::request::proxy_tunnel::ProxyTunnelStream> = connector
+            let tunnel_stream: crate::request::ProxyTunnelStream =
+                crate::request::ProxyTunnelStream::new(proxy_stream);
+            let tls_stream: TlsStream<crate::request::ProxyTunnelStream> = connector
                 .connect(dns_name, tunnel_stream)
                 .await
                 .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
@@ -417,36 +381,31 @@ impl HttpRequest {
         let mut tcp_stream: AsyncTcpStream = AsyncTcpStream::connect(proxy_host_port)
             .await
             .map_err(|err| RequestError::TcpStreamConnect(err.to_string()))?;
-
         let auth_methods: Vec<u8> =
             if proxy_config.username.is_some() && proxy_config.password.is_some() {
                 vec![0x05, 0x02, 0x00, 0x02]
             } else {
                 vec![0x05, 0x01, 0x00]
             };
-
         tcp_stream
             .write_all(&auth_methods)
             .await
             .map_err(|err| RequestError::Request(err.to_string()))?;
-
         let mut response: [u8; 2] = [0u8; 2];
         tcp_stream
             .read_exact(&mut response)
             .await
             .map_err(|err| RequestError::Request(err.to_string()))?;
-
         if response[0] != 0x05 {
             return Err(RequestError::Request("Invalid SOCKS5 response".to_string()));
         }
-
         match response[1] {
             0x00 => {}
             0x02 => {
                 if let (Some(username), Some(password)) =
                     (&proxy_config.username, &proxy_config.password)
                 {
-                    let mut auth_request = vec![0x01]; // Version 1
+                    let mut auth_request = vec![0x01];
                     auth_request.push(username.len() as u8);
                     auth_request.extend_from_slice(username.as_bytes());
                     auth_request.push(password.len() as u8);
@@ -485,9 +444,7 @@ impl HttpRequest {
                 ));
             }
         }
-
         let mut connect_request: Vec<u8> = vec![0x05, 0x01, 0x00];
-
         if target_host.parse::<Ipv4Addr>().is_ok() {
             connect_request.push(0x01);
             let ip: Ipv4Addr = target_host.parse().unwrap();
@@ -501,9 +458,7 @@ impl HttpRequest {
             connect_request.push(target_host.len() as u8);
             connect_request.extend_from_slice(target_host.as_bytes());
         }
-
         connect_request.extend_from_slice(&target_port.to_be_bytes());
-
         tcp_stream
             .write_all(&connect_request)
             .await
@@ -521,7 +476,6 @@ impl HttpRequest {
                 connect_response[1]
             )));
         }
-
         match connect_response[3] {
             0x01 => {
                 let mut skip: [u8; 6] = [0u8; 6];
@@ -555,14 +509,11 @@ impl HttpRequest {
                 ));
             }
         }
-
         let proxy_stream: BoxAsyncReadWrite = Box::new(tcp_stream);
-
         let config: Config = self
             .config
             .read()
             .map_or(Config::default(), |config| config.clone());
-
         if Self::get_protocol(&config).is_https() {
             let roots: RootCertStore = {
                 match self.tmp.clone().read() {
@@ -575,7 +526,6 @@ impl HttpRequest {
                     }
                 }
             };
-
             let tls_config: ClientConfig = ClientConfig::builder()
                 .with_root_certificates(roots)
                 .with_no_client_auth();
@@ -583,8 +533,9 @@ impl HttpRequest {
             let dns_name: ServerName<'_> = ServerName::try_from(target_host.clone())
                 .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
 
-            let tunnel_stream = crate::request::proxy_tunnel::ProxyTunnelStream::new(proxy_stream);
-            let tls_stream: TlsStream<crate::request::proxy_tunnel::ProxyTunnelStream> = connector
+            let tunnel_stream: crate::request::ProxyTunnelStream =
+                crate::request::ProxyTunnelStream::new(proxy_stream);
+            let tls_stream: TlsStream<crate::request::ProxyTunnelStream> = connector
                 .connect(dns_name, tunnel_stream)
                 .await
                 .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
@@ -602,16 +553,14 @@ impl HttpRequest {
                 config.url_obj = self
                     .parse_url()
                     .map_err(|err| RequestError::InvalidUrl(err.to_string()))?;
-                let host = config.url_obj.host.clone().unwrap_or_default();
+                let host: String = config.url_obj.host.clone().unwrap_or_default();
                 let port = self.get_port(config.url_obj.port.clone().unwrap_or_default(), &config);
                 (host, port)
             } else {
                 (String::new(), 0u16)
             }
         };
-
         let mut stream: BoxAsyncReadWrite = self.get_connection_stream_async(host, port).await?;
-
         let res: Result<BoxResponseTrait, RequestError> = match methods {
             m if m.is_get() => self.send_get_request_async(&mut stream).await,
             m if m.is_post() => self.send_post_request_async(&mut stream).await,
@@ -620,7 +569,6 @@ impl HttpRequest {
                 err
             ))),
         };
-
         res
     }
 }

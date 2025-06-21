@@ -1,14 +1,4 @@
 use crate::*;
-use std::pin::Pin;
-use std::task::{Context, Poll};
-
-pub struct ProxyTunnelStream {
-    inner: BoxAsyncReadWrite,
-}
-
-pub struct SyncProxyTunnelStream {
-    inner: BoxReadWrite,
-}
 
 impl ProxyTunnelStream {
     pub fn new(stream: BoxAsyncReadWrite) -> Self {

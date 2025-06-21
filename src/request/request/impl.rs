@@ -77,17 +77,14 @@ impl HttpRequest {
     /// before constructing the HTTP request.
     pub(crate) fn get_header_bytes(&self) -> Vec<u8> {
         let mut header: RequestHeaders = self.get_header();
-
         let body_length: usize = if self.get_methods().is_get() {
             0usize
         } else {
             self.get_body_bytes().len()
         };
-
         if let Ok(config) = self.config.read() {
             let host_value: String = config.url_obj.host.clone().unwrap_or_default();
             let content_length_value: String = body_length.to_string();
-
             if !header.contains_key(HOST) {
                 header.insert(HOST.to_owned(), host_value);
             }
@@ -101,17 +98,14 @@ impl HttpRequest {
                 header.insert(USER_AGENT.to_owned(), APP_NAME.to_owned());
             }
         }
-
         let estimated_size: usize = header.iter().map(|(k, v)| k.len() + v.len() + 4).sum();
         let mut header_bytes: Vec<u8> = Vec::with_capacity(estimated_size);
-
         for (key, value) in &header {
             header_bytes.extend_from_slice(key.as_bytes());
             header_bytes.extend_from_slice(b": ");
             header_bytes.extend_from_slice(value.as_bytes());
             header_bytes.extend_from_slice(HTTP_BR_BYTES);
         }
-
         header_bytes
     }
 
@@ -135,7 +129,6 @@ impl HttpRequest {
     pub(crate) fn get_body_bytes(&self) -> Vec<u8> {
         let header: RequestHeaders = self.get_header();
         let body: Body = self.get_body();
-
         if let Some(content_type_value) = header.get(CONTENT_TYPE) {
             let res: String = content_type_value
                 .to_lowercase()
@@ -144,7 +137,6 @@ impl HttpRequest {
                 .get_body_string(&body);
             return res.into_bytes();
         }
-
         for (key, value) in &header {
             if key.eq_ignore_ascii_case(CONTENT_TYPE) {
                 let res: String = value
@@ -155,7 +147,6 @@ impl HttpRequest {
                 return res.into_bytes();
             }
         }
-
         String::new().into_bytes()
     }
 
@@ -272,20 +263,16 @@ impl HttpRequest {
         let request_line_size: usize =
             method_str.len() + 1 + path.len() + 1 + http_version_str.len();
         let total_size: usize = request_line_size + 2 + header_bytes.len() + 2 + body_bytes.len();
-
         let mut request: Vec<u8> = Vec::with_capacity(total_size);
-
         request.extend_from_slice(method_str.as_bytes());
         request.push(b' ');
         request.extend_from_slice(path.as_bytes());
         request.push(b' ');
         request.extend_from_slice(http_version_str.as_bytes());
         request.extend_from_slice(HTTP_BR_BYTES);
-
         request.extend_from_slice(&header_bytes);
         request.extend_from_slice(HTTP_BR_BYTES);
         request.extend_from_slice(&body_bytes);
-
         stream
             .write_all(&request)
             .and_then(|_| stream.flush())
@@ -317,15 +304,12 @@ impl HttpRequest {
             .read()
             .map_or(DEFAULT_BUFFER_SIZE, |config| config.buffer);
         let mut buffer: Vec<u8> = vec![0; buffer_size];
-
         let initial_capacity: usize = buffer_size.max(8192);
         let mut response_bytes: Vec<u8> = Vec::with_capacity(initial_capacity);
-
         let mut headers_done: bool = false;
         let mut content_length: usize = 0;
         let mut redirect_url: Option<Vec<u8>> = None;
         let mut headers_end_pos: usize = 0;
-
         let http_version: String = self
             .config
             .read()
@@ -334,21 +318,17 @@ impl HttpRequest {
             });
         let http_version_bytes: Vec<u8> = http_version.to_lowercase().into_bytes();
         let location_sign_key: Vec<u8> = format!("{}:", LOCATION.to_lowercase()).into_bytes();
-
         'read_loop: while let Ok(n) = stream.read(&mut buffer) {
             if n == 0 {
                 break;
             }
-
             if response_bytes.len() + n > response_bytes.capacity() {
                 let new_capacity: usize =
                     (response_bytes.capacity() * 2).max(response_bytes.len() + n);
                 response_bytes.reserve(new_capacity - response_bytes.capacity());
             }
-
             let old_len: usize = response_bytes.len();
             response_bytes.extend_from_slice(&buffer[..n]);
-
             if !headers_done {
                 let search_start: usize = old_len.saturating_sub(3);
                 if let Some(pos) = Self::find_double_crlf(&response_bytes, search_start) {
@@ -364,7 +344,6 @@ impl HttpRequest {
                     )?;
                 }
             }
-
             if headers_done {
                 let total_expected_length: usize = headers_end_pos + content_length;
                 if response_bytes.len() >= total_expected_length {
@@ -408,7 +387,6 @@ impl HttpRequest {
         {
             let status_code_start: usize = status_pos + http_version_bytes.len() + 1;
             let status_code_end: usize = status_code_start + 3;
-
             if status_code_end <= headers_bytes.len() {
                 let status_code: usize =
                     Self::parse_status_code(&headers_bytes[status_code_start..status_code_end]);
@@ -427,7 +405,6 @@ impl HttpRequest {
                 }
             }
         }
-
         *content_length = Self::get_content_length(headers_bytes);
         Ok(())
     }
@@ -436,16 +413,13 @@ impl HttpRequest {
         if needle.is_empty() || haystack.len() < needle.len() {
             return None;
         }
-
         let needle_len: usize = needle.len();
         let search_len: usize = haystack.len() - needle_len + 1;
         let first_needle_lower: u8 = needle[0].to_ascii_lowercase();
-
         'outer: for i in 0..search_len {
             if haystack[i].to_ascii_lowercase() != first_needle_lower {
                 continue;
             }
-
             for j in 1..needle_len {
                 if haystack[i + j].to_ascii_lowercase() != needle[j].to_ascii_lowercase() {
                     continue 'outer;
@@ -481,19 +455,15 @@ impl HttpRequest {
     }
 
     fn get_content_length(response_bytes: &[u8]) -> usize {
-        const CONTENT_LENGTH_PATTERN: &[u8] = b"content-length:";
-
         if let Some(pos) =
             Self::find_pattern_case_insensitive(response_bytes, CONTENT_LENGTH_PATTERN)
         {
             let value_start: usize = pos + CONTENT_LENGTH_PATTERN.len();
-
             let value_start: usize = if response_bytes.get(value_start) == Some(&b' ') {
                 value_start + 1
             } else {
                 value_start
             };
-
             if let Some(end_pos) = Self::find_crlf(response_bytes, value_start) {
                 let value_bytes: &[u8] = &response_bytes[value_start..end_pos];
                 return Self::parse_decimal_bytes(value_bytes);
@@ -514,7 +484,6 @@ impl HttpRequest {
     fn parse_decimal_bytes(bytes: &[u8]) -> usize {
         let mut result: usize = 0;
         let mut started: bool = false;
-
         for &byte in bytes {
             match byte {
                 b'0'..=b'9' => {
@@ -532,7 +501,6 @@ impl HttpRequest {
         if status_bytes.len() != 3 {
             return 0;
         }
-
         let mut result: usize = 0;
         for &byte in status_bytes {
             if byte >= b'0' && byte <= b'9' {
@@ -627,7 +595,6 @@ impl HttpRequest {
         tcp_stream
             .set_write_timeout(Some(timeout))
             .map_err(|err| RequestError::SetWriteTimeout(err.to_string()))?;
-
         let stream: Result<Box<dyn ReadWrite>, RequestError> =
             if Self::get_protocol(&config).is_https() {
                 match self.tmp.clone().read() {
@@ -727,7 +694,7 @@ impl HttpRequest {
             (&proxy_config.username, &proxy_config.password)
         {
             let auth: String = format!("{}:{}", username, password);
-            let auth_encoded: String = Self::base64_encode(auth.as_bytes());
+            let auth_encoded: String = base64_encode(auth.as_bytes());
             format!(
                 "CONNECT {}:{} HTTP/1.1\r\nHost: {}:{}\r\nProxy-Authorization: Basic {}\r\n\r\n",
                 target_host, target_port, target_host, target_port, auth_encoded
@@ -773,11 +740,10 @@ impl HttpRequest {
                         ClientConnection::new(Arc::clone(&client_config), dns_name)
                             .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
 
-                    let tunnel_stream =
-                        crate::request::proxy_tunnel::SyncProxyTunnelStream::new(proxy_stream);
+                    let tunnel_stream = crate::request::SyncProxyTunnelStream::new(proxy_stream);
                     let tls_stream: StreamOwned<
                         ClientConnection,
-                        crate::request::proxy_tunnel::SyncProxyTunnelStream,
+                        crate::request::SyncProxyTunnelStream,
                     > = StreamOwned::new(session, tunnel_stream);
                     return Ok(Box::new(tls_stream));
                 }
@@ -810,12 +776,12 @@ impl HttpRequest {
         tcp_stream
             .set_write_timeout(Some(timeout))
             .map_err(|err| RequestError::SetWriteTimeout(err.to_string()))?;
-
-        let auth_methods = if proxy_config.username.is_some() && proxy_config.password.is_some() {
-            vec![0x05, 0x02, 0x00, 0x02]
-        } else {
-            vec![0x05, 0x01, 0x00]
-        };
+        let auth_methods: Vec<u8> =
+            if proxy_config.username.is_some() && proxy_config.password.is_some() {
+                vec![0x05, 0x02, 0x00, 0x02]
+            } else {
+                vec![0x05, 0x01, 0x00]
+            };
         tcp_stream
             .write_all(&auth_methods)
             .map_err(|err| RequestError::Request(err.to_string()))?;
@@ -913,7 +879,7 @@ impl HttpRequest {
                     .map_err(|err| RequestError::Request(err.to_string()))?;
             }
             0x04 => {
-                let mut skip = [0u8; 18]; // IPv6 (16 bytes) + port (2 bytes)
+                let mut skip = [0u8; 18];
                 tcp_stream
                     .read_exact(&mut skip)
                     .map_err(|err| RequestError::Request(err.to_string()))?;
@@ -943,11 +909,10 @@ impl HttpRequest {
                         ClientConnection::new(Arc::clone(&client_config), dns_name)
                             .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
 
-                    let tunnel_stream =
-                        crate::request::proxy_tunnel::SyncProxyTunnelStream::new(proxy_stream);
+                    let tunnel_stream = crate::request::SyncProxyTunnelStream::new(proxy_stream);
                     let tls_stream: StreamOwned<
                         ClientConnection,
-                        crate::request::proxy_tunnel::SyncProxyTunnelStream,
+                        crate::request::SyncProxyTunnelStream,
                     > = StreamOwned::new(session, tunnel_stream);
                     return Ok(Box::new(tls_stream));
                 }
@@ -960,32 +925,6 @@ impl HttpRequest {
             }
         }
         Ok(proxy_stream)
-    }
-
-    /// Simple base64 encoding function
-    pub(crate) fn base64_encode(input: &[u8]) -> String {
-        const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-        let mut result: String = String::new();
-        for chunk in input.chunks(3) {
-            let mut buf: [u8; 3] = [0u8; 3];
-            for (i, &byte) in chunk.iter().enumerate() {
-                buf[i] = byte;
-            }
-            let b: u32 = ((buf[0] as u32) << 16) | ((buf[1] as u32) << 8) | (buf[2] as u32);
-            result.push(CHARS[((b >> 18) & 63) as usize] as char);
-            result.push(CHARS[((b >> 12) & 63) as usize] as char);
-            result.push(if chunk.len() > 1 {
-                CHARS[((b >> 6) & 63) as usize] as char
-            } else {
-                '='
-            });
-            result.push(if chunk.len() > 2 {
-                CHARS[(b & 63) as usize] as char
-            } else {
-                '='
-            });
-        }
-        result
     }
 }
 
