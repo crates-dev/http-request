@@ -102,7 +102,8 @@ impl RequestBuilder {
     /// Sets the headers for the request.
     ///
     /// This method allows you to specify the headers for the request being built.
-    /// Existing headers may be merged with the provided ones.
+    /// Existing headers may be merged with the provided ones. If a header with the same name
+    /// (case-insensitive) already exists, it will be replaced.
     ///
     /// # Parameters
     /// - `header`: The headers to be set for the request.
@@ -116,7 +117,23 @@ impl RequestBuilder {
     {
         if let Some(tmp_header) = Arc::get_mut(&mut self.http_request.header) {
             for (key, value) in header {
-                tmp_header.insert(key.to_string(), value.to_string());
+                let key_str: String = key.to_string();
+                let value_str: String = value.to_string();
+                let mut found_existing: bool = false;
+                let mut existing_key: Option<String> = None;
+                for existing_key_ref in tmp_header.keys() {
+                    if existing_key_ref.eq_ignore_ascii_case(&key_str) {
+                        existing_key = Some(existing_key_ref.clone());
+                        found_existing = true;
+                        break;
+                    }
+                }
+                if found_existing {
+                    if let Some(existing_key) = existing_key {
+                        tmp_header.remove(&existing_key);
+                    }
+                }
+                tmp_header.insert(key_str, value_str);
             }
         }
         self

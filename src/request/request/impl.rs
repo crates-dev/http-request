@@ -107,6 +107,12 @@ impl HttpRequest {
     ///
     /// This function ensures that all necessary headers are present and correctly formatted
     /// before constructing the HTTP request.
+    fn header_contains_key_case_insensitive(header: &RequestHeaders, target_key: &str) -> bool {
+        header
+            .keys()
+            .any(|key| key.eq_ignore_ascii_case(target_key))
+    }
+
     pub(crate) fn get_header_bytes(&self) -> Vec<u8> {
         let mut header: RequestHeaders = self.get_header();
         let body_length: usize = if self.get_methods().is_get() {
@@ -117,16 +123,16 @@ impl HttpRequest {
         if let Ok(config) = self.config.read() {
             let host_value: String = config.url_obj.host.clone().unwrap_or_default();
             let content_length_value: String = body_length.to_string();
-            if !header.contains_key(HOST) {
+            if !Self::header_contains_key_case_insensitive(&header, HOST) {
                 header.insert(HOST.to_owned(), host_value);
             }
-            if !header.contains_key(CONTENT_LENGTH) {
+            if !Self::header_contains_key_case_insensitive(&header, CONTENT_LENGTH) {
                 header.insert(CONTENT_LENGTH.to_owned(), content_length_value);
             }
-            if !header.contains_key(ACCEPT) {
+            if !Self::header_contains_key_case_insensitive(&header, ACCEPT) {
                 header.insert(ACCEPT.to_owned(), ACCEPT_ANY.to_owned());
             }
-            if !header.contains_key(USER_AGENT) {
+            if !Self::header_contains_key_case_insensitive(&header, USER_AGENT) {
                 header.insert(USER_AGENT.to_owned(), APP_NAME.to_owned());
             }
         }

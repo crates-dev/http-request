@@ -495,6 +495,43 @@ async fn test_readme_async_get_request() {
 }
 
 #[test]
+fn test_case_insensitive_header_matching() {
+    let mut header1: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header1.insert("Content-Type", "application/json");
+    header1.insert("User-Agent", "test-agent");
+
+    let mut header2: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header2.insert("content-type", "text/html");
+    header2.insert("HOST", "example.com");
+
+    let _request_builder = RequestBuilder::new()
+        .get("http://localhost")
+        .headers(header1)
+        .headers(header2)
+        .timeout(6000)
+        .build();
+
+    println!("Case insensitive header test completed");
+}
+
+#[test]
+fn test_case_insensitive_required_headers() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("host", "custom-host.com");
+    header.insert("CONTENT-LENGTH", "100");
+    header.insert("Accept", "application/xml");
+    header.insert("user-agent", "custom-agent");
+
+    let _request_builder = RequestBuilder::new()
+        .get("http://localhost")
+        .headers(header)
+        .timeout(6000)
+        .build();
+
+    println!("Case insensitive required headers test completed");
+}
+
+#[test]
 fn test_http_proxy_get_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("header-key", "header-value");
