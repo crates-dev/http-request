@@ -1,3 +1,3 @@
 use crate::*;
 
-pub type ArcRwLock<T> = Arc<RwLock<T>>;
+pub(crate) type ArcRwLock<T> = Arc<RwLock<T>>;

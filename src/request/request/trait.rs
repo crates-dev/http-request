@@ -1,5 +1,8 @@
 use crate::*;
 
+pub(crate) trait AsyncReadWrite: AsyncRead + AsyncWrite + Unpin + Send {}
+pub(crate) trait ReadWrite: Read + Write {}
+
 pub trait AsyncRequestTrait: Send + Debug {
     type RequestResult: Sized;
 

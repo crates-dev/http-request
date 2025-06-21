@@ -2,7 +2,6 @@ pub(crate) mod body;
 pub(crate) mod cfg;
 pub(crate) mod common;
 pub(crate) mod r#const;
-pub(crate) mod global_trait;
 pub(crate) mod request;
 pub(crate) mod response;
 pub(crate) mod utils;
@@ -21,7 +20,6 @@ pub use http_type::{
 pub(crate) use body::*;
 pub(crate) use common::*;
 pub(crate) use r#const::*;
-pub(crate) use global_trait::*;
 pub(crate) use utils::*;
 
 pub(crate) use futures::Future;

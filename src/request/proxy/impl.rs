@@ -1,7 +1,7 @@
 use crate::*;
 
 impl ProxyTunnelStream {
-    pub fn new(stream: BoxAsyncReadWrite) -> Self {
+    pub(crate) fn new(stream: BoxAsyncReadWrite) -> Self {
         Self { inner: stream }
     }
 }
@@ -43,7 +43,7 @@ impl AsyncWrite for ProxyTunnelStream {
 impl Unpin for ProxyTunnelStream {}
 
 impl SyncProxyTunnelStream {
-    pub fn new(stream: BoxReadWrite) -> Self {
+    pub(crate) fn new(stream: BoxReadWrite) -> Self {
         Self { inner: stream }
     }
 }
