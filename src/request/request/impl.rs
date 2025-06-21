@@ -85,16 +85,20 @@ impl HttpRequest {
         };
 
         if let Ok(config) = self.config.read() {
-            let required_headers: [(&str, String); 4] = [
-                (HOST, config.url_obj.host.clone().unwrap_or_default()),
-                (CONTENT_LENGTH, body_length.to_string()),
-                (ACCEPT, ACCEPT_ANY.to_owned()),
-                (USER_AGENT, APP_NAME.to_owned()),
-            ];
-            for (key, default_value) in required_headers {
-                if !header.contains_key(key) {
-                    header.insert(key.to_owned(), default_value);
-                }
+            let host_value: String = config.url_obj.host.clone().unwrap_or_default();
+            let content_length_value: String = body_length.to_string();
+
+            if !header.contains_key(HOST) {
+                header.insert(HOST.to_owned(), host_value);
+            }
+            if !header.contains_key(CONTENT_LENGTH) {
+                header.insert(CONTENT_LENGTH.to_owned(), content_length_value);
+            }
+            if !header.contains_key(ACCEPT) {
+                header.insert(ACCEPT.to_owned(), ACCEPT_ANY.to_owned());
+            }
+            if !header.contains_key(USER_AGENT) {
+                header.insert(USER_AGENT.to_owned(), APP_NAME.to_owned());
             }
         }
 
@@ -131,18 +135,28 @@ impl HttpRequest {
     fn get_body_bytes(&self) -> Vec<u8> {
         let header: RequestHeaders = self.get_header();
         let body: Body = self.get_body();
-        let mut res: String = String::new();
-        for (key, value) in header {
+
+        if let Some(content_type_value) = header.get(CONTENT_TYPE) {
+            let res: String = content_type_value
+                .to_lowercase()
+                .parse::<ContentType>()
+                .unwrap_or_default()
+                .get_body_string(&body);
+            return res.into_bytes();
+        }
+
+        for (key, value) in &header {
             if key.eq_ignore_ascii_case(CONTENT_TYPE) {
-                res = value
+                let res: String = value
                     .to_lowercase()
                     .parse::<ContentType>()
                     .unwrap_or_default()
                     .get_body_string(&body);
-                break;
+                return res.into_bytes();
             }
         }
-        res.into_bytes()
+
+        String::new().into_bytes()
     }
 
     /// Retrieves the full path of the HTTP request, including the query string if present.
@@ -336,13 +350,10 @@ impl HttpRequest {
             response_bytes.extend_from_slice(&buffer[..n]);
 
             if !headers_done {
-                let search_start: usize = old_len.saturating_sub(HTTP_DOUBLE_BR_BYTES.len() - 1);
-                if let Some(pos) = response_bytes[search_start..]
-                    .windows(HTTP_DOUBLE_BR_BYTES.len())
-                    .position(|window| window == HTTP_DOUBLE_BR_BYTES)
-                {
+                let search_start: usize = old_len.saturating_sub(3);
+                if let Some(pos) = Self::find_double_crlf(&response_bytes, search_start) {
                     headers_done = true;
-                    headers_end_pos = search_start + pos + HTTP_DOUBLE_BR_BYTES.len();
+                    headers_end_pos = pos + 4;
 
                     self.parse_response_headers(
                         &response_bytes[..headers_end_pos],
@@ -392,9 +403,8 @@ impl HttpRequest {
         content_length: &mut usize,
         redirect_url: &mut Option<Vec<u8>>,
     ) -> Result<(), RequestError> {
-        if let Some(status_pos) = headers_bytes
-            .windows(http_version_bytes.len())
-            .position(|window: &[u8]| case_insensitive_match(window, http_version_bytes))
+        if let Some(status_pos) =
+            Self::find_pattern_case_insensitive(headers_bytes, http_version_bytes)
         {
             let status_code_start: usize = status_pos + http_version_bytes.len() + 1;
             let status_code_end: usize = status_code_start + 3;
@@ -404,16 +414,14 @@ impl HttpRequest {
                     Self::parse_status_code(&headers_bytes[status_code_start..status_code_end]);
 
                 if (300..=399).contains(&status_code) {
-                    if let Some(location_pos) = headers_bytes
-                        .windows(location_sign_key.len())
-                        .position(|window: &[u8]| case_insensitive_match(window, location_sign_key))
+                    if let Some(location_pos) =
+                        Self::find_pattern_case_insensitive(headers_bytes, location_sign_key)
                     {
                         let start: usize = location_pos + location_sign_key.len();
-                        if let Some(end_pos) = headers_bytes[start..]
-                            .windows(HTTP_BR_BYTES.len())
-                            .position(|window: &[u8]| window == HTTP_BR_BYTES)
-                        {
-                            *redirect_url = Some(headers_bytes[start..start + end_pos].to_vec());
+                        if let Some(end_pos) = Self::find_crlf(headers_bytes, start) {
+                            let mut url_vec = Vec::with_capacity(end_pos - start);
+                            url_vec.extend_from_slice(&headers_bytes[start..end_pos]);
+                            *redirect_url = Some(url_vec);
                         }
                     }
                 }
@@ -424,19 +432,61 @@ impl HttpRequest {
         Ok(())
     }
 
+    fn find_pattern_case_insensitive(haystack: &[u8], needle: &[u8]) -> Option<usize> {
+        if needle.is_empty() || haystack.len() < needle.len() {
+            return None;
+        }
+
+        let needle_len: usize = needle.len();
+        let search_len: usize = haystack.len() - needle_len + 1;
+        let first_needle_lower: u8 = needle[0].to_ascii_lowercase();
+
+        'outer: for i in 0..search_len {
+            if haystack[i].to_ascii_lowercase() != first_needle_lower {
+                continue;
+            }
+
+            for j in 1..needle_len {
+                if haystack[i + j].to_ascii_lowercase() != needle[j].to_ascii_lowercase() {
+                    continue 'outer;
+                }
+            }
+            return Some(i);
+        }
+        None
+    }
+
+    fn find_crlf(data: &[u8], start: usize) -> Option<usize> {
+        let search_data: &[u8] = &data[start..];
+        for i in 0..search_data.len().saturating_sub(1) {
+            if search_data[i] == b'\r' && search_data[i + 1] == b'\n' {
+                return Some(start + i);
+            }
+        }
+        None
+    }
+
+    fn find_double_crlf(data: &[u8], start: usize) -> Option<usize> {
+        let search_data: &[u8] = &data[start..];
+        for i in 0..search_data.len().saturating_sub(3) {
+            if search_data[i] == b'\r'
+                && search_data[i + 1] == b'\n'
+                && search_data[i + 2] == b'\r'
+                && search_data[i + 3] == b'\n'
+            {
+                return Some(start + i);
+            }
+        }
+        None
+    }
+
     fn get_content_length(response_bytes: &[u8]) -> usize {
-        const CONTENT_LENGTH_LOWER: &[u8] = b"content-length:";
-        const CONTENT_LENGTH_UPPER: &[u8] = b"Content-Length:";
+        const CONTENT_LENGTH_PATTERN: &[u8] = b"content-length:";
 
-        let header_pos: Option<usize> = response_bytes
-            .windows(CONTENT_LENGTH_LOWER.len())
-            .position(|window: &[u8]| {
-                window.eq_ignore_ascii_case(CONTENT_LENGTH_LOWER)
-                    || window.eq_ignore_ascii_case(CONTENT_LENGTH_UPPER)
-            });
-
-        if let Some(pos) = header_pos {
-            let value_start: usize = pos + CONTENT_LENGTH_LOWER.len();
+        if let Some(pos) =
+            Self::find_pattern_case_insensitive(response_bytes, CONTENT_LENGTH_PATTERN)
+        {
+            let value_start: usize = pos + CONTENT_LENGTH_PATTERN.len();
 
             let value_start: usize = if response_bytes.get(value_start) == Some(&b' ') {
                 value_start + 1
@@ -444,14 +494,9 @@ impl HttpRequest {
                 value_start
             };
 
-            if let Some(end_pos) = response_bytes[value_start..]
-                .windows(2)
-                .position(|window: &[u8]| window == b"\r\n")
-            {
-                let value_bytes: &[u8] = &response_bytes[value_start..value_start + end_pos];
-                if let Ok(value_str) = std::str::from_utf8(value_bytes) {
-                    return value_str.trim().parse::<usize>().unwrap_or(0);
-                }
+            if let Some(end_pos) = Self::find_crlf(response_bytes, value_start) {
+                let value_bytes: &[u8] = &response_bytes[value_start..end_pos];
+                return Self::parse_decimal_bytes(value_bytes);
             }
         }
         0
@@ -466,9 +511,37 @@ impl HttpRequest {
     ///
     /// # Returns
     /// Returns the parsed status code as `usize`. If parsing fails, returns `0`.
+    fn parse_decimal_bytes(bytes: &[u8]) -> usize {
+        let mut result: usize = 0;
+        let mut started: bool = false;
+
+        for &byte in bytes {
+            match byte {
+                b'0'..=b'9' => {
+                    started = true;
+                    result = result * 10 + (byte - b'0') as usize;
+                }
+                b' ' | b'\t' if !started => continue,
+                _ => break,
+            }
+        }
+        result
+    }
+
     fn parse_status_code(status_bytes: &[u8]) -> usize {
-        let status_str: &str = std::str::from_utf8(status_bytes).unwrap_or_default();
-        status_str.trim().parse::<usize>().unwrap_or_default()
+        if status_bytes.len() != 3 {
+            return 0;
+        }
+
+        let mut result: usize = 0;
+        for &byte in status_bytes {
+            if byte >= b'0' && byte <= b'9' {
+                result = result * 10 + (byte - b'0') as usize;
+            } else {
+                return 0;
+            }
+        }
+        result
     }
 
     /// Handles HTTP redirects by following the redirection URL.

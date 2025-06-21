@@ -51,21 +51,3 @@ pub fn split_multi_byte<'a>(data: &'a [u8], delimiter: &'a [u8]) -> Vec<&'a [u8]
     }
     result
 }
-
-/// Compares two byte slices case-insensitively.
-///
-/// This function checks if two byte slices are equal, ignoring case differences.
-///
-/// # Parameters
-/// - `first`: The first byte slice.
-/// - `second`: The second byte slice.
-///
-/// # Returns
-/// Returns `true` if the slices match case-insensitively, otherwise `false`.
-pub fn case_insensitive_match(first: &[u8], second: &[u8]) -> bool {
-    first.len() == second.len()
-        && first
-            .iter()
-            .zip(second)
-            .all(|(byte1, byte2)| byte1.to_ascii_lowercase() == byte2.to_ascii_lowercase())
-}

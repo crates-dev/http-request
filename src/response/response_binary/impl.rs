@@ -61,13 +61,21 @@ impl ResponseTrait for HttpResponseBinary {
                 break;
             }
 
-            if let Some(colon_pos) = line.iter().position(|&b: &u8| b == b':') {
-                if colon_pos > 0 && colon_pos + 1 < line.len() {
-                    let key_bytes: &[u8] = &line[..colon_pos];
-                    let value_start: usize = if line.get(colon_pos + 1) == Some(&b' ') {
-                        colon_pos + 2
+            let mut colon_pos: Option<usize> = None;
+            for (i, &byte) in line.iter().enumerate() {
+                if byte == b':' {
+                    colon_pos = Some(i);
+                    break;
+                }
+            }
+
+            if let Some(pos) = colon_pos {
+                if pos > 0 && pos + 1 < line.len() {
+                    let key_bytes: &[u8] = &line[..pos];
+                    let value_start: usize = if line.get(pos + 1) == Some(&b' ') {
+                        pos + 2
                     } else {
-                        colon_pos + 1
+                        pos + 1
                     };
                     let value_bytes: &[u8] = &line[value_start..];
 
@@ -81,26 +89,34 @@ impl ResponseTrait for HttpResponseBinary {
             }
         }
 
-        let body: Vec<u8> = if lines.len() == 0 {
-            Vec::new()
-        } else if lines.len() == 1 {
-            lines.next().unwrap_or(&[]).to_vec()
-        } else {
-            let total_size: usize = lines
-                .as_slice()
-                .iter()
-                .map(|line: &&[u8]| line.len())
-                .sum::<usize>()
-                + (lines.len().saturating_sub(1)) * BR_BYTES.len();
-            let mut body: Vec<u8> = Vec::with_capacity(total_size);
-
-            for (i, line) in lines.enumerate() {
-                if i > 0 {
-                    body.extend_from_slice(BR_BYTES);
-                }
+        let body: Vec<u8> = match lines.len() {
+            0 => Vec::new(),
+            1 => {
+                let line = lines.next().unwrap_or(&[]);
+                let mut body = Vec::with_capacity(line.len());
                 body.extend_from_slice(line);
+                body
             }
-            body
+            _ => {
+                let lines_slice = lines.as_slice();
+                let total_size: usize = lines_slice
+                    .iter()
+                    .map(|line: &&[u8]| line.len())
+                    .sum::<usize>()
+                    + lines_slice.len().saturating_sub(1) * BR_BYTES.len();
+
+                let mut body: Vec<u8> = Vec::with_capacity(total_size);
+                let mut first: bool = true;
+
+                for line in lines {
+                    if !first {
+                        body.extend_from_slice(BR_BYTES);
+                    }
+                    body.extend_from_slice(line);
+                    first = false;
+                }
+                body
+            }
         };
 
         HttpResponseBinary {
