@@ -5,6 +5,7 @@ pub(crate) mod websocket;
 pub(crate) mod websocket_builder;
 
 pub use shared::*;
+pub use websocket::{BoxAsyncWebSocketTrait, BoxWebSocketTrait};
 pub use websocket_builder::*;
 
 pub(crate) use config::*;

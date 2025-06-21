@@ -1,6 +1,6 @@
 use crate::*;
 
-pub(crate) trait WebSocketTrait: Send + Sync {
+pub trait WebSocketTrait: Send + Sync {
     fn send_text(&mut self, text: &str) -> WebSocketResult;
     fn send_binary(&mut self, data: &[u8]) -> WebSocketResult;
     fn send_ping(&mut self, data: &[u8]) -> WebSocketResult;
@@ -10,7 +10,7 @@ pub(crate) trait WebSocketTrait: Send + Sync {
     fn is_connected(&self) -> bool;
 }
 
-pub(crate) trait AsyncWebSocketTrait: Send + Sync {
+pub trait AsyncWebSocketTrait: Send + Sync {
     fn send_text<'a>(
         &'a mut self,
         text: &'a str,
