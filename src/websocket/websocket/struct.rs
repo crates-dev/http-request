@@ -1,10 +1,12 @@
 use crate::*;
-use std::sync::atomic::AtomicBool;
-use tokio::net::TcpStream;
-use tokio::sync::Mutex;
-use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 
-type WebSocketConnection = Arc<Mutex<Option<WebSocketStream<MaybeTlsStream<TcpStream>>>>>;
+#[derive(Debug)]
+pub enum WebSocketConnectionType {
+    Direct(WebSocketStream<MaybeTlsStream<AsyncTcpStream>>),
+    Proxy(WebSocketStream<WebSocketProxyTunnelStream>),
+}
+
+type WebSocketConnection = Arc<AsyncMutex<Option<WebSocketConnectionType>>>;
 
 #[derive(Debug)]
 pub struct WebSocket {
@@ -22,7 +24,7 @@ impl Clone for WebSocket {
             header: self.header.clone(),
             config: self.config.clone(),
             connected: Arc::new(AtomicBool::new(false)),
-            connection: Arc::new(Mutex::new(None)),
+            connection: Arc::new(AsyncMutex::new(None)),
         }
     }
 }
@@ -34,7 +36,54 @@ impl Default for WebSocket {
             header: Arc::new(hash_map_xx_hash3_64()),
             config: Arc::new(RwLock::new(WebSocketConfig::default())),
             connected: Arc::new(AtomicBool::new(false)),
-            connection: Arc::new(Mutex::new(None)),
+            connection: Arc::new(AsyncMutex::new(None)),
+        }
+    }
+}
+
+impl Stream for WebSocketConnectionType {
+    type Item =
+        Result<tokio_tungstenite::tungstenite::Message, tokio_tungstenite::tungstenite::Error>;
+
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        match &mut *self {
+            WebSocketConnectionType::Direct(stream) => Pin::new(stream).poll_next(cx),
+            WebSocketConnectionType::Proxy(stream) => Pin::new(stream).poll_next(cx),
+        }
+    }
+}
+
+impl Sink<tokio_tungstenite::tungstenite::Message> for WebSocketConnectionType {
+    type Error = tokio_tungstenite::tungstenite::Error;
+
+    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        match &mut *self {
+            WebSocketConnectionType::Direct(stream) => Pin::new(stream).poll_ready(cx),
+            WebSocketConnectionType::Proxy(stream) => Pin::new(stream).poll_ready(cx),
+        }
+    }
+
+    fn start_send(
+        mut self: Pin<&mut Self>,
+        item: tokio_tungstenite::tungstenite::Message,
+    ) -> Result<(), Self::Error> {
+        match &mut *self {
+            WebSocketConnectionType::Direct(stream) => Pin::new(stream).start_send(item),
+            WebSocketConnectionType::Proxy(stream) => Pin::new(stream).start_send(item),
+        }
+    }
+
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        match &mut *self {
+            WebSocketConnectionType::Direct(stream) => Pin::new(stream).poll_flush(cx),
+            WebSocketConnectionType::Proxy(stream) => Pin::new(stream).poll_flush(cx),
+        }
+    }
+
+    fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        match &mut *self {
+            WebSocketConnectionType::Direct(stream) => Pin::new(stream).poll_close(cx),
+            WebSocketConnectionType::Proxy(stream) => Pin::new(stream).poll_close(cx),
         }
     }
 }

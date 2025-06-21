@@ -1,7 +1,7 @@
 use crate::*;
 
 impl std::fmt::Display for WebSocketError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self.kind {
             WebSocketErrorKind::Connection => write!(f, "Connection error: {}", self.message),
             WebSocketErrorKind::Protocol => write!(f, "Protocol error: {}", self.message),
@@ -64,9 +64,7 @@ impl SharedWebSocketBuilder {
         if url.is_empty() {
             return Err(WebSocketError::invalid_url("URL is empty"));
         }
-
         let mut url_obj: HttpUrlComponents = HttpUrlComponents::default();
-
         if url.starts_with("ws://") {
             url_obj.protocol = Protocol::HTTP;
             url_obj.port = Some(80);
@@ -76,17 +74,14 @@ impl SharedWebSocketBuilder {
         } else {
             return Err(WebSocketError::invalid_url("Invalid WebSocket URL scheme"));
         }
-
         let without_protocol: &str = if url.starts_with("ws://") {
             &url[5..]
         } else {
             &url[6..]
         };
-
         let parts: Vec<&str> = without_protocol.splitn(2, '/').collect();
         let host_port: &str = parts[0];
         let path: &str = if parts.len() > 1 { parts[1] } else { "" };
-
         if host_port.contains(':') {
             let host_port_parts: Vec<&str> = host_port.splitn(2, ':').collect();
             url_obj.host = Some(host_port_parts[0].to_string());
@@ -96,13 +91,11 @@ impl SharedWebSocketBuilder {
         } else {
             url_obj.host = Some(host_port.to_string());
         }
-
         url_obj.path = Some(if path.is_empty() {
             "/".to_string()
         } else {
             format!("/{}", path)
         });
-
         Ok(url_obj)
     }
 }

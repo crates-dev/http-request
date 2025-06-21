@@ -24,7 +24,7 @@ pub(crate) use common::*;
 pub(crate) use r#const::*;
 pub(crate) use utils::*;
 
-pub(crate) use futures::Future;
+pub(crate) use futures::{Future, Sink, Stream};
 pub(crate) use http_type::{
     ACCEPT, ACCEPT_ANY, BR_BYTES, CONTENT_LENGTH, CONTENT_TYPE, Compress, ContentType,
     DEFAULT_BUFFER_SIZE, DEFAULT_HTTP_PATH, DEFAULT_MAX_REDIRECT_TIMES, DEFAULT_TIMEOUT, EMPTY_STR,
@@ -39,12 +39,12 @@ pub(crate) use serde::{Serialize, Serializer};
 pub(crate) use std::{
     borrow::Cow,
     collections::HashSet,
-    fmt::{self, Debug, Display},
+    fmt::{self, Debug, Display, Formatter},
     io::{Read, Write},
     net::{Ipv4Addr, Ipv6Addr, TcpStream},
     pin::Pin,
     str::from_utf8,
-    sync::{Arc, RwLock},
+    sync::{Arc, RwLock, atomic::AtomicBool},
     task::{Context, Poll},
     time::Duration,
     vec::IntoIter,
@@ -52,8 +52,10 @@ pub(crate) use std::{
 pub(crate) use tokio::{
     io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt},
     net::TcpStream as AsyncTcpStream,
+    sync::{Mutex as AsyncMutex, MutexGuard as AsyncMutexGuard},
 };
 pub(crate) use tokio_rustls::{TlsConnector, client::TlsStream};
+pub(crate) use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 pub(crate) use webpki_roots::TLS_SERVER_ROOTS;
 
 #[cfg(test)]

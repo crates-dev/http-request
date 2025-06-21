@@ -7,7 +7,7 @@ impl Default for Body {
 }
 
 impl Display for Body {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             Self::Text(text) => write!(f, "{}", text.to_string()),
             Self::Json(json) => write!(

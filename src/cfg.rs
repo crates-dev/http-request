@@ -552,7 +552,7 @@ fn test_sync_websocket_connection() {
 }
 
 #[test]
-fn test_websocket_with_proxy() {
+fn test_websocket_with_http_proxy() {
     let mut websocket_builder = WebSocketBuilder::new()
         .connect("wss://echo.websocket.org/")
         .timeout(10000)
@@ -560,10 +560,121 @@ fn test_websocket_with_proxy() {
         .http_proxy("127.0.0.1", 7890)
         .build_sync();
 
-    websocket_builder
-        .send_text("Hello WebSocket with proxy!")
-        .and_then(|_| websocket_builder.close())
-        .unwrap_or_else(|e| println!("Proxy WebSocket Error => {}", e));
+    match websocket_builder.send_text("Hello WebSocket with HTTP proxy!") {
+        Ok(_) => println!("WebSocket HTTP proxy test unexpectedly succeeded"),
+        Err(e) => {
+            let error_msg = e.to_string();
+            assert!(error_msg.contains("Proxy support not yet implemented"));
+            println!("WebSocket HTTP proxy test correctly failed: {}", e);
+        }
+    }
+}
+
+#[test]
+fn test_websocket_with_https_proxy() {
+    let mut websocket_builder = WebSocketBuilder::new()
+        .connect("wss://echo.websocket.org/")
+        .timeout(10000)
+        .buffer(4096)
+        .https_proxy("127.0.0.1", 7890)
+        .build_sync();
+
+    match websocket_builder.send_text("Hello WebSocket with HTTPS proxy!") {
+        Ok(_) => println!("WebSocket HTTPS proxy test unexpectedly succeeded"),
+        Err(e) => {
+            let error_msg = e.to_string();
+            assert!(error_msg.contains("Proxy support not yet implemented"));
+            println!("WebSocket HTTPS proxy test correctly failed: {}", e);
+        }
+    }
+}
+
+#[test]
+fn test_websocket_with_socks5_proxy() {
+    let mut websocket_builder = WebSocketBuilder::new()
+        .connect("wss://echo.websocket.org/")
+        .timeout(10000)
+        .buffer(4096)
+        .socks5_proxy("127.0.0.1", 1080)
+        .build_sync();
+
+    match websocket_builder.send_text("Hello WebSocket with SOCKS5 proxy!") {
+        Ok(_) => println!("WebSocket SOCKS5 proxy test unexpectedly succeeded"),
+        Err(e) => {
+            let error_msg = e.to_string();
+            assert!(error_msg.contains("Proxy support not yet implemented"));
+            println!("WebSocket SOCKS5 proxy test correctly failed: {}", e);
+        }
+    }
+}
+
+#[test]
+fn test_websocket_with_http_proxy_auth() {
+    let mut websocket_builder = WebSocketBuilder::new()
+        .connect("wss://echo.websocket.org/")
+        .timeout(10000)
+        .buffer(4096)
+        .http_proxy_auth("127.0.0.1", 7890, "username", "password")
+        .build_sync();
+
+    match websocket_builder.send_text("Hello WebSocket with HTTP proxy auth!") {
+        Ok(_) => println!("WebSocket HTTP proxy auth test unexpectedly succeeded"),
+        Err(e) => {
+            let error_msg = e.to_string();
+            assert!(error_msg.contains("Proxy support not yet implemented"));
+            println!("WebSocket HTTP proxy auth test correctly failed: {}", e);
+        }
+    }
+}
+
+#[tokio::test]
+async fn test_websocket_with_socks5_proxy_auth_async() {
+    let mut websocket_builder = WebSocketBuilder::new()
+        .connect("wss://echo.websocket.org/")
+        .timeout(10000)
+        .buffer(4096)
+        .socks5_proxy_auth("127.0.0.1", 1080, "username", "password")
+        .build_async();
+
+    match websocket_builder
+        .send_text_async("Hello WebSocket with SOCKS5 proxy auth!")
+        .await
+    {
+        Ok(_) => println!("WebSocket SOCKS5 proxy auth async test unexpectedly succeeded"),
+        Err(e) => {
+            let error_msg = e.to_string();
+            assert!(error_msg.contains("Proxy support not yet implemented"));
+            println!(
+                "WebSocket SOCKS5 proxy auth async test correctly failed: {}",
+                e
+            );
+        }
+    }
+}
+
+#[tokio::test]
+async fn test_websocket_with_https_proxy_auth_async() {
+    let mut websocket_builder = WebSocketBuilder::new()
+        .connect("wss://echo.websocket.org/")
+        .timeout(10000)
+        .buffer(4096)
+        .https_proxy_auth("127.0.0.1", 7890, "username", "password")
+        .build_async();
+
+    match websocket_builder
+        .send_text_async("Hello WebSocket with HTTPS proxy auth!")
+        .await
+    {
+        Ok(_) => println!("WebSocket HTTPS proxy auth async test unexpectedly succeeded"),
+        Err(e) => {
+            let error_msg = e.to_string();
+            assert!(error_msg.contains("Proxy support not yet implemented"));
+            println!(
+                "WebSocket HTTPS proxy auth async test correctly failed: {}",
+                e
+            );
+        }
+    }
 }
 
 #[tokio::test]
