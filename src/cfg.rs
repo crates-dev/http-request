@@ -473,6 +473,100 @@ fn test_readme_sync_post_binary_request() {
 }
 
 #[tokio::test]
+async fn test_async_websocket_connection() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("Authorization", "Bearer test-token");
+
+    let mut websocket_builder = WebSocketBuilder::new()
+        .connect("wss://echo.websocket.org/")
+        .headers(header)
+        .timeout(10000)
+        .buffer(4096)
+        .protocols(&["chat", "superchat"])
+        .build_async();
+
+    match websocket_builder.send_text_async("Hello WebSocket!").await {
+        Ok(_) => {
+            println!("Async WebSocket text message sent successfully");
+            match websocket_builder.send_binary_async(b"binary data").await {
+                Ok(_) => {
+                    println!("Async WebSocket binary message sent successfully");
+                    match websocket_builder.receive_async().await {
+                        Ok(message) => match message {
+                            WebSocketMessage::Text(text) => println!("Received text: {}", text),
+                            WebSocketMessage::Binary(data) => {
+                                println!("Received binary: {:?}", data)
+                            }
+                            WebSocketMessage::Close => println!("Connection closed"),
+                            _ => println!("Received other message type"),
+                        },
+                        Err(e) => println!("Error receiving message: {}", e),
+                    }
+                }
+                Err(e) => println!("Error sending binary: {}", e),
+            }
+        }
+        Err(e) => println!("Error sending text: {}", e),
+    }
+
+    websocket_builder
+        .close_async_method()
+        .await
+        .unwrap_or_else(|e| println!("Error closing: {}", e));
+}
+
+#[test]
+fn test_sync_websocket_connection() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("Authorization", "Bearer test-token");
+
+    let mut websocket_builder = WebSocketBuilder::new()
+        .connect("wss://echo.websocket.org/")
+        .headers(header)
+        .timeout(10000)
+        .buffer(4096)
+        .protocols(&["chat", "superchat"])
+        .build_sync();
+
+    websocket_builder
+        .send_text("Hello WebSocket!")
+        .and_then(|_| {
+            println!("Sync WebSocket text message sent successfully");
+            websocket_builder.send_binary(b"binary data")
+        })
+        .and_then(|_| {
+            println!("Sync WebSocket binary message sent successfully");
+            match websocket_builder.receive() {
+                Ok(message) => match message {
+                    WebSocketMessage::Text(text) => println!("Received text: {}", text),
+                    WebSocketMessage::Binary(data) => println!("Received binary: {:?}", data),
+                    WebSocketMessage::Close => println!("Connection closed"),
+                    _ => println!("Received other message type"),
+                },
+                Err(e) => println!("Error receiving message: {}", e),
+            }
+            Ok(())
+        })
+        .and_then(|_| websocket_builder.close())
+        .unwrap_or_else(|e| println!("Error => {}", e));
+}
+
+#[test]
+fn test_websocket_with_proxy() {
+    let mut websocket_builder = WebSocketBuilder::new()
+        .connect("wss://echo.websocket.org/")
+        .timeout(10000)
+        .buffer(4096)
+        .http_proxy("127.0.0.1", 7890)
+        .build_sync();
+
+    websocket_builder
+        .send_text("Hello WebSocket with proxy!")
+        .and_then(|_| websocket_builder.close())
+        .unwrap_or_else(|e| println!("Proxy WebSocket Error => {}", e));
+}
+
+#[tokio::test]
 async fn test_readme_async_get_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("header-key", "header-value");

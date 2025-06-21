@@ -24,6 +24,8 @@ webpki-roots = "1.0.1"
 tokio = { version = "1.0", features = ["full"] }
 tokio-rustls = "0.26.0"
 futures = "0.3"
+tokio-tungstenite = "0.24.0"
+tungstenite = "0.24.0"
 
 [profile.dev]
 incremental = true
