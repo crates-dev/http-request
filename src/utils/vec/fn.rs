@@ -1,6 +1,6 @@
 use crate::*;
 
-pub fn split_whitespace(input: &[u8]) -> Vec<&[u8]> {
+pub(crate) fn split_whitespace(input: &[u8]) -> Vec<&[u8]> {
     let mut parts: Vec<&[u8]> = Vec::new();
     let mut start: usize = 0;
     for (i, &byte) in input.iter().enumerate() {
@@ -17,7 +17,7 @@ pub fn split_whitespace(input: &[u8]) -> Vec<&[u8]> {
     parts
 }
 
-pub fn split_multi_byte<'a>(data: &'a [u8], delimiter: &'a [u8]) -> Vec<&'a [u8]> {
+pub(crate) fn split_multi_byte<'a>(data: &'a [u8], delimiter: &'a [u8]) -> Vec<&'a [u8]> {
     let mut result: Vec<&[u8]> = Vec::new();
     let mut start: usize = 0;
     for i in 0..=data.len() {
