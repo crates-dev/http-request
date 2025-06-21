@@ -1,4 +1,5 @@
 pub(crate) mod config;
+pub(crate) mod proxy_tunnel;
 pub(crate) mod request;
 pub(crate) mod request_builder;
 pub(crate) mod tmp;

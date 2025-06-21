@@ -150,6 +150,114 @@ request_builder
     .unwrap_or_else(|e| println!("Error => {}", e));
 ```
 
+### Send request with HTTP proxy
+
+```rs
+use http_request::*;
+
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+header.insert("header-key", "header-value");
+let mut request_builder = RequestBuilder::new()
+    .get("https://ltpp.vip/")
+    .headers(header)
+    .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
+    .http1_1_only()
+    .buffer(4096)
+    .decode()
+    .http_proxy("proxy.example.com", 8080)
+    .build();
+request_builder
+    .send()
+    .and_then(|response| {
+        println!("{:?}", response.text());
+        Ok(())
+    })
+    .unwrap_or_else(|e| println!("Error => {}", e));
+```
+
+### Send request with HTTP proxy authentication
+
+```rs
+use http_request::*;
+
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+header.insert("header-key", "header-value");
+let mut request_builder = RequestBuilder::new()
+    .get("https://ltpp.vip/")
+    .headers(header)
+    .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
+    .http1_1_only()
+    .buffer(4096)
+    .decode()
+    .http_proxy_auth("proxy.example.com", 8080, "username", "password")
+    .build();
+request_builder
+    .send()
+    .and_then(|response| {
+        println!("{:?}", response.text());
+        Ok(())
+    })
+    .unwrap_or_else(|e| println!("Error => {}", e));
+```
+
+### Send request with SOCKS5 proxy
+
+```rs
+use http_request::*;
+
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+header.insert("header-key", "header-value");
+let mut request_builder = RequestBuilder::new()
+    .get("http://httpbin.org/get")
+    .headers(header)
+    .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
+    .http1_1_only()
+    .buffer(4096)
+    .decode()
+    .socks5_proxy("127.0.0.1", 1080)
+    .build();
+request_builder
+    .send()
+    .and_then(|response| {
+        println!("{:?}", response.text());
+        Ok(())
+    })
+    .unwrap_or_else(|e| println!("Error => {}", e));
+```
+
+### Send request with SOCKS5 proxy authentication
+
+```rs
+use http_request::*;
+
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+header.insert("header-key", "header-value");
+let mut request_builder = RequestBuilder::new()
+    .get("http://httpbin.org/get")
+    .headers(header)
+    .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
+    .http1_1_only()
+    .buffer(4096)
+    .decode()
+    .socks5_proxy_auth("127.0.0.1", 1080, "username", "password")
+    .build();
+request_builder
+    .send()
+    .and_then(|response| {
+        println!("{:?}", response.text());
+        Ok(())
+    })
+    .unwrap_or_else(|e| println!("Error => {}", e));
+```
+
 ## Asynchronous
 
 ### Send get request
@@ -253,6 +361,110 @@ let mut request_builder = RequestBuilder::new()
 match request_builder.send().await {
     Ok(response) => {
         println!("{:?}", response.decode(4096).text());
+    }
+    Err(e) => println!("Error => {}", e),
+}
+```
+
+### Send request with HTTP proxy
+
+```rs
+use http_request::*;
+
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+header.insert("header-key", "header-value");
+let mut request_builder = RequestBuilder::new()
+    .get("https://ltpp.vip/")
+    .headers(header)
+    .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
+    .http1_1_only()
+    .buffer(4096)
+    .decode()
+    .http_proxy("proxy.example.com", 8080)
+    .build_async();
+match request_builder.send().await {
+    Ok(response) => {
+        println!("{:?}", response.text());
+    }
+    Err(e) => println!("Error => {}", e),
+}
+```
+
+### Send request with HTTP proxy authentication
+
+```rs
+use http_request::*;
+
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+header.insert("header-key", "header-value");
+let mut request_builder = RequestBuilder::new()
+    .get("https://ltpp.vip/")
+    .headers(header)
+    .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
+    .http1_1_only()
+    .buffer(4096)
+    .decode()
+    .http_proxy_auth("proxy.example.com", 8080, "username", "password")
+    .build_async();
+match request_builder.send().await {
+    Ok(response) => {
+        println!("{:?}", response.text());
+    }
+    Err(e) => println!("Error => {}", e),
+}
+```
+
+### Send request with SOCKS5 proxy
+
+```rs
+use http_request::*;
+
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+header.insert("header-key", "header-value");
+let mut request_builder = RequestBuilder::new()
+    .get("http://httpbin.org/get")
+    .headers(header)
+    .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
+    .http1_1_only()
+    .buffer(4096)
+    .decode()
+    .socks5_proxy("127.0.0.1", 1080)
+    .build_async();
+match request_builder.send().await {
+    Ok(response) => {
+        println!("{:?}", response.text());
+    }
+    Err(e) => println!("Error => {}", e),
+}
+```
+
+### Send request with SOCKS5 proxy authentication
+
+```rs
+use http_request::*;
+
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+header.insert("header-key", "header-value");
+let mut request_builder = RequestBuilder::new()
+    .get("http://httpbin.org/get")
+    .headers(header)
+    .timeout(6000)
+    .redirect()
+    .max_redirect_times(8)
+    .http1_1_only()
+    .buffer(4096)
+    .decode()
+    .socks5_proxy_auth("127.0.0.1", 1080, "username", "password")
+    .build_async();
+match request_builder.send().await {
+    Ok(response) => {
+        println!("{:?}", response.text());
     }
     Err(e) => println!("Error => {}", e),
 }

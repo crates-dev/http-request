@@ -1,5 +1,7 @@
 #[cfg(test)]
 mod cfg;
+#[cfg(test)]
+mod test_https_proxy;
 
 pub(crate) mod body;
 pub(crate) mod common;
@@ -40,10 +42,13 @@ pub(crate) use rustls::{
 };
 pub(crate) use serde::{Serialize, Serializer};
 pub(crate) use std::{
+    borrow::Cow,
     collections::HashSet,
     fmt::{self, Debug, Display},
-    net::TcpStream,
+    io::{Read, Write},
+    net::{Ipv4Addr, Ipv6Addr, TcpStream},
     pin::Pin,
+    str::from_utf8,
     sync::{Arc, RwLock},
     time::Duration,
     vec::IntoIter,
@@ -53,10 +58,11 @@ pub(crate) use tokio::{
     net::TcpStream as AsyncTcpStream,
 };
 pub(crate) use tokio_rustls::{TlsConnector, client::TlsStream};
+pub(crate) use webpki_roots::TLS_SERVER_ROOTS;
 
 #[cfg(test)]
 use std::{
-    sync::Mutex,
+    sync::{Mutex, MutexGuard},
     thread::{JoinHandle, spawn},
     time::Instant,
 };

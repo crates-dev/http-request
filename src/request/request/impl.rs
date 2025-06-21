@@ -610,12 +610,15 @@ impl HttpRequest {
         host: String,
         port: u16,
     ) -> Result<Box<dyn ReadWrite>, RequestError> {
+        let config: Config = self
+            .config
+            .read()
+            .map_or(Config::default(), |config| config.clone());
+        if let Some(proxy_config) = &config.proxy {
+            return self.get_proxy_connection_stream(host, port, proxy_config);
+        }
         let host_port: (String, u16) = (host.clone(), port);
-        let timeout: Duration = Duration::from_millis(
-            self.config
-                .read()
-                .map_or(DEFAULT_TIMEOUT, |config| config.timeout),
-        );
+        let timeout: Duration = Duration::from_millis(config.timeout);
         let tcp_stream: TcpStream = TcpStream::connect(host_port.clone())
             .map_err(|err| RequestError::TcpStreamConnect(err.to_string()))?;
         tcp_stream
@@ -624,19 +627,16 @@ impl HttpRequest {
         tcp_stream
             .set_write_timeout(Some(timeout))
             .map_err(|err| RequestError::SetWriteTimeout(err.to_string()))?;
-        let config: Config = self
-            .config
-            .read()
-            .map_or(Config::default(), |config| config.clone());
+
         let stream: Result<Box<dyn ReadWrite>, RequestError> =
             if Self::get_protocol(&config).is_https() {
                 match self.tmp.clone().read() {
                     Ok(tmp) => {
                         let roots: RootCertStore = tmp.root_cert.clone();
-                        let config: ClientConfig = ClientConfig::builder()
+                        let tls_config: ClientConfig = ClientConfig::builder()
                             .with_root_certificates(roots)
                             .with_no_client_auth();
-                        let client_config: Arc<ClientConfig> = Arc::new(config);
+                        let client_config: Arc<ClientConfig> = Arc::new(tls_config);
                         let dns_name: ServerName<'_> = ServerName::try_from(host.clone())
                             .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
                         let session: ClientConnection =
@@ -655,6 +655,337 @@ impl HttpRequest {
                 Ok(Box::new(tcp_stream))
             };
         stream
+    }
+
+    /// Establishes a proxy connection stream to the specified host and port.
+    fn get_proxy_connection_stream(
+        &self,
+        target_host: String,
+        target_port: u16,
+        proxy_config: &ProxyConfig,
+    ) -> Result<Box<dyn ReadWrite>, RequestError> {
+        let timeout: Duration = Duration::from_millis(
+            self.config
+                .read()
+                .map_or(DEFAULT_TIMEOUT, |config| config.timeout),
+        );
+        match proxy_config.proxy_type {
+            ProxyType::Http | ProxyType::Https => {
+                self.get_http_proxy_connection(target_host, target_port, proxy_config, timeout)
+            }
+            ProxyType::Socks5 => {
+                self.get_socks5_proxy_connection(target_host, target_port, proxy_config, timeout)
+            }
+        }
+    }
+
+    /// Establishes an HTTP/HTTPS proxy connection.
+    fn get_http_proxy_connection(
+        &self,
+        target_host: String,
+        target_port: u16,
+        proxy_config: &ProxyConfig,
+        timeout: Duration,
+    ) -> Result<Box<dyn ReadWrite>, RequestError> {
+        let proxy_host_port: (String, u16) = (proxy_config.host.clone(), proxy_config.port);
+        let tcp_stream: TcpStream = TcpStream::connect(proxy_host_port)
+            .map_err(|err| RequestError::TcpStreamConnect(err.to_string()))?;
+        tcp_stream
+            .set_read_timeout(Some(timeout))
+            .map_err(|err| RequestError::SetReadTimeout(err.to_string()))?;
+        tcp_stream
+            .set_write_timeout(Some(timeout))
+            .map_err(|err| RequestError::SetWriteTimeout(err.to_string()))?;
+        let mut proxy_stream: Box<dyn ReadWrite> = if proxy_config.proxy_type == ProxyType::Https {
+            match self.tmp.clone().read() {
+                Ok(tmp) => {
+                    let roots: RootCertStore = tmp.root_cert.clone();
+                    let tls_config: ClientConfig = ClientConfig::builder()
+                        .with_root_certificates(roots)
+                        .with_no_client_auth();
+                    let client_config: Arc<ClientConfig> = Arc::new(tls_config);
+                    let dns_name: ServerName<'_> = ServerName::try_from(proxy_config.host.clone())
+                        .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
+                    let session: ClientConnection =
+                        ClientConnection::new(Arc::clone(&client_config), dns_name)
+                            .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
+                    let tls_stream: StreamOwned<ClientConnection, TcpStream> =
+                        StreamOwned::new(session, tcp_stream);
+                    Box::new(tls_stream)
+                }
+                Err(err) => {
+                    return Err(RequestError::Unknown(format!(
+                        "error reading temporary configuration: {}",
+                        err
+                    )));
+                }
+            }
+        } else {
+            Box::new(tcp_stream)
+        };
+        let connect_request: String = if let (Some(username), Some(password)) =
+            (&proxy_config.username, &proxy_config.password)
+        {
+            let auth: String = format!("{}:{}", username, password);
+            let auth_encoded: String = Self::base64_encode(auth.as_bytes());
+            format!(
+                "CONNECT {}:{} HTTP/1.1\r\nHost: {}:{}\r\nProxy-Authorization: Basic {}\r\n\r\n",
+                target_host, target_port, target_host, target_port, auth_encoded
+            )
+        } else {
+            format!(
+                "CONNECT {}:{} HTTP/1.1\r\nHost: {}:{}\r\n\r\n",
+                target_host, target_port, target_host, target_port
+            )
+        };
+        proxy_stream
+            .write_all(connect_request.as_bytes())
+            .map_err(|err| RequestError::Request(err.to_string()))?;
+        proxy_stream
+            .flush()
+            .map_err(|err| RequestError::Request(err.to_string()))?;
+        let mut response_buffer = [0u8; 1024];
+        let bytes_read: usize = proxy_stream
+            .read(&mut response_buffer)
+            .map_err(|err| RequestError::Request(err.to_string()))?;
+        let response: Cow<'_, str> = String::from_utf8_lossy(&response_buffer[..bytes_read]);
+        if !response.starts_with("HTTP/1.1 200") && !response.starts_with("HTTP/1.0 200") {
+            return Err(RequestError::Request(format!(
+                "Proxy connection failed: {}",
+                response.lines().next().unwrap_or("Unknown error")
+            )));
+        }
+        let config: Config = self
+            .config
+            .read()
+            .map_or(Config::default(), |config| config.clone());
+        if Self::get_protocol(&config).is_https() {
+            match self.tmp.clone().read() {
+                Ok(tmp) => {
+                    let roots: RootCertStore = tmp.root_cert.clone();
+                    let tls_config: ClientConfig = ClientConfig::builder()
+                        .with_root_certificates(roots)
+                        .with_no_client_auth();
+                    let client_config: Arc<ClientConfig> = Arc::new(tls_config);
+                    let dns_name: ServerName<'_> = ServerName::try_from(target_host.clone())
+                        .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
+                    let session: ClientConnection =
+                        ClientConnection::new(Arc::clone(&client_config), dns_name)
+                            .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
+
+                    let tunnel_stream =
+                        crate::request::proxy_tunnel::SyncProxyTunnelStream::new(proxy_stream);
+                    let tls_stream: StreamOwned<
+                        ClientConnection,
+                        crate::request::proxy_tunnel::SyncProxyTunnelStream,
+                    > = StreamOwned::new(session, tunnel_stream);
+                    return Ok(Box::new(tls_stream));
+                }
+                Err(err) => {
+                    return Err(RequestError::Unknown(format!(
+                        "error reading temporary configuration: {}",
+                        err
+                    )));
+                }
+            }
+        }
+
+        Ok(proxy_stream)
+    }
+
+    /// Establishes a SOCKS5 proxy connection.
+    fn get_socks5_proxy_connection(
+        &self,
+        target_host: String,
+        target_port: u16,
+        proxy_config: &ProxyConfig,
+        timeout: Duration,
+    ) -> Result<Box<dyn ReadWrite>, RequestError> {
+        let proxy_host_port: (String, u16) = (proxy_config.host.clone(), proxy_config.port);
+        let mut tcp_stream: TcpStream = TcpStream::connect(proxy_host_port)
+            .map_err(|err| RequestError::TcpStreamConnect(err.to_string()))?;
+        tcp_stream
+            .set_read_timeout(Some(timeout))
+            .map_err(|err| RequestError::SetReadTimeout(err.to_string()))?;
+        tcp_stream
+            .set_write_timeout(Some(timeout))
+            .map_err(|err| RequestError::SetWriteTimeout(err.to_string()))?;
+
+        let auth_methods = if proxy_config.username.is_some() && proxy_config.password.is_some() {
+            vec![0x05, 0x02, 0x00, 0x02]
+        } else {
+            vec![0x05, 0x01, 0x00]
+        };
+        tcp_stream
+            .write_all(&auth_methods)
+            .map_err(|err| RequestError::Request(err.to_string()))?;
+        let mut response = [0u8; 2];
+        tcp_stream
+            .read_exact(&mut response)
+            .map_err(|err| RequestError::Request(err.to_string()))?;
+        if response[0] != 0x05 {
+            return Err(RequestError::Request("Invalid SOCKS5 response".to_string()));
+        }
+        match response[1] {
+            0x00 => {}
+            0x02 => {
+                if let (Some(username), Some(password)) =
+                    (&proxy_config.username, &proxy_config.password)
+                {
+                    let mut auth_request: Vec<u8> = vec![0x01];
+                    auth_request.push(username.len() as u8);
+                    auth_request.extend_from_slice(username.as_bytes());
+                    auth_request.push(password.len() as u8);
+                    auth_request.extend_from_slice(password.as_bytes());
+                    tcp_stream
+                        .write_all(&auth_request)
+                        .map_err(|err| RequestError::Request(err.to_string()))?;
+
+                    let mut auth_response: [u8; 2] = [0u8; 2];
+                    tcp_stream
+                        .read_exact(&mut auth_response)
+                        .map_err(|err| RequestError::Request(err.to_string()))?;
+                    if auth_response[1] != 0x00 {
+                        return Err(RequestError::Request(
+                            "SOCKS5 authentication failed".to_string(),
+                        ));
+                    }
+                } else {
+                    return Err(RequestError::Request(
+                        "SOCKS5 proxy requires authentication".to_string(),
+                    ));
+                }
+            }
+            0xFF => {
+                return Err(RequestError::Request(
+                    "No acceptable SOCKS5 authentication methods".to_string(),
+                ));
+            }
+            _ => {
+                return Err(RequestError::Request(
+                    "Unsupported SOCKS5 authentication method".to_string(),
+                ));
+            }
+        }
+        let mut connect_request: Vec<u8> = vec![0x05, 0x01, 0x00];
+        if target_host.parse::<Ipv4Addr>().is_ok() {
+            connect_request.push(0x01);
+            let ip: Ipv4Addr = target_host.parse().unwrap();
+            connect_request.extend_from_slice(&ip.octets());
+        } else if target_host.parse::<Ipv6Addr>().is_ok() {
+            connect_request.push(0x04);
+            let ip: Ipv6Addr = target_host.parse().unwrap();
+            connect_request.extend_from_slice(&ip.octets());
+        } else {
+            connect_request.push(0x03);
+            connect_request.push(target_host.len() as u8);
+            connect_request.extend_from_slice(target_host.as_bytes());
+        }
+        connect_request.extend_from_slice(&target_port.to_be_bytes());
+        tcp_stream
+            .write_all(&connect_request)
+            .map_err(|err| RequestError::Request(err.to_string()))?;
+        let mut connect_response: [u8; 4] = [0u8; 4];
+        tcp_stream
+            .read_exact(&mut connect_response)
+            .map_err(|err| RequestError::Request(err.to_string()))?;
+        if connect_response[0] != 0x05 || connect_response[1] != 0x00 {
+            return Err(RequestError::Request(format!(
+                "SOCKS5 connection failed with code: {}",
+                connect_response[1]
+            )));
+        }
+        match connect_response[3] {
+            0x01 => {
+                let mut skip = [0u8; 6];
+                tcp_stream
+                    .read_exact(&mut skip)
+                    .map_err(|err| RequestError::Request(err.to_string()))?;
+            }
+            0x03 => {
+                let mut len = [0u8; 1];
+                tcp_stream
+                    .read_exact(&mut len)
+                    .map_err(|err| RequestError::Request(err.to_string()))?;
+                let mut skip = vec![0u8; len[0] as usize + 2];
+                tcp_stream
+                    .read_exact(&mut skip)
+                    .map_err(|err| RequestError::Request(err.to_string()))?;
+            }
+            0x04 => {
+                let mut skip = [0u8; 18]; // IPv6 (16 bytes) + port (2 bytes)
+                tcp_stream
+                    .read_exact(&mut skip)
+                    .map_err(|err| RequestError::Request(err.to_string()))?;
+            }
+            _ => {
+                return Err(RequestError::Request(
+                    "Invalid SOCKS5 address type".to_string(),
+                ));
+            }
+        }
+        let proxy_stream: Box<dyn ReadWrite> = Box::new(tcp_stream);
+        let config: Config = self
+            .config
+            .read()
+            .map_or(Config::default(), |config| config.clone());
+        if Self::get_protocol(&config).is_https() {
+            match self.tmp.clone().read() {
+                Ok(tmp) => {
+                    let roots: RootCertStore = tmp.root_cert.clone();
+                    let tls_config: ClientConfig = ClientConfig::builder()
+                        .with_root_certificates(roots)
+                        .with_no_client_auth();
+                    let client_config: Arc<ClientConfig> = Arc::new(tls_config);
+                    let dns_name: ServerName<'_> = ServerName::try_from(target_host.clone())
+                        .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
+                    let session: ClientConnection =
+                        ClientConnection::new(Arc::clone(&client_config), dns_name)
+                            .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
+
+                    let tunnel_stream =
+                        crate::request::proxy_tunnel::SyncProxyTunnelStream::new(proxy_stream);
+                    let tls_stream: StreamOwned<
+                        ClientConnection,
+                        crate::request::proxy_tunnel::SyncProxyTunnelStream,
+                    > = StreamOwned::new(session, tunnel_stream);
+                    return Ok(Box::new(tls_stream));
+                }
+                Err(err) => {
+                    return Err(RequestError::Unknown(format!(
+                        "error reading temporary configuration: {}",
+                        err
+                    )));
+                }
+            }
+        }
+        Ok(proxy_stream)
+    }
+
+    /// Simple base64 encoding function
+    pub(crate) fn base64_encode(input: &[u8]) -> String {
+        const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        let mut result: String = String::new();
+        for chunk in input.chunks(3) {
+            let mut buf: [u8; 3] = [0u8; 3];
+            for (i, &byte) in chunk.iter().enumerate() {
+                buf[i] = byte;
+            }
+            let b: u32 = ((buf[0] as u32) << 16) | ((buf[1] as u32) << 8) | (buf[2] as u32);
+            result.push(CHARS[((b >> 18) & 63) as usize] as char);
+            result.push(CHARS[((b >> 12) & 63) as usize] as char);
+            result.push(if chunk.len() > 1 {
+                CHARS[((b >> 6) & 63) as usize] as char
+            } else {
+                '='
+            });
+            result.push(if chunk.len() > 2 {
+                CHARS[(b & 63) as usize] as char
+            } else {
+                '='
+            });
+        }
+        result
     }
 }
 

@@ -1,4 +1,4 @@
-use std::fmt::Debug;
+use crate::*;
 
 /// A trait representing common behaviors for HTTP response types.
 ///

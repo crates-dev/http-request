@@ -282,7 +282,7 @@ fn test_thread_https_get_request() {
             >,
         > = Arc::clone(&request_builder);
         let handle: JoinHandle<()> = spawn(move || {
-            let mut request_builder: std::sync::MutexGuard<
+            let mut request_builder: MutexGuard<
                 '_,
                 Box<
                     dyn RequestTrait<
@@ -301,13 +301,13 @@ fn test_thread_https_get_request() {
             let start_time: Instant = Instant::now();
             match request_builder.send() {
                 Ok(response) => {
-                    let duration: std::time::Duration = start_time.elapsed();
+                    let duration: Duration = start_time.elapsed();
                     let response_text: HttpResponseText = response.text();
                     println!("Thread finished in: {:?}", duration);
                     println!("ResponseTrait => {:?}", response_text);
                 }
                 Err(e) => {
-                    let duration: std::time::Duration = start_time.elapsed();
+                    let duration: Duration = start_time.elapsed();
                     println!("Thread finished in: {:?}", duration);
                     println!("Error => {}", e);
                 }
@@ -357,13 +357,13 @@ fn test_thread_http_get_request() {
             let start_time: Instant = Instant::now();
             match request_builder.send() {
                 Ok(response) => {
-                    let duration: std::time::Duration = start_time.elapsed();
+                    let duration: Duration = start_time.elapsed();
                     println!("Thread finished in: {:?}", duration);
                     let response_text: HttpResponseText = response.text();
                     println!("ResponseTrait => {:?}", response_text);
                 }
                 Err(e) => {
-                    let duration: std::time::Duration = start_time.elapsed();
+                    let duration: Duration = start_time.elapsed();
                     println!("Thread finished in: {:?}", duration);
                     println!("Error => {}", e);
                 }
@@ -495,6 +495,126 @@ async fn test_readme_async_get_request() {
             println!("{:?}", response.text());
         }
         Err(e) => println!("Error => {}", e),
+    }
+}
+
+#[test]
+fn test_http_proxy_get_request() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("header-key", "header-value");
+    let mut request_builder = RequestBuilder::new()
+        .get("http://httpbin.org/get")
+        .headers(header)
+        .timeout(10000)
+        .redirect()
+        .buffer(4096)
+        .max_redirect_times(8)
+        .http1_1_only()
+        .http_proxy("proxy.example.com", 8080)
+        .build();
+
+    match request_builder.send() {
+        Ok(response) => {
+            println!("HTTP Proxy GET Response => {:?}", response.text());
+        }
+        Err(e) => println!("HTTP Proxy GET Error (expected) => {}", e),
+    }
+}
+
+#[test]
+fn test_http_proxy_auth_get_request() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("header-key", "header-value");
+    let mut request_builder = RequestBuilder::new()
+        .get("http://httpbin.org/get")
+        .headers(header)
+        .timeout(10000)
+        .redirect()
+        .buffer(4096)
+        .max_redirect_times(8)
+        .http1_1_only()
+        .http_proxy_auth("proxy.example.com", 8080, "username", "password")
+        .build();
+
+    match request_builder.send() {
+        Ok(response) => {
+            println!("HTTP Proxy Auth GET Response => {:?}", response.text());
+        }
+        Err(e) => println!("HTTP Proxy Auth GET Error (expected) => {}", e),
+    }
+}
+
+#[test]
+fn test_socks5_proxy_get_request() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("header-key", "header-value");
+    let mut request_builder = RequestBuilder::new()
+        .get("http://httpbin.org/get")
+        .headers(header)
+        .timeout(10000)
+        .redirect()
+        .buffer(4096)
+        .max_redirect_times(8)
+        .http1_1_only()
+        .socks5_proxy("127.0.0.1", 1080)
+        .build();
+
+    match request_builder.send() {
+        Ok(response) => {
+            println!("SOCKS5 Proxy GET Response => {:?}", response.text());
+        }
+        Err(e) => println!("SOCKS5 Proxy GET Error (expected) => {}", e),
+    }
+}
+
+#[tokio::test]
+async fn test_async_http_proxy_get_request() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("header-key", "header-value");
+
+    let mut request_builder = RequestBuilder::new()
+        .get("http://httpbin.org/get")
+        .headers(header)
+        .timeout(10000)
+        .redirect()
+        .buffer(4096)
+        .max_redirect_times(8)
+        .http1_1_only()
+        .http_proxy("proxy.example.com", 8080)
+        .build_async();
+
+    match request_builder.send().await {
+        Ok(response) => {
+            println!("Async HTTP Proxy GET Response => {:?}", response.text());
+        }
+        Err(e) => println!("Async HTTP Proxy GET Error (expected) => {}", e),
+    }
+}
+
+#[tokio::test]
+async fn test_async_socks5_proxy_auth_get_request() {
+    let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+    header.insert("header-key", "header-value");
+
+    let mut request_builder = RequestBuilder::new()
+        .get("http://httpbin.org/get")
+        .headers(header)
+        .timeout(10000)
+        .redirect()
+        .buffer(4096)
+        .max_redirect_times(8)
+        .http1_1_only()
+        .socks5_proxy_auth("127.0.0.1", 1080, "username", "password")
+        .build_async();
+
+    match request_builder.send().await {
+        Ok(response) => {
+            println!(
+                "Async SOCKS5 Proxy Auth GET Response => {:?}",
+                response.text()
+            );
+        }
+        Err(e) => println!("Async SOCKS5 Proxy Auth GET Error (expected) => {}", e),
     }
 }
 

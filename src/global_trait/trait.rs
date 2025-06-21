@@ -2,4 +2,4 @@ use crate::*;
 
 pub trait AsyncReadWrite: AsyncRead + AsyncWrite + Unpin + Send {}
 
-pub trait ReadWrite: std::io::Read + std::io::Write {}
+pub trait ReadWrite: Read + Write {}

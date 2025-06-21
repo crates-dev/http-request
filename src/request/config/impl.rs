@@ -11,6 +11,7 @@ impl Default for Config {
             http_version: HttpVersion::default(),
             buffer: DEFAULT_BUFFER_SIZE,
             decode: true,
+            proxy: None,
         }
     }
 }

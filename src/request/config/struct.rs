@@ -10,4 +10,21 @@ pub(crate) struct Config {
     pub(crate) http_version: HttpVersion,
     pub(crate) buffer: usize,
     pub(crate) decode: bool,
+    pub(crate) proxy: Option<ProxyConfig>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct ProxyConfig {
+    pub(crate) proxy_type: ProxyType,
+    pub(crate) host: String,
+    pub(crate) port: u16,
+    pub(crate) username: Option<String>,
+    pub(crate) password: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) enum ProxyType {
+    Http,
+    Https,
+    Socks5,
 }

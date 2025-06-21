@@ -293,6 +293,168 @@ impl RequestBuilder {
         self
     }
 
+    /// Sets an HTTP proxy for the request.
+    ///
+    /// This method configures the request to use an HTTP proxy server.
+    ///
+    /// # Parameters
+    /// - `host`: The hostname or IP address of the proxy server.
+    /// - `port`: The port number of the proxy server.
+    ///
+    /// # Returns
+    /// A mutable reference to the current instance, allowing for method chaining.
+    pub fn http_proxy(&mut self, host: &str, port: u16) -> &mut Self {
+        if let Ok(mut config) = self.http_request.config.write() {
+            config.proxy = Some(ProxyConfig {
+                proxy_type: ProxyType::Http,
+                host: host.to_string(),
+                port,
+                username: None,
+                password: None,
+            });
+        }
+        self
+    }
+
+    /// Sets an HTTPS proxy for the request.
+    ///
+    /// This method configures the request to use an HTTPS proxy server.
+    ///
+    /// # Parameters
+    /// - `host`: The hostname or IP address of the proxy server.
+    /// - `port`: The port number of the proxy server.
+    ///
+    /// # Returns
+    /// A mutable reference to the current instance, allowing for method chaining.
+    pub fn https_proxy(&mut self, host: &str, port: u16) -> &mut Self {
+        if let Ok(mut config) = self.http_request.config.write() {
+            config.proxy = Some(ProxyConfig {
+                proxy_type: ProxyType::Https,
+                host: host.to_string(),
+                port,
+                username: None,
+                password: None,
+            });
+        }
+        self
+    }
+
+    /// Sets a SOCKS5 proxy for the request.
+    ///
+    /// This method configures the request to use a SOCKS5 proxy server.
+    ///
+    /// # Parameters
+    /// - `host`: The hostname or IP address of the proxy server.
+    /// - `port`: The port number of the proxy server.
+    ///
+    /// # Returns
+    /// A mutable reference to the current instance, allowing for method chaining.
+    pub fn socks5_proxy(&mut self, host: &str, port: u16) -> &mut Self {
+        if let Ok(mut config) = self.http_request.config.write() {
+            config.proxy = Some(ProxyConfig {
+                proxy_type: ProxyType::Socks5,
+                host: host.to_string(),
+                port,
+                username: None,
+                password: None,
+            });
+        }
+        self
+    }
+
+    /// Sets an HTTP proxy with authentication for the request.
+    ///
+    /// This method configures the request to use an HTTP proxy server with username and password authentication.
+    ///
+    /// # Parameters
+    /// - `host`: The hostname or IP address of the proxy server.
+    /// - `port`: The port number of the proxy server.
+    /// - `username`: The username for proxy authentication.
+    /// - `password`: The password for proxy authentication.
+    ///
+    /// # Returns
+    /// A mutable reference to the current instance, allowing for method chaining.
+    pub fn http_proxy_auth(
+        &mut self,
+        host: &str,
+        port: u16,
+        username: &str,
+        password: &str,
+    ) -> &mut Self {
+        if let Ok(mut config) = self.http_request.config.write() {
+            config.proxy = Some(ProxyConfig {
+                proxy_type: ProxyType::Http,
+                host: host.to_string(),
+                port,
+                username: Some(username.to_string()),
+                password: Some(password.to_string()),
+            });
+        }
+        self
+    }
+
+    /// Sets an HTTPS proxy with authentication for the request.
+    ///
+    /// This method configures the request to use an HTTPS proxy server with username and password authentication.
+    ///
+    /// # Parameters
+    /// - `host`: The hostname or IP address of the proxy server.
+    /// - `port`: The port number of the proxy server.
+    /// - `username`: The username for proxy authentication.
+    /// - `password`: The password for proxy authentication.
+    ///
+    /// # Returns
+    /// A mutable reference to the current instance, allowing for method chaining.
+    pub fn https_proxy_auth(
+        &mut self,
+        host: &str,
+        port: u16,
+        username: &str,
+        password: &str,
+    ) -> &mut Self {
+        if let Ok(mut config) = self.http_request.config.write() {
+            config.proxy = Some(ProxyConfig {
+                proxy_type: ProxyType::Https,
+                host: host.to_string(),
+                port,
+                username: Some(username.to_string()),
+                password: Some(password.to_string()),
+            });
+        }
+        self
+    }
+
+    /// Sets a SOCKS5 proxy with authentication for the request.
+    ///
+    /// This method configures the request to use a SOCKS5 proxy server with username and password authentication.
+    ///
+    /// # Parameters
+    /// - `host`: The hostname or IP address of the proxy server.
+    /// - `port`: The port number of the proxy server.
+    /// - `username`: The username for proxy authentication.
+    /// - `password`: The password for proxy authentication.
+    ///
+    /// # Returns
+    /// A mutable reference to the current instance, allowing for method chaining.
+    pub fn socks5_proxy_auth(
+        &mut self,
+        host: &str,
+        port: u16,
+        username: &str,
+        password: &str,
+    ) -> &mut Self {
+        if let Ok(mut config) = self.http_request.config.write() {
+            config.proxy = Some(ProxyConfig {
+                proxy_type: ProxyType::Socks5,
+                host: host.to_string(),
+                port,
+                username: Some(username.to_string()),
+                password: Some(password.to_string()),
+            });
+        }
+        self
+    }
+
     /// Finalizes the builder and returns a fully constructed async `HttpRequest` instance.
     ///
     /// This method takes the current configuration stored in `http_request`, creates a new

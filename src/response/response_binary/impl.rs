@@ -23,13 +23,13 @@ impl ResponseTrait for HttpResponseBinary {
 
         let http_version: HttpVersion = status_parts
             .get(0)
-            .and_then(|part: &&[u8]| std::str::from_utf8(part).ok())
+            .and_then(|part: &&[u8]| from_utf8(part).ok())
             .and_then(|version_str: &str| version_str.parse::<HttpVersion>().ok())
             .unwrap_or_default();
 
         let status_code: ResponseStatusCode = status_parts
             .get(1)
-            .and_then(|part: &&[u8]| std::str::from_utf8(part).ok())
+            .and_then(|part: &&[u8]| from_utf8(part).ok())
             .and_then(|code_str: &str| code_str.parse().ok())
             .unwrap_or(HttpStatus::Unknown.code());
 
@@ -79,10 +79,9 @@ impl ResponseTrait for HttpResponseBinary {
                     };
                     let value_bytes: &[u8] = &line[value_start..];
 
-                    if let (Ok(key_str), Ok(value_str)) = (
-                        std::str::from_utf8(key_bytes),
-                        std::str::from_utf8(value_bytes),
-                    ) {
+                    if let (Ok(key_str), Ok(value_str)) =
+                        (from_utf8(key_bytes), from_utf8(value_bytes))
+                    {
                         headers.insert(key_str.trim().to_string(), value_str.trim().to_string());
                     }
                 }
