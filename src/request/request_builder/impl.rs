@@ -486,7 +486,7 @@ impl RequestBuilder {
         Box::new(self.builder.clone())
     }
 
-    /// Finalizes the builder and returns a fully constructed `HttpRequest` instance.
+    /// Finalizes the builder and returns a fully constructed synchronous `HttpRequest` instance.
     ///
     /// This method takes the current configuration stored in `http_request`, creates a new
     /// `HttpRequest` instance with the configuration, and resets the builder's temporary
@@ -494,7 +494,7 @@ impl RequestBuilder {
     ///
     /// # Returns
     /// Returns a fully constructed `BoxRequestTrait` instance based on the current builder state.
-    pub fn build(&mut self) -> BoxRequestTrait {
+    pub fn build_sync(&mut self) -> BoxRequestTrait {
         self.builder = self.http_request.clone();
         self.http_request = HttpRequest::default();
         Box::new(self.builder.clone())

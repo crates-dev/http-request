@@ -56,7 +56,7 @@ let mut request_builder = RequestBuilder::new()
     .http1_1_only()
     .buffer(4096)
     .decode()
-    .build();
+    .build_sync();
 request_builder
     .send()
     .and_then(|response| {
@@ -87,7 +87,7 @@ let mut request_builder = RequestBuilder::new()
     .max_redirect_times(8)
     .http1_1_only()
     .buffer(4096)
-    .build();
+    .build_sync();
 request_builder
     .send()
     .and_then(|response| {
@@ -114,7 +114,7 @@ let mut request_builder = RequestBuilder::new()
     .http1_1_only()
     .buffer(4096)
     .decode()
-    .build();
+    .build_sync();
 request_builder
     .send()
     .and_then(|response| {
@@ -140,7 +140,7 @@ let mut request_builder = RequestBuilder::new()
     .max_redirect_times(8)
     .http1_1_only()
     .buffer(4096)
-    .build();
+    .build_sync();
 request_builder
     .send()
     .and_then(|response| {
@@ -167,7 +167,7 @@ let mut request_builder = RequestBuilder::new()
     .buffer(4096)
     .decode()
     .http_proxy("127.0.0.1", 7890)
-    .build();
+    .build_sync();
 request_builder
     .send()
     .and_then(|response| {
@@ -194,7 +194,7 @@ let mut request_builder = RequestBuilder::new()
     .buffer(4096)
     .decode()
     .http_proxy_auth("127.0.0.1", 7890, "username", "password")
-    .build();
+    .build_sync();
 request_builder
     .send()
     .and_then(|response| {
@@ -221,7 +221,7 @@ let mut request_builder = RequestBuilder::new()
     .buffer(4096)
     .decode()
     .socks5_proxy("127.0.0.1", 1080)
-    .build();
+    .build_sync();
 request_builder
     .send()
     .and_then(|response| {
@@ -248,7 +248,7 @@ let mut request_builder = RequestBuilder::new()
     .buffer(4096)
     .decode()
     .socks5_proxy_auth("127.0.0.1", 1080, "username", "password")
-    .build();
+    .build_sync();
 request_builder
     .send()
     .and_then(|response| {

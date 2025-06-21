@@ -45,7 +45,7 @@ fn test_http_post_request() {
         .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
-        .build();
+        .build_sync();
     request_builder
         .send()
         .and_then(|response| {
@@ -69,7 +69,7 @@ fn test_http_get_request() {
         .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
-        .build();
+        .build_sync();
     request_builder
         .send()
         .and_then(|response| {
@@ -100,7 +100,7 @@ fn test_https_post_request() {
         .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
-        .build();
+        .build_sync();
     request_builder
         .send()
         .and_then(|response| {
@@ -124,7 +124,7 @@ fn test_https_get_request() {
         .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
-        .build();
+        .build_sync();
     request_builder
         .send()
         .and_then(|response| {
@@ -148,7 +148,7 @@ fn test_http_post_text_request() {
         .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
-        .build();
+        .build_sync();
     request_builder
         .send()
         .and_then(|response| {
@@ -172,7 +172,7 @@ fn test_http_post_binary_request() {
         .buffer(4096)
         .max_redirect_times(8)
         .http1_1_only()
-        .build();
+        .build_sync();
     request_builder
         .send()
         .and_then(|response| {
@@ -192,7 +192,7 @@ fn test_auto_gzip_get() {
         .decode()
         .buffer(4096)
         .http1_1_only()
-        .build();
+        .build_sync();
     request_builder
         .send()
         .and_then(|response| {
@@ -211,7 +211,7 @@ fn test_gzip_get() {
         .max_redirect_times(8)
         .buffer(4096)
         .http1_1_only()
-        .build();
+        .build_sync();
     request_builder
         .send()
         .and_then(|response| {
@@ -230,7 +230,7 @@ fn test_unredirect_get() {
         .buffer(4096)
         .unredirect()
         .http1_1_only()
-        .build();
+        .build_sync();
     request_builder
         .send()
         .and_then(|response| {
@@ -261,7 +261,7 @@ fn test_thread_https_get_request() {
             .buffer(4096)
             .max_redirect_times(8)
             .http1_1_only()
-            .build(),
+            .build_sync(),
     ));
     for _ in 0..num_threads {
         let request_builder: Arc<
@@ -332,7 +332,7 @@ fn test_thread_http_get_request() {
             .buffer(100)
             .max_redirect_times(0)
             .http2_only()
-            .build(),
+            .build_sync(),
     ));
     for _ in 0..num_threads {
         let request_builder: Arc<
@@ -389,7 +389,7 @@ fn test_readme_sync_get_request() {
         .http1_1_only()
         .buffer(4096)
         .decode()
-        .build();
+        .build_sync();
     request_builder
         .send()
         .and_then(|response| {
@@ -415,7 +415,7 @@ fn test_readme_sync_post_json_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .buffer(4096)
-        .build();
+        .build_sync();
     request_builder
         .send()
         .and_then(|response| {
@@ -439,7 +439,7 @@ fn test_readme_sync_post_text_request() {
         .http1_1_only()
         .buffer(4096)
         .decode()
-        .build();
+        .build_sync();
     request_builder
         .send()
         .and_then(|response| {
@@ -462,7 +462,7 @@ fn test_readme_sync_post_binary_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .buffer(4096)
-        .build();
+        .build_sync();
     request_builder
         .send()
         .and_then(|response| {
@@ -509,7 +509,7 @@ fn test_case_insensitive_header_matching() {
         .headers(header1)
         .headers(header2)
         .timeout(6000)
-        .build();
+        .build_sync();
 
     println!("Case insensitive header test completed");
 }
@@ -526,7 +526,7 @@ fn test_case_insensitive_required_headers() {
         .get("http://ide.ltpp.vip/?language=rust")
         .headers(header)
         .timeout(6000)
-        .build();
+        .build_sync();
 
     println!("Case insensitive required headers test completed");
 }
@@ -544,7 +544,7 @@ fn test_http_proxy_get_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .http_proxy("127.0.0.1", 7890)
-        .build();
+        .build_sync();
 
     match request_builder.send() {
         Ok(response) => {
@@ -567,7 +567,7 @@ fn test_http_proxy_auth_get_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .http_proxy_auth("127.0.0.1", 7890, "username", "password")
-        .build();
+        .build_sync();
 
     match request_builder.send() {
         Ok(response) => {
@@ -590,7 +590,7 @@ fn test_socks5_proxy_get_request() {
         .max_redirect_times(8)
         .http1_1_only()
         .socks5_proxy("127.0.0.1", 1080)
-        .build();
+        .build_sync();
 
     match request_builder.send() {
         Ok(response) => {
@@ -781,7 +781,7 @@ fn test_https_over_http_proxy_sync() {
         .headers(header)
         .timeout(10000)
         .http_proxy("127.0.0.1", 7890)
-        .build();
+        .build_sync();
 
     match request_builder.send() {
         Ok(response) => {
@@ -806,7 +806,7 @@ fn test_https_over_socks5_proxy_sync() {
         .headers(header)
         .timeout(10000)
         .socks5_proxy("127.0.0.1", 1080)
-        .build();
+        .build_sync();
 
     match request_builder.send() {
         Ok(response) => {
