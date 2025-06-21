@@ -688,7 +688,6 @@ impl HttpRequest {
                     tcp_stream
                         .write_all(&auth_request)
                         .map_err(|err| RequestError::Request(err.to_string()))?;
-
                     let mut auth_response: [u8; 2] = [0u8; 2];
                     tcp_stream
                         .read_exact(&mut auth_response)
@@ -849,10 +848,8 @@ impl HttpRequest {
             self.config.read().map_or("HTTP/1.1".to_string(), |config| {
                 config.http_version.to_string()
             });
-
         let request: Vec<u8> =
             SharedRequestBuilder::build_get_request(path, header_bytes, http_version_str);
-
         stream
             .write_all(&request)
             .await
@@ -876,14 +873,12 @@ impl HttpRequest {
             self.config.read().map_or("HTTP/1.1".to_string(), |config| {
                 config.http_version.to_string()
             });
-
         let request: Vec<u8> = SharedRequestBuilder::build_post_request(
             path,
             header_bytes,
             body_bytes,
             http_version_str,
         );
-
         stream
             .write_all(&request)
             .await
@@ -983,7 +978,6 @@ impl HttpRequest {
                     .map_or(HttpResponseBinary::default(), |response| response.clone()),
             ));
         }
-
         let url: String = String::from_utf8(redirect_url.unwrap())
             .map_err(|err| RequestError::InvalidUrl(err.to_string()))?;
         self.handle_redirect_async(url).await
@@ -1351,7 +1345,6 @@ impl HttpRequest {
             let connector: TlsConnector = TlsConnector::from(Arc::new(tls_config));
             let dns_name: ServerName<'_> = ServerName::try_from(target_host.clone())
                 .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
-
             let tunnel_stream: crate::request::ProxyTunnelStream =
                 crate::request::ProxyTunnelStream::new(proxy_stream);
             let tls_stream: TlsStream<crate::request::ProxyTunnelStream> = connector
