@@ -79,7 +79,7 @@ let body: JsonValue = json_value!({
     "test": 1
 });
 let mut request_builder = RequestBuilder::new()
-    .post("http://localhost:80")
+    .post("http://code.ltpp.vip")
     .json(body)
     .headers(header)
     .timeout(6000)
@@ -105,7 +105,7 @@ use http_request::*;
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
 let mut request_builder = RequestBuilder::new()
-    .post("http://localhost")
+    .post("http://ide.ltpp.vip/?language=rust")
     .text("hello")
     .headers(header)
     .timeout(6000)
@@ -132,7 +132,7 @@ use http_request::*;
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
 let mut request_builder = RequestBuilder::new()
-    .post("http://localhost")
+    .post("http://ide.ltpp.vip/?language=rust")
     .body("hello".as_bytes())
     .headers(header)
     .timeout(6000)
@@ -212,7 +212,7 @@ use http_request::*;
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
 let mut request_builder = RequestBuilder::new()
-    .get("http://httpbin.org/get")
+    .get("http://ide.ltpp.vip/?language=rust")
     .headers(header)
     .timeout(6000)
     .redirect()
@@ -239,7 +239,7 @@ use http_request::*;
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
 let mut request_builder = RequestBuilder::new()
-    .get("http://httpbin.org/get")
+    .get("http://ide.ltpp.vip/?language=rust")
     .headers(header)
     .timeout(6000)
     .redirect()
@@ -298,7 +298,7 @@ let body: JsonValue = json_value!({
     "test": 1
 });
 let mut request_builder = RequestBuilder::new()
-    .post("http://localhost:80")
+    .post("http://code.ltpp.vip")
     .json(body)
     .headers(header)
     .timeout(6000)
@@ -323,7 +323,7 @@ use http_request::*;
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
 let mut request_builder = RequestBuilder::new()
-    .post("http://localhost")
+    .post("http://ide.ltpp.vip/?language=rust")
     .text("hello")
     .headers(header)
     .timeout(6000)
@@ -349,7 +349,7 @@ use http_request::*;
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
 let mut request_builder = RequestBuilder::new()
-    .post("http://localhost")
+    .post("http://ide.ltpp.vip/?language=rust")
     .body("hello".as_bytes())
     .headers(header)
     .timeout(6000)
@@ -426,7 +426,7 @@ use http_request::*;
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
 let mut request_builder = RequestBuilder::new()
-    .get("http://httpbin.org/get")
+    .get("http://ide.ltpp.vip/?language=rust")
     .headers(header)
     .timeout(6000)
     .redirect()
@@ -452,7 +452,7 @@ use http_request::*;
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
 let mut request_builder = RequestBuilder::new()
-    .get("http://httpbin.org/get")
+    .get("http://ide.ltpp.vip/?language=rust")
     .headers(header)
     .timeout(6000)
     .redirect()

@@ -7,7 +7,7 @@ async fn test_async_http_get_request() {
     header.insert("header-key", "header-value");
 
     let mut request_builder = RequestBuilder::new()
-        .get("https://httpbin.org/get")
+        .get("https://ide.ltpp.vip/?language=rust")
         .headers(header)
         .timeout(10000)
         .redirect()
@@ -37,7 +37,7 @@ fn test_http_post_request() {
         "testin": ""
     });
     let mut request_builder = RequestBuilder::new()
-        .post("http://localhost:80/rust?hello=rust")
+        .post("https://ide.ltpp.vip/?language=rust")
         .json(body)
         .headers(header)
         .timeout(6000)
@@ -62,7 +62,7 @@ fn test_http_get_request() {
     let mut body: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     body.insert("body-key", "body-value");
     let mut request_builder = RequestBuilder::new()
-        .get("http://localhost")
+        .get("http://ide.ltpp.vip/?language=rust")
         .headers(header)
         .timeout(6000)
         .redirect()
@@ -140,7 +140,7 @@ fn test_http_post_text_request() {
     header.insert("Accept", "*/*");
     header.insert("Content-Type", "application/json");
     let mut request_builder = RequestBuilder::new()
-        .post("http://localhost:80")
+        .post("http://code.ltpp.vip")
         .text("hello")
         .headers(header)
         .timeout(6000)
@@ -164,7 +164,7 @@ fn test_http_post_binary_request() {
     header.insert("Accept", "*/*");
     header.insert("Content-Type", "application/json");
     let mut request_builder = RequestBuilder::new()
-        .post("http://localhost:80")
+        .post("http://code.ltpp.vip")
         .body("hello".as_bytes())
         .headers(header)
         .timeout(6000)
@@ -407,7 +407,7 @@ fn test_readme_sync_post_json_request() {
         "test": 1
     });
     let mut request_builder = RequestBuilder::new()
-        .post("http://localhost:80")
+        .post("http://code.ltpp.vip")
         .json(body)
         .headers(header)
         .timeout(6000)
@@ -430,7 +430,7 @@ fn test_readme_sync_post_text_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("header-key", "header-value");
     let mut request_builder = RequestBuilder::new()
-        .post("http://localhost")
+        .post("http://ide.ltpp.vip/?language=rust")
         .text("hello")
         .headers(header)
         .timeout(6000)
@@ -454,7 +454,7 @@ fn test_readme_sync_post_binary_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("header-key", "header-value");
     let mut request_builder = RequestBuilder::new()
-        .post("http://localhost")
+        .post("http://ide.ltpp.vip/?language=rust")
         .body("hello".as_bytes())
         .headers(header)
         .timeout(6000)
@@ -505,7 +505,7 @@ fn test_case_insensitive_header_matching() {
     header2.insert("HOST", "example.com");
 
     let _request_builder = RequestBuilder::new()
-        .get("http://localhost")
+        .get("http://ide.ltpp.vip/?language=rust")
         .headers(header1)
         .headers(header2)
         .timeout(6000)
@@ -523,7 +523,7 @@ fn test_case_insensitive_required_headers() {
     header.insert("user-agent", "custom-agent");
 
     let _request_builder = RequestBuilder::new()
-        .get("http://localhost")
+        .get("http://ide.ltpp.vip/?language=rust")
         .headers(header)
         .timeout(6000)
         .build();
@@ -536,7 +536,7 @@ fn test_http_proxy_get_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("header-key", "header-value");
     let mut request_builder = RequestBuilder::new()
-        .get("http://httpbin.org/get")
+        .get("http://ide.ltpp.vip/?language=rust")
         .headers(header)
         .timeout(10000)
         .redirect()
@@ -559,7 +559,7 @@ fn test_http_proxy_auth_get_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("header-key", "header-value");
     let mut request_builder = RequestBuilder::new()
-        .get("http://httpbin.org/get")
+        .get("http://ide.ltpp.vip/?language=rust")
         .headers(header)
         .timeout(10000)
         .redirect()
@@ -582,7 +582,7 @@ fn test_socks5_proxy_get_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("header-key", "header-value");
     let mut request_builder = RequestBuilder::new()
-        .get("http://httpbin.org/get")
+        .get("http://ide.ltpp.vip/?language=rust")
         .headers(header)
         .timeout(10000)
         .redirect()
@@ -606,7 +606,7 @@ async fn test_async_http_proxy_get_request() {
     header.insert("header-key", "header-value");
 
     let mut request_builder = RequestBuilder::new()
-        .get("http://httpbin.org/get")
+        .get("http://ide.ltpp.vip/?language=rust")
         .headers(header)
         .timeout(10000)
         .redirect()
@@ -630,7 +630,7 @@ async fn test_async_socks5_proxy_auth_get_request() {
     header.insert("header-key", "header-value");
 
     let mut request_builder = RequestBuilder::new()
-        .get("http://httpbin.org/get")
+        .get("http://ide.ltpp.vip/?language=rust")
         .headers(header)
         .timeout(10000)
         .redirect()
@@ -659,7 +659,7 @@ async fn test_readme_async_post_json_request() {
         "test": 1
     });
     let mut request_builder = RequestBuilder::new()
-        .post("http://localhost:80")
+        .post("http://code.ltpp.vip")
         .json(body)
         .headers(header)
         .timeout(6000)
@@ -681,7 +681,7 @@ async fn test_readme_async_post_text_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("header-key", "header-value");
     let mut request_builder = RequestBuilder::new()
-        .post("http://localhost")
+        .post("http://ide.ltpp.vip/?language=rust")
         .text("hello")
         .headers(header)
         .timeout(6000)
@@ -704,7 +704,7 @@ async fn test_readme_async_post_binary_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("header-key", "header-value");
     let mut request_builder = RequestBuilder::new()
-        .post("http://localhost")
+        .post("http://ide.ltpp.vip/?language=rust")
         .body("hello".as_bytes())
         .headers(header)
         .timeout(6000)
@@ -727,7 +727,7 @@ async fn test_https_over_http_proxy_async() {
     header.insert("User-Agent", "test-agent");
 
     let mut request_builder = RequestBuilder::new()
-        .get("https://httpbin.org/get")
+        .get("https://ide.ltpp.vip/?language=rust")
         .headers(header)
         .timeout(10000)
         .http_proxy("proxy.example.com", 8080)
@@ -752,7 +752,7 @@ async fn test_https_over_socks5_proxy_async() {
     header.insert("User-Agent", "test-agent");
 
     let mut request_builder = RequestBuilder::new()
-        .get("https://httpbin.org/get")
+        .get("https://ide.ltpp.vip/?language=rust")
         .headers(header)
         .timeout(10000)
         .socks5_proxy("127.0.0.1", 1080)
@@ -777,7 +777,7 @@ fn test_https_over_http_proxy_sync() {
     header.insert("User-Agent", "test-agent");
 
     let mut request_builder = RequestBuilder::new()
-        .get("https://httpbin.org/get")
+        .get("https://ide.ltpp.vip/?language=rust")
         .headers(header)
         .timeout(10000)
         .http_proxy("proxy.example.com", 8080)
@@ -802,7 +802,7 @@ fn test_https_over_socks5_proxy_sync() {
     header.insert("User-Agent", "test-agent");
 
     let mut request_builder = RequestBuilder::new()
-        .get("https://httpbin.org/get")
+        .get("https://ide.ltpp.vip/?language=rust")
         .headers(header)
         .timeout(10000)
         .socks5_proxy("127.0.0.1", 1080)
