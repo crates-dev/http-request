@@ -1,16 +1,21 @@
 use crate::*;
-use futures::{SinkExt, StreamExt};
-use std::sync::atomic::Ordering;
-use std::time::Duration;
-use tokio::time::timeout;
-use tokio_tungstenite::{
-    client_async_with_config, connect_async_with_config, tungstenite::Message,
-    tungstenite::handshake::client::Request,
-};
 
 impl WebSocket {
     fn get_url(&self) -> String {
         self.url.as_ref().clone()
+    }
+
+    fn generate_websocket_key() -> String {
+        let mut key_bytes: [u8; 16] = [0u8; 16];
+        let now: u64 = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos() as u64;
+        let ptr: usize = &key_bytes as *const _ as usize;
+        for (i, byte) in key_bytes.iter_mut().enumerate() {
+            *byte = ((now.wrapping_add(ptr as u64).wrapping_add(i as u64)) % 256) as u8;
+        }
+        base64_encode(&key_bytes)
     }
 
     fn get_headers(&self) -> Vec<(String, String)> {
@@ -41,8 +46,8 @@ impl WebSocket {
         );
         let headers: Vec<(String, String)> = self.get_headers();
         let mut request_builder = Request::builder().uri(&url);
-        for (key, value) in headers {
-            request_builder = request_builder.header(&key, &value);
+        for (key, value) in &headers {
+            request_builder = request_builder.header(key, value);
         }
         let request: Request = request_builder
             .body(())
@@ -61,11 +66,33 @@ impl WebSocket {
             let target_host: String = url_obj.host.clone().unwrap_or_default();
             let target_port: u16 = url_obj.port.unwrap_or_default();
             let proxy_stream: BoxAsyncReadWrite = self
-                .get_proxy_connection_stream_async(target_host, target_port, &proxy_config)
+                .get_proxy_connection_stream_async(target_host.clone(), target_port, &proxy_config)
                 .await?;
             let proxy_tunnel_stream: WebSocketProxyTunnelStream =
                 WebSocketProxyTunnelStream::new(proxy_stream);
-            let connect_future = client_async_with_config(request, proxy_tunnel_stream, None);
+            let mut proxy_request_builder = Request::builder().uri(&url);
+            proxy_request_builder = proxy_request_builder
+                .header(HOST, format!("{}:{}", target_host, target_port))
+                .header(UPGRADE, "websocket")
+                .header(CONNECTION, "Upgrade")
+                .header(SEC_WEBSOCKET_VERSION, "13")
+                .header(SEC_WEBSOCKET_KEY, Self::generate_websocket_key());
+            for (key, value) in &headers {
+                proxy_request_builder = proxy_request_builder.header(key, value);
+            }
+            let protocols: Vec<String> = self
+                .config
+                .read()
+                .map(|c| c.protocols.clone())
+                .unwrap_or_default();
+            if !protocols.is_empty() {
+                proxy_request_builder =
+                    proxy_request_builder.header("Sec-WebSocket-Protocol", protocols.join(", "));
+            }
+            let proxy_request: Request = proxy_request_builder.body(()).map_err(|e| {
+                WebSocketError::invalid_url(format!("Failed to build proxy request: {}", e))
+            })?;
+            let connect_future = client_async_with_config(proxy_request, proxy_tunnel_stream, None);
             let (ws_stream, _) = timeout(timeout_duration, connect_future)
                 .await
                 .map_err(|_| WebSocketError::timeout("Connection timeout"))?
@@ -105,7 +132,6 @@ impl WebSocket {
                 })?;
             WebSocketConnectionType::Direct(ws_stream)
         };
-
         let mut connection: AsyncMutexGuard<'_, Option<WebSocketConnectionType>> =
             self.connection.lock().await;
         *connection = Some(ws_stream);

@@ -24,13 +24,14 @@ pub(crate) use common::*;
 pub(crate) use r#const::*;
 pub(crate) use utils::*;
 
-pub(crate) use futures::{Future, Sink, Stream};
+pub(crate) use futures::{Future, Sink, SinkExt, Stream, StreamExt};
 pub(crate) use http_type::{
-    ACCEPT, ACCEPT_ANY, BR_BYTES, CONTENT_LENGTH, CONTENT_TYPE, Compress, ContentType,
+    ACCEPT, ACCEPT_ANY, BR_BYTES, CONNECTION, CONTENT_LENGTH, CONTENT_TYPE, Compress, ContentType,
     DEFAULT_BUFFER_SIZE, DEFAULT_HTTP_PATH, DEFAULT_MAX_REDIRECT_TIMES, DEFAULT_TIMEOUT, EMPTY_STR,
     HOST, HTTP_BR_BYTES, HttpStatus, HttpUrlComponents, HttpVersion, LOCATION, Method, Protocol,
     QUERY_SYMBOL, RequestBody, RequestBodyString, RequestError, RequestHeaders, ResponseHeaders,
-    ResponseStatusCode, SPACE_U8, TAB_U8, USER_AGENT,
+    ResponseStatusCode, SEC_WEBSOCKET_KEY, SEC_WEBSOCKET_VERSION, SPACE_U8, TAB_U8, UPGRADE,
+    USER_AGENT,
 };
 pub(crate) use rustls::{
     ClientConfig, ClientConnection, RootCertStore, StreamOwned, pki_types::ServerName,
@@ -44,18 +45,25 @@ pub(crate) use std::{
     net::{Ipv4Addr, Ipv6Addr, TcpStream},
     pin::Pin,
     str::from_utf8,
-    sync::{Arc, RwLock, atomic::AtomicBool},
+    sync::{
+        Arc, RwLock,
+        atomic::{AtomicBool, Ordering},
+    },
     task::{Context, Poll},
-    time::Duration,
+    time::{Duration, SystemTime, UNIX_EPOCH},
     vec::IntoIter,
 };
 pub(crate) use tokio::{
     io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt},
     net::TcpStream as AsyncTcpStream,
     sync::{Mutex as AsyncMutex, MutexGuard as AsyncMutexGuard},
+    time::timeout,
 };
 pub(crate) use tokio_rustls::{TlsConnector, client::TlsStream};
-pub(crate) use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
+pub(crate) use tokio_tungstenite::{
+    MaybeTlsStream, WebSocketStream, client_async_with_config, connect_async_with_config,
+    tungstenite::Message, tungstenite::handshake::client::Request,
+};
 pub(crate) use webpki_roots::TLS_SERVER_ROOTS;
 
 #[cfg(test)]
