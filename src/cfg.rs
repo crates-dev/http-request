@@ -185,7 +185,7 @@ fn test_http_post_binary_request() {
 #[test]
 fn test_auto_gzip_get() {
     let mut request_builder = RequestBuilder::new()
-        .get("https://proxy.ltpp.vip/visit/add?origin=https://docs.ltpp.vip/")
+        .get("https://ide.ltpp.vip/?language=rust")
         .timeout(4000)
         .redirect()
         .max_redirect_times(8)
@@ -205,7 +205,7 @@ fn test_auto_gzip_get() {
 #[test]
 fn test_gzip_get() {
     let mut request_builder = RequestBuilder::new()
-        .get("https://proxy.ltpp.vip/visit/add?origin=https://docs.ltpp.vip/")
+        .get("https://ide.ltpp.vip/?language=rust")
         .timeout(4000)
         .redirect()
         .max_redirect_times(8)
@@ -224,7 +224,7 @@ fn test_gzip_get() {
 #[test]
 fn test_unredirect_get() {
     let mut request_builder = RequestBuilder::new()
-        .post("https://proxy.ltpp.vip/visit/add?origin=https://docs.ltpp.vip/")
+        .post("https://ide.ltpp.vip/?language=rust")
         .timeout(4000)
         .max_redirect_times(8)
         .buffer(4096)
@@ -730,7 +730,7 @@ async fn test_https_over_http_proxy_async() {
         .get("https://ide.ltpp.vip/?language=rust")
         .headers(header)
         .timeout(10000)
-        .http_proxy("proxy.example.com", 8080)
+        .http_proxy("127.0.0.1", 7890)
         .build_async();
 
     match request_builder.send().await {
@@ -780,7 +780,7 @@ fn test_https_over_http_proxy_sync() {
         .get("https://ide.ltpp.vip/?language=rust")
         .headers(header)
         .timeout(10000)
-        .http_proxy("proxy.example.com", 8080)
+        .http_proxy("127.0.0.1", 7890)
         .build();
 
     match request_builder.send() {
