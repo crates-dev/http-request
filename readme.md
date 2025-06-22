@@ -19,6 +19,7 @@
 ## Features
 
 - **Support for HTTP/HTTPS**: Supports both HTTP and HTTPS protocols.
+- **WebSocket Support**: Full WebSocket support with both synchronous and asynchronous APIs for real-time communication.
 - **Lightweight Design**: The `http_request` crate provides a simple and efficient API for building, sending, and handling HTTP requests while minimizing resource consumption.
 - **Supports Common HTTP Method**: Supports common HTTP methods such as GET and POST.
 - **Flexible Request Building**: Offers rich configuration options through `RequestBuilder` to set request headers, bodies, and URLs.
@@ -29,6 +30,7 @@
 - **Redirect Handling**: Supports redirect handling, allows setting the maximum number of redirects, and includes redirect loop detection.
 - **timeout**: Supports timeout.
 - **Automatic and Manual Response Body Decoding**: Supports both automatic and manual decoding of response bodies, allowing for seamless interaction with different content types (e.g., JSON, XML, etc.).
+- **Proxy Support**: Comprehensive proxy support including HTTP, HTTPS, and SOCKS5 proxies with authentication for both HTTP requests and WebSocket connections.
 
 ## Installation
 
@@ -258,6 +260,117 @@ request_builder
     .unwrap_or_else(|e| println!("Error => {}", e));
 ```
 
+### WebSocket connection
+
+```rs
+use http_request::*;
+
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+header.insert("Authorization", "Bearer test-token");
+
+let mut websocket_builder: WebSocket = WebSocketBuilder::new()
+    .connect("ws://127.0.0.1:60006/api/ws?uuid=1")
+    .headers(header)
+    .timeout(10000)
+    .buffer(4096)
+    .protocols(&["chat", "superchat"])
+    .build_sync();
+
+websocket_builder
+    .send_text("Hello WebSocket!")
+    .and_then(|_| {
+        println!("Sync WebSocket text message sent successfully");
+        websocket_builder.send_binary(b"binary data")
+    })
+    .and_then(|_| {
+        println!("Sync WebSocket binary message sent successfully");
+        match websocket_builder.receive() {
+            Ok(message) => match message {
+                WebSocketMessage::Text(text) => println!("Received text: {}", text),
+                WebSocketMessage::Binary(data) => println!("Received binary: {:?}", data),
+                WebSocketMessage::Close => println!("Connection closed"),
+                _ => println!("Received other message type"),
+            },
+            Err(e) => println!("Error receiving message: {}", e),
+        }
+        Ok(())
+    })
+    .and_then(|_| websocket_builder.close())
+    .unwrap_or_else(|e| println!("Error => {}", e));
+```
+
+### WebSocket with HTTP proxy
+
+```rs
+use http_request::*;
+
+let mut websocket_builder: WebSocket = WebSocketBuilder::new()
+    .connect("ws://127.0.0.1:60006/api/ws?uuid=1")
+    .timeout(10000)
+    .buffer(4096)
+    .http_proxy("127.0.0.1", 7890)
+    .build_sync();
+
+match websocket_builder.send_text("Hello WebSocket with HTTP proxy!") {
+    Ok(_) => println!("WebSocket HTTP proxy message sent successfully"),
+    Err(e) => println!("WebSocket HTTP proxy error: {}", e),
+}
+```
+
+### WebSocket with HTTP proxy authentication
+
+```rs
+use http_request::*;
+
+let mut websocket_builder: WebSocket = WebSocketBuilder::new()
+    .connect("ws://127.0.0.1:60006/api/ws?uuid=1")
+    .timeout(10000)
+    .buffer(4096)
+    .http_proxy_auth("127.0.0.1", 7890, "username", "password")
+    .build_sync();
+
+match websocket_builder.send_text("Hello WebSocket with HTTP proxy auth!") {
+    Ok(_) => println!("WebSocket HTTP proxy auth message sent successfully"),
+    Err(e) => println!("WebSocket HTTP proxy auth error: {}", e),
+}
+```
+
+### WebSocket with SOCKS5 proxy
+
+```rs
+use http_request::*;
+
+let mut websocket_builder: WebSocket = WebSocketBuilder::new()
+    .connect("ws://127.0.0.1:60006/api/ws?uuid=1")
+    .timeout(10000)
+    .buffer(4096)
+    .socks5_proxy("127.0.0.1", 1080)
+    .build_sync();
+
+match websocket_builder.send_text("Hello WebSocket with SOCKS5 proxy!") {
+    Ok(_) => println!("WebSocket SOCKS5 proxy message sent successfully"),
+    Err(e) => println!("WebSocket SOCKS5 proxy error: {}", e),
+}
+```
+
+### WebSocket with SOCKS5 proxy authentication
+
+```rs
+use http_request::*;
+
+let mut websocket_builder: WebSocket = WebSocketBuilder::new()
+    .connect("ws://127.0.0.1:60006/api/ws?uuid=1")
+    .timeout(10000)
+    .buffer(4096)
+    .socks5_proxy_auth("127.0.0.1", 1080, "username", "password")
+    .build_sync();
+
+match websocket_builder.send_text("Hello WebSocket with SOCKS5 proxy auth!") {
+    Ok(_) => println!("WebSocket SOCKS5 proxy auth message sent successfully"),
+    Err(e) => println!("WebSocket SOCKS5 proxy auth error: {}", e),
+}
+```
+
 ## Asynchronous
 
 ### Send get request
@@ -467,6 +580,122 @@ match request_builder.send().await {
         println!("{:?}", response.text());
     }
     Err(e) => println!("Error => {}", e),
+}
+```
+
+### WebSocket connection
+
+```rs
+use http_request::*;
+
+let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
+header.insert("Authorization", "Bearer test-token");
+
+let mut websocket_builder: WebSocket = WebSocketBuilder::new()
+    .connect("ws://127.0.0.1:60006/api/ws?uuid=1")
+    .headers(header)
+    .timeout(10000)
+    .buffer(4096)
+    .protocols(&["chat", "superchat"])
+    .build_async();
+
+match websocket_builder.send_text_async("Hello WebSocket!").await {
+    Ok(_) => {
+        println!("Async WebSocket text message sent successfully");
+        match websocket_builder.send_binary_async(b"binary data").await {
+            Ok(_) => {
+                println!("Async WebSocket binary message sent successfully");
+                match websocket_builder.receive_async().await {
+                    Ok(message) => match message {
+                        WebSocketMessage::Text(text) => println!("Received text: {}", text),
+                        WebSocketMessage::Binary(data) => println!("Received binary: {:?}", data),
+                        WebSocketMessage::Close => println!("Connection closed"),
+                        _ => println!("Received other message type"),
+                    },
+                    Err(e) => println!("Error receiving message: {}", e),
+                }
+            }
+            Err(e) => println!("Error sending binary: {}", e),
+        }
+    }
+    Err(e) => println!("Error sending text: {}", e),
+}
+
+websocket_builder
+    .close_async_method()
+    .await
+    .unwrap_or_else(|e| println!("Error closing: {}", e));
+```
+
+### WebSocket with HTTP proxy
+
+```rs
+use http_request::*;
+
+let mut websocket_builder: WebSocket = WebSocketBuilder::new()
+    .connect("ws://127.0.0.1:60006/api/ws?uuid=1")
+    .timeout(10000)
+    .buffer(4096)
+    .http_proxy("127.0.0.1", 7890)
+    .build_async();
+
+match websocket_builder.send_text_async("Hello WebSocket with HTTP proxy!").await {
+    Ok(_) => println!("Async WebSocket HTTP proxy message sent successfully"),
+    Err(e) => println!("Async WebSocket HTTP proxy error: {}", e),
+}
+```
+
+### WebSocket with HTTP proxy authentication
+
+```rs
+use http_request::*;
+
+let mut websocket_builder: WebSocket = WebSocketBuilder::new()
+    .connect("ws://127.0.0.1:60006/api/ws?uuid=1")
+    .timeout(10000)
+    .buffer(4096)
+    .http_proxy_auth("127.0.0.1", 7890, "username", "password")
+    .build_async();
+
+match websocket_builder.send_text_async("Hello WebSocket with HTTP proxy auth!").await {
+    Ok(_) => println!("Async WebSocket HTTP proxy auth message sent successfully"),
+    Err(e) => println!("Async WebSocket HTTP proxy auth error: {}", e),
+}
+```
+
+### WebSocket with SOCKS5 proxy
+
+```rs
+use http_request::*;
+
+let mut websocket_builder: WebSocket = WebSocketBuilder::new()
+    .connect("ws://127.0.0.1:60006/api/ws?uuid=1")
+    .timeout(10000)
+    .buffer(4096)
+    .socks5_proxy("127.0.0.1", 1080)
+    .build_async();
+
+match websocket_builder.send_text_async("Hello WebSocket with SOCKS5 proxy!").await {
+    Ok(_) => println!("Async WebSocket SOCKS5 proxy message sent successfully"),
+    Err(e) => println!("Async WebSocket SOCKS5 proxy error: {}", e),
+}
+```
+
+### WebSocket with SOCKS5 proxy authentication
+
+```rs
+use http_request::*;
+
+let mut websocket_builder: WebSocket = WebSocketBuilder::new()
+    .connect("ws://127.0.0.1:60006/api/ws?uuid=1")
+    .timeout(10000)
+    .buffer(4096)
+    .socks5_proxy_auth("127.0.0.1", 1080, "username", "password")
+    .build_async();
+
+match websocket_builder.send_text_async("Hello WebSocket with SOCKS5 proxy auth!").await {
+    Ok(_) => println!("Async WebSocket SOCKS5 proxy auth message sent successfully"),
+    Err(e) => println!("Async WebSocket SOCKS5 proxy auth error: {}", e),
 }
 ```
 

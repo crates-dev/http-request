@@ -6,8 +6,6 @@ pub enum WebSocketConnectionType {
     Proxy(WebSocketStream<WebSocketProxyTunnelStream>),
 }
 
-type WebSocketConnection = Arc<AsyncMutex<Option<WebSocketConnectionType>>>;
-
 #[derive(Debug)]
 pub struct WebSocket {
     pub(crate) url: Arc<String>,
