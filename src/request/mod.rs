@@ -5,9 +5,10 @@ pub(crate) mod request_builder;
 pub(crate) mod shared;
 pub(crate) mod tmp;
 
+pub use request::*;
+
 pub(crate) use config::*;
 pub(crate) use proxy::*;
-pub(crate) use request::*;
 pub(crate) use shared::*;
 pub(crate) use tmp::*;
 
