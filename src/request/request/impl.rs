@@ -124,24 +124,37 @@ impl HttpRequest {
             let host_value: String = config.url_obj.host.clone().unwrap_or_default();
             let content_length_value: String = body_length.to_string();
             if !Self::header_contains_key_case_insensitive(&header, HOST) {
-                header.insert(HOST.to_owned(), host_value);
+                let mut host_deque: VecDeque<String> = VecDeque::new();
+                host_deque.push_front(host_value);
+                header.insert(HOST.to_owned(), host_deque);
             }
             if !Self::header_contains_key_case_insensitive(&header, CONTENT_LENGTH) {
-                header.insert(CONTENT_LENGTH.to_owned(), content_length_value);
+                let mut content_length_deque: VecDeque<String> = VecDeque::new();
+                content_length_deque.push_front(content_length_value);
+                header.insert(CONTENT_LENGTH.to_owned(), content_length_deque);
             }
             if !Self::header_contains_key_case_insensitive(&header, ACCEPT) {
-                header.insert(ACCEPT.to_owned(), ACCEPT_ANY.to_owned());
+                let mut accept_deque: VecDeque<String> = VecDeque::new();
+                accept_deque.push_front(ACCEPT_ANY.to_owned());
+                header.insert(ACCEPT.to_owned(), accept_deque);
             }
             if !Self::header_contains_key_case_insensitive(&header, USER_AGENT) {
-                header.insert(USER_AGENT.to_owned(), APP_NAME.to_owned());
+                let mut user_agent_deque: VecDeque<String> = VecDeque::new();
+                user_agent_deque.push_front(APP_NAME.to_owned());
+                header.insert(USER_AGENT.to_owned(), user_agent_deque);
             }
         }
-        let estimated_size: usize = header.iter().map(|(k, v)| k.len() + v.len() + 4).sum();
+        let estimated_size: usize = header
+            .iter()
+            .map(|(k, v)| k.len() + v.front().map_or(0, |s| s.len()) + 4)
+            .sum();
         let mut header_bytes: Vec<u8> = Vec::with_capacity(estimated_size);
         for (key, value) in &header {
             header_bytes.extend_from_slice(key.as_bytes());
             header_bytes.extend_from_slice(b": ");
-            header_bytes.extend_from_slice(value.as_bytes());
+            if let Some(header_value) = value.front() {
+                header_bytes.extend_from_slice(header_value.as_bytes());
+            }
             header_bytes.extend_from_slice(HTTP_BR_BYTES);
         }
         header_bytes
@@ -168,21 +181,25 @@ impl HttpRequest {
         let header: RequestHeaders = self.get_header();
         let body: Body = self.get_body();
         if let Some(content_type_value) = header.get(CONTENT_TYPE) {
-            let res: String = content_type_value
-                .to_lowercase()
-                .parse::<ContentType>()
-                .unwrap_or_default()
-                .get_body_string(&body);
-            return res.into_bytes();
-        }
-        for (key, value) in &header {
-            if key.eq_ignore_ascii_case(CONTENT_TYPE) {
-                let res: String = value
+            if let Some(first_value) = content_type_value.front() {
+                let res: String = first_value
                     .to_lowercase()
                     .parse::<ContentType>()
                     .unwrap_or_default()
                     .get_body_string(&body);
                 return res.into_bytes();
+            }
+        }
+        for (key, value) in &header {
+            if key.eq_ignore_ascii_case(CONTENT_TYPE) {
+                if let Some(first_value) = value.front() {
+                    let res: String = first_value
+                        .to_lowercase()
+                        .parse::<ContentType>()
+                        .unwrap_or_default()
+                        .get_body_string(&body);
+                    return res.into_bytes();
+                }
             }
         }
         String::new().into_bytes()

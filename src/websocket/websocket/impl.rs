@@ -21,7 +21,9 @@ impl WebSocket {
     fn get_headers(&self) -> Vec<(String, String)> {
         let mut headers: Vec<(String, String)> = Vec::new();
         for (key, value) in self.header.iter() {
-            headers.push((key.clone(), value.clone()));
+            if let Some(first_value) = value.front() {
+                headers.push((key.clone(), first_value.clone()));
+            }
         }
         headers
     }

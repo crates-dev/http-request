@@ -45,10 +45,19 @@ impl ResponseTrait for HttpResponseText {
             .read()
             .map_or(Vec::new(), |body| body.as_bytes().to_vec())
             .to_vec();
-        let headers: HashMapXxHash3_64<String, String> = self
-            .headers
-            .read()
-            .map_or(hash_map_xx_hash3_64(), |headers| headers.clone());
+        let headers: HashMapXxHash3_64<String, String> =
+            self.headers
+                .read()
+                .map_or(hash_map_xx_hash3_64(), |headers_ref| {
+                    let mut string_headers: HashMapXxHash3_64<String, String> =
+                        hash_map_xx_hash3_64();
+                    for (key, value_deque) in headers_ref.iter() {
+                        if let Some(first_value) = value_deque.front() {
+                            string_headers.insert(key.clone(), first_value.clone());
+                        }
+                    }
+                    string_headers
+                });
         let body: Vec<u8> = Compress::from(&headers)
             .decode(&tmp_body, buffer_size)
             .into_owned();

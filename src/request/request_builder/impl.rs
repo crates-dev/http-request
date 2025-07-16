@@ -133,7 +133,9 @@ impl RequestBuilder {
                         tmp_header.remove(&existing_key);
                     }
                 }
-                tmp_header.insert(key_str, value_str);
+                let mut value_deque: VecDeque<String> = VecDeque::new();
+                value_deque.push_front(value_str);
+                tmp_header.insert(key_str, value_deque);
             }
         }
         self

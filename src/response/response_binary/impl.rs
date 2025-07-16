@@ -50,7 +50,7 @@ impl ResponseTrait for HttpResponseBinary {
                 }
             },
         );
-        let mut headers: HashMapXxHash3_64<String, String> = hash_map_xx_hash3_64();
+        let mut headers: HashMapXxHash3_64<String, VecDeque<String>> = hash_map_xx_hash3_64();
         for line in lines.by_ref() {
             if line.is_empty() {
                 break;
@@ -74,7 +74,9 @@ impl ResponseTrait for HttpResponseBinary {
                     if let (Ok(key_str), Ok(value_str)) =
                         (from_utf8(key_bytes), from_utf8(value_bytes))
                     {
-                        headers.insert(key_str.trim().to_string(), value_str.trim().to_string());
+                        let mut value_deque: VecDeque<String> = VecDeque::new();
+                        value_deque.push_front(value_str.trim().to_string());
+                        headers.insert(key_str.trim().to_string(), value_deque);
                     }
                 }
             }
@@ -137,9 +139,18 @@ impl ResponseTrait for HttpResponseBinary {
             let headers_guard = self.headers.read();
             let body_guard = self.body.read();
             match (headers_guard, body_guard) {
-                (Ok(headers_ref), Ok(body_ref)) => Compress::from(&*headers_ref)
-                    .decode(&*body_ref, buffer_size)
-                    .into_owned(),
+                (Ok(headers_ref), Ok(body_ref)) => {
+                    let mut string_headers: HashMapXxHash3_64<String, String> =
+                        hash_map_xx_hash3_64();
+                    for (key, value_deque) in headers_ref.iter() {
+                        if let Some(first_value) = value_deque.front() {
+                            string_headers.insert(key.clone(), first_value.clone());
+                        }
+                    }
+                    Compress::from(&string_headers)
+                        .decode(&*body_ref, buffer_size)
+                        .into_owned()
+                }
                 _ => Vec::new(),
             }
         };

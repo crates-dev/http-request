@@ -39,7 +39,7 @@ pub(crate) use rustls::{
 pub(crate) use serde::{Serialize, Serializer};
 pub(crate) use std::{
     borrow::Cow,
-    collections::HashSet,
+    collections::{HashSet, VecDeque},
     fmt::{self, Debug, Display, Formatter},
     io::{Read, Write},
     net::{Ipv4Addr, Ipv6Addr, TcpStream},
