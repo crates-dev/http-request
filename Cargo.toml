@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.89.10"
+version = "8.89.11"
 edition = "2024"
 authors = ["root@ltpp.vip"]
 license = "MIT"
@@ -16,11 +16,11 @@ exclude = [
 ]
 
 [dependencies]
-http-type = "4.37.0"
+http-type = "4.38.0"
 rustls = "0.23.29"
 serde = "1.0.219"
-serde_json = "1.0.140"
-webpki-roots = "1.0.1"
+serde_json = "1.0.141"
+webpki-roots = "1.0.2"
 tokio = { version = "1.46.1", features = ["full"] }
 tokio-rustls = "0.26.2"
 futures = "0.3.31"
