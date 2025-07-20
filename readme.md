@@ -44,7 +44,7 @@ cargo add http-request
 
 ### Send get request
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -72,7 +72,7 @@ request_builder
 
 #### Send Body Json
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -101,7 +101,7 @@ request_builder
 
 #### Send Body Text
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -128,7 +128,7 @@ request_builder
 
 #### Send Body Binary
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -154,7 +154,7 @@ request_builder
 
 ### Send request with HTTP proxy
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -181,7 +181,7 @@ request_builder
 
 ### Send request with HTTP proxy authentication
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -208,7 +208,7 @@ request_builder
 
 ### Send request with SOCKS5 proxy
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -235,7 +235,7 @@ request_builder
 
 ### Send request with SOCKS5 proxy authentication
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -262,7 +262,7 @@ request_builder
 
 ### WebSocket connection
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -301,7 +301,7 @@ websocket_builder
 
 ### WebSocket with HTTP proxy
 
-```rs
+```rust
 use http_request::*;
 
 let mut websocket_builder: WebSocket = WebSocketBuilder::new()
@@ -319,7 +319,7 @@ match websocket_builder.send_text("Hello WebSocket with HTTP proxy!") {
 
 ### WebSocket with HTTP proxy authentication
 
-```rs
+```rust
 use http_request::*;
 
 let mut websocket_builder: WebSocket = WebSocketBuilder::new()
@@ -337,7 +337,7 @@ match websocket_builder.send_text("Hello WebSocket with HTTP proxy auth!") {
 
 ### WebSocket with SOCKS5 proxy
 
-```rs
+```rust
 use http_request::*;
 
 let mut websocket_builder: WebSocket = WebSocketBuilder::new()
@@ -355,7 +355,7 @@ match websocket_builder.send_text("Hello WebSocket with SOCKS5 proxy!") {
 
 ### WebSocket with SOCKS5 proxy authentication
 
-```rs
+```rust
 use http_request::*;
 
 let mut websocket_builder: WebSocket = WebSocketBuilder::new()
@@ -375,7 +375,7 @@ match websocket_builder.send_text("Hello WebSocket with SOCKS5 proxy auth!") {
 
 ### Send get request
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -402,7 +402,7 @@ match request_builder.send().await {
 
 #### Send Body Json
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -430,7 +430,7 @@ match request_builder.send().await {
 
 #### Send Body Text
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -456,7 +456,7 @@ match request_builder.send().await {
 
 #### Send Body Binary
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -481,7 +481,7 @@ match request_builder.send().await {
 
 ### Send request with HTTP proxy
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -507,7 +507,7 @@ match request_builder.send().await {
 
 ### Send request with HTTP proxy authentication
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -533,7 +533,7 @@ match request_builder.send().await {
 
 ### Send request with SOCKS5 proxy
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -559,7 +559,7 @@ match request_builder.send().await {
 
 ### Send request with SOCKS5 proxy authentication
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -585,7 +585,7 @@ match request_builder.send().await {
 
 ### WebSocket connection
 
-```rs
+```rust
 use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -629,7 +629,7 @@ websocket_builder
 
 ### WebSocket with HTTP proxy
 
-```rs
+```rust
 use http_request::*;
 
 let mut websocket_builder: WebSocket = WebSocketBuilder::new()
@@ -647,7 +647,7 @@ match websocket_builder.send_text_async("Hello WebSocket with HTTP proxy!").awai
 
 ### WebSocket with HTTP proxy authentication
 
-```rs
+```rust
 use http_request::*;
 
 let mut websocket_builder: WebSocket = WebSocketBuilder::new()
@@ -665,7 +665,7 @@ match websocket_builder.send_text_async("Hello WebSocket with HTTP proxy auth!")
 
 ### WebSocket with SOCKS5 proxy
 
-```rs
+```rust
 use http_request::*;
 
 let mut websocket_builder: WebSocket = WebSocketBuilder::new()
@@ -683,7 +683,7 @@ match websocket_builder.send_text_async("Hello WebSocket with SOCKS5 proxy!").aw
 
 ### WebSocket with SOCKS5 proxy authentication
 
-```rs
+```rust
 use http_request::*;
 
 let mut websocket_builder: WebSocket = WebSocketBuilder::new()
