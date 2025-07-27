@@ -159,8 +159,7 @@ impl WebSocket {
     }
 
     fn send_message_sync(&self, message: Message) -> Result<(), WebSocketError> {
-        let rt: tokio::runtime::Runtime =
-            tokio::runtime::Runtime::new().map_err(|e| WebSocketError::io(e.to_string()))?;
+        let rt: Runtime = Runtime::new().map_err(|e| WebSocketError::io(e.to_string()))?;
         rt.block_on(self.send_message_async(message))
     }
 
@@ -191,8 +190,7 @@ impl WebSocket {
     }
 
     fn receive_message_sync(&self) -> Result<WebSocketMessage, WebSocketError> {
-        let rt: tokio::runtime::Runtime =
-            tokio::runtime::Runtime::new().map_err(|e| WebSocketError::io(e.to_string()))?;
+        let rt: Runtime = Runtime::new().map_err(|e| WebSocketError::io(e.to_string()))?;
         rt.block_on(self.receive_message_async())
     }
 
@@ -227,8 +225,7 @@ impl WebSocket {
     }
 
     fn close_sync(&self) -> Result<(), WebSocketError> {
-        let rt: tokio::runtime::Runtime =
-            tokio::runtime::Runtime::new().map_err(|e| WebSocketError::io(e.to_string()))?;
+        let rt: Runtime = Runtime::new().map_err(|e| WebSocketError::io(e.to_string()))?;
         rt.block_on(self.close_async_internal())
     }
 

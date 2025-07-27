@@ -32,6 +32,13 @@ pub(crate) use http_type::{
     QUERY_SYMBOL, RequestBody, RequestBodyString, RequestError, RequestHeaders, ResponseHeaders,
     ResponseStatusCode, SEC_WEBSOCKET_KEY, SEC_WEBSOCKET_VERSION, SPACE_U8, TAB_U8, UPGRADE,
     USER_AGENT,
+    tokio::{
+        io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, ReadBuf},
+        net::TcpStream as AsyncTcpStream,
+        runtime::Runtime,
+        sync::{Mutex as AsyncMutex, MutexGuard as AsyncMutexGuard},
+        time::timeout,
+    },
 };
 pub(crate) use rustls::{
     ClientConfig, ClientConnection, RootCertStore, StreamOwned, pki_types::ServerName,
@@ -53,12 +60,6 @@ pub(crate) use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
     vec::IntoIter,
 };
-pub(crate) use tokio::{
-    io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt},
-    net::TcpStream as AsyncTcpStream,
-    sync::{Mutex as AsyncMutex, MutexGuard as AsyncMutexGuard},
-    time::timeout,
-};
 pub(crate) use tokio_rustls::{TlsConnector, client::TlsStream};
 pub(crate) use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream, client_async_with_config, connect_async_with_config,
@@ -72,3 +73,6 @@ use std::{
     thread::{JoinHandle, spawn},
     time::Instant,
 };
+
+#[cfg(test)]
+use http_type::tokio;
