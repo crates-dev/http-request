@@ -1,23 +1,75 @@
 use crate::*;
 
+/// Blanket implementation for AsyncReadWrite trait.
+///
+/// # Generic Parameters
+///
+/// - `T` - Type implementing AsyncRead + AsyncWrite + Unpin + Send
 impl<T: AsyncRead + AsyncWrite + Unpin + Send> AsyncReadWrite for T {}
+
+/// Blanket implementation for ReadWrite trait.
+///
+/// # Generic Parameters
+///
+/// - `T` - Type implementing Read + Write
 impl<T: Read + Write> ReadWrite for T {}
 
+/// Async request trait implementation for HttpRequest.
+///
+/// # Associated Types
+///
+/// - `RequestResult` - The result type of async requests.
+///
+/// # Returns
+///
+/// - `Pin<Box<dyn Future<Output = RequestResult> + Send + '_>>` - Future representing the async request.
 impl AsyncRequestTrait for HttpRequest {
     type RequestResult = RequestResult;
 
+    /// Sends an asynchronous HTTP request.
+    ///
+    /// # Returns
+    ///
+    /// - `Pin<Box<dyn Future<Output = RequestResult> + Send + '_>>` - Future representing the async request.
     fn send(&mut self) -> Pin<Box<dyn Future<Output = Self::RequestResult> + Send + '_>> {
         Box::pin(self.send_async())
     }
 }
 
+/// Sync request trait implementation for HttpRequest.
+///
+/// # Associated Types
+///
+/// - `RequestResult` - The result type of sync requests.
+///
+/// # Returns
+///
+/// - `RequestResult` - Result of the sync request.
 impl RequestTrait for HttpRequest {
     type RequestResult = RequestResult;
+
+    /// Sends a synchronous HTTP request.
+    ///
+    /// # Returns
+    ///
+    /// - `RequestResult` - Result of the sync request.
     fn send(&mut self) -> Self::RequestResult {
         self.send_sync()
     }
 }
 
+/// Default implementation for HttpRequest.
+///
+/// # Returns
+///
+/// - `HttpRequest` - Default initialized HttpRequest with:
+///   - Empty methods
+///   - Empty URL
+///   - Empty headers
+///   - Default body
+///   - Default config
+///   - Default tmp storage
+///   - Default response
 impl Default for HttpRequest {
     fn default() -> Self {
         Self {
@@ -39,36 +91,60 @@ impl Default for HttpRequest {
 /// - Constructing and sending HTTP GET or POST requests.
 /// - Parsing responses and handling redirects.
 impl HttpRequest {
-    /// Returns the protocol of the HTTP request.
+    /// Gets the protocol from config.
+    ///
+    /// # Arguments
+    ///
+    /// - `&Config` - Request configuration.
+    ///
+    /// # Returns
+    ///
+    /// - `Protocol` - The HTTP protocol.
     pub(crate) fn get_protocol(config: &Config) -> Protocol {
         config.url_obj.protocol.clone()
     }
 
-    /// Returns the HTTP method used for the request.
+    /// Gets the HTTP methods.
+    ///
+    /// # Returns
+    ///
+    /// - `Method` - The HTTP methods.
     pub(crate) fn get_methods(&self) -> Method {
         self.methods.as_ref().clone()
     }
 
-    /// Returns the URL of the HTTP request.
+    /// Gets the request URL.
+    ///
+    /// # Returns
+    ///
+    /// - `String` - The request URL.
     fn get_url(&self) -> String {
         self.url.as_ref().clone()
     }
 
-    /// Returns the headers of the HTTP request.
+    /// Gets the request headers.
+    ///
+    /// # Returns
+    ///
+    /// - `RequestHeaders` - The request headers.
     fn get_header(&self) -> RequestHeaders {
         self.header.as_ref().clone()
     }
 
-    /// Returns the body of the HTTP request.
+    /// Gets the request body.
+    ///
+    /// # Returns
+    ///
+    /// - `Body` - The request body.
     fn get_body(&self) -> Body {
         self.body.as_ref().clone()
     }
 
     /// Sets the URL for the HTTP request.
     ///
-    /// # Parameters
+    /// # Arguments
     ///
-    /// - `url`: The new URL to set.
+    /// - `String` - The new URL to set.
     pub(crate) fn url(&mut self, url: String) {
         self.url = Arc::new(url);
     }
@@ -76,6 +152,12 @@ impl HttpRequest {
     /// Parses the current URL into a `HttpUrlComponents` object.
     ///
     /// Returns `Ok(HttpUrlComponents)` if the parsing succeeds, or `Err(RequestError::InvalidUrl)` otherwise.
+    /// Parses the current URL into a `HttpUrlComponents` object.
+    ///
+    /// # Returns
+    ///
+    /// - `Ok(HttpUrlComponents)` if parsing succeeds
+    /// - `Err(RequestError::InvalidUrl)` if parsing fails
     pub(crate) fn parse_url(&self) -> Result<HttpUrlComponents, RequestError> {
         match HttpUrlComponents::parse(&self.get_url()) {
             Ok(parse_res) => Ok(parse_res),
@@ -113,6 +195,11 @@ impl HttpRequest {
             .any(|key| key.eq_ignore_ascii_case(target_key))
     }
 
+    /// Converts HTTP headers into formatted HTTP header bytes.
+    ///
+    /// # Returns
+    ///
+    /// - `Vec<u8>` - The formatted HTTP headers as bytes.
     pub(crate) fn get_header_bytes(&self) -> Vec<u8> {
         let mut header: RequestHeaders = self.get_header();
         let body_length: usize = if self.get_methods().is_get() {
@@ -177,6 +264,11 @@ impl HttpRequest {
     /// The `Content-Type` header is matched case-insensitively. If no matching `Content-Type`
     /// is found or the parsing fails, the method defaults to returning an empty byte vector.
     /// The body processing relies on the implementation of the `ContentType` parsing logic.
+    /// Converts the HTTP body into URL-encoded bytes.
+    ///
+    /// # Returns
+    ///
+    /// - `Vec<u8>` - The URL-encoded body bytes.
     pub(crate) fn get_body_bytes(&self) -> Vec<u8> {
         let header: RequestHeaders = self.get_header();
         let body: Body = self.get_body();
@@ -221,6 +313,11 @@ impl HttpRequest {
     ///
     /// - `String` - The full path, including the query string if available, or just the
     ///   path if no query string is present.
+    /// Gets the full request path including query string.
+    ///
+    /// # Returns
+    ///
+    /// - `String` - The full path with query string if present.
     pub(crate) fn get_path(&self) -> String {
         let path: String = self.config.read().map_or(String::new(), |config| {
             let query: String = config.url_obj.query.clone().unwrap_or_default();
@@ -860,7 +957,15 @@ impl HttpRequest {
 
 /// Async implementation for HttpRequest
 impl HttpRequest {
-    /// Sends an async GET request over the provided stream and returns the HTTP response.
+    /// Sends an async GET request.
+    ///
+    /// # Arguments
+    ///
+    /// - `&mut BoxAsyncReadWrite` - The async stream to write to.
+    ///
+    /// # Returns
+    ///
+    /// - `Result<BoxResponseTrait, RequestError>` - Result containing the response or error.
     async fn send_get_request_async(
         &mut self,
         stream: &mut BoxAsyncReadWrite,
@@ -884,7 +989,15 @@ impl HttpRequest {
         self.read_response_async(stream).await
     }
 
-    /// Sends an async POST request over the provided stream and returns the HTTP response.
+    /// Sends an async POST request.
+    ///
+    /// # Arguments
+    ///
+    /// - `&mut BoxAsyncReadWrite` - The async stream to write to.
+    ///
+    /// # Returns
+    ///
+    /// - `Result<BoxResponseTrait, RequestError>` - Result containing the response or error.
     async fn send_post_request_async(
         &mut self,
         stream: &mut BoxAsyncReadWrite,
@@ -913,7 +1026,15 @@ impl HttpRequest {
         self.read_response_async(stream).await
     }
 
-    /// Reads an async HTTP response from the provided stream.
+    /// Reads an async HTTP response.
+    ///
+    /// # Arguments
+    ///
+    /// - `&mut BoxAsyncReadWrite` - The async stream to read from.
+    ///
+    /// # Returns
+    ///
+    /// - `Result<BoxResponseTrait, RequestError>` - Result containing the response or error.
     async fn read_response_async(
         &mut self,
         stream: &mut BoxAsyncReadWrite,
@@ -1006,7 +1127,15 @@ impl HttpRequest {
         self.handle_redirect_async(url).await
     }
 
-    /// Handles HTTP redirects asynchronously by following the redirection URL.
+    /// Handles async HTTP redirects.
+    ///
+    /// # Arguments
+    ///
+    /// - `String` - The redirect URL.
+    ///
+    /// # Returns
+    ///
+    /// - `Pin<Box<dyn Future<Output = Result<BoxResponseTrait, RequestError>> + Send + '_>>` - Future representing the redirect handling.
     fn handle_redirect_async(
         &mut self,
         url: String,
@@ -1034,7 +1163,16 @@ impl HttpRequest {
         })
     }
 
-    /// Establishes an async connection stream to the specified host and port.
+    /// Establishes an async connection stream.
+    ///
+    /// # Arguments
+    ///
+    /// - `String` - The host to connect to.
+    /// - `u16` - The port to connect to.
+    ///
+    /// # Returns
+    ///
+    /// - `Result<BoxAsyncReadWrite, RequestError>` - Result containing the stream or error.
     async fn get_connection_stream_async(
         &self,
         host: String,
@@ -1081,7 +1219,17 @@ impl HttpRequest {
         }
     }
 
-    /// Establishes an async proxy connection stream to the specified host and port.
+    /// Establishes an async proxy connection stream.
+    ///
+    /// # Arguments
+    ///
+    /// - `String` - The target host.
+    /// - `u16` - The target port.
+    /// - `&ProxyConfig` - The proxy configuration.
+    ///
+    /// # Returns
+    ///
+    /// - `Result<BoxAsyncReadWrite, RequestError>` - Result containing the stream or error.
     async fn get_proxy_connection_stream_async(
         &self,
         target_host: String,
@@ -1101,6 +1249,16 @@ impl HttpRequest {
     }
 
     /// Establishes an async HTTP/HTTPS proxy connection.
+    ///
+    /// # Arguments
+    ///
+    /// - `String` - The target host.
+    /// - `u16` - The target port.
+    /// - `&ProxyConfig` - The proxy configuration.
+    ///
+    /// # Returns
+    ///
+    /// - `Result<BoxAsyncReadWrite, RequestError>` - Result containing the stream or error.
     async fn get_http_proxy_connection_async(
         &self,
         target_host: String,
@@ -1207,6 +1365,16 @@ impl HttpRequest {
     }
 
     /// Establishes an async SOCKS5 proxy connection.
+    ///
+    /// # Arguments
+    ///
+    /// - `String` - The target host.
+    /// - `u16` - The target port.
+    /// - `&ProxyConfig` - The proxy configuration.
+    ///
+    /// # Returns
+    ///
+    /// - `Result<BoxAsyncReadWrite, RequestError>` - Result containing the stream or error.
     async fn get_socks5_proxy_connection_async(
         &self,
         target_host: String,
@@ -1381,6 +1549,10 @@ impl HttpRequest {
     }
 
     /// Sends the HTTP request asynchronously.
+    ///
+    /// # Returns
+    ///
+    /// - `RequestResult` - Result of the async request.
     pub(crate) async fn send_async(&mut self) -> RequestResult {
         let methods: Method = self.get_methods();
         let (host, port) = {

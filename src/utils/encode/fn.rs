@@ -1,6 +1,14 @@
 use crate::*;
 
-/// Simple base64 encoding function
+/// Encodes binary data into a base64 string.
+///
+/// # Arguments
+///
+/// - `&[u8]` - The binary data to encode.
+///
+/// # Returns
+///
+/// - `String` - The base64 encoded string.
 pub(crate) fn base64_encode(input: &[u8]) -> String {
     let mut result: String = String::new();
     for chunk in input.chunks(3) {

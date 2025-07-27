@@ -1,3 +1,16 @@
+//! http-request
+//!
+//! http-request is a lightweight, efficient library for building, sending,
+//! and handling HTTP/HTTPS requests in Rust applications.
+//! It provides a simple and intuitive API, allowing developers to easily
+//! interact with web services, whether they use the "HTTP" or "HTTPS" protocol.
+//! The library supports various HTTP methods, custom headers, request bodies,
+//! timeout, automatic handling of redirects (including detecting redirect loops),
+//! and enhanced response body decoding (both automatic and manual), enabling fast
+//! and secure communication. Whether working with secure "HTTPS" connections
+//! or standard "HTTP" requests, the library is optimized for performance,
+//! minimal resource usage, and easy integration into Rust projects.
+
 pub(crate) mod body;
 pub(crate) mod cfg;
 pub(crate) mod common;

@@ -15,9 +15,14 @@ use crate::*;
 /// - `body`: A `Vec<u8>` representing the body of the HTTP response, which contains the content being returned.
 #[derive(Debug, Clone)]
 pub struct HttpResponseBinary {
+    /// HTTP protocol version.
     pub(crate) http_version: ArcRwLock<HttpVersion>,
+    /// HTTP response status code.
     pub(crate) status_code: ResponseStatusCode,
+    /// HTTP response status text.
     pub(crate) status_text: ArcRwLock<String>,
+    /// HTTP response headers.
     pub(crate) headers: ArcRwLock<ResponseHeaders>,
+    /// HTTP response body content.
     pub(crate) body: ArcRwLock<RequestBody>,
 }

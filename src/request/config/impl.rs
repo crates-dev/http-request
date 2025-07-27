@@ -1,5 +1,15 @@
 use crate::*;
 
+/// Provides default configuration values for HTTP requests.
+///
+/// # Returns
+///
+/// - `Config` - A configuration instance with default values:
+///   - timeout: DEFAULT_TIMEOUT
+///   - redirect: false
+///   - max_redirect_times: DEFAULT_MAX_REDIRECT_TIMES
+///   - buffer: DEFAULT_BUFFER_SIZE
+///   - decode: true
 impl Default for Config {
     fn default() -> Self {
         Self {

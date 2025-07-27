@@ -451,67 +451,171 @@ impl WebSocket {
         Ok(proxy_stream)
     }
 
+    /// Sends a text message synchronously.
+    ///
+    /// # Arguments
+    ///
+    /// - `&str` - The text message to send.
+    ///
+    /// # Returns
+    ///
+    /// - `WebSocketResult` - Result indicating success or failure.
     pub fn send_text(&mut self, text: &str) -> WebSocketResult {
         let message: Message = Message::Text(text.into());
         self.send_message_sync(message)
     }
 
+    /// Sends a binary message synchronously.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The binary data to send.
+    ///
+    /// # Returns
+    ///
+    /// - `WebSocketResult` - Result indicating success or failure.
     pub fn send_binary(&mut self, data: &[u8]) -> WebSocketResult {
         let message: Message = Message::Binary(data.to_vec().into());
         self.send_message_sync(message)
     }
 
+    /// Sends a ping message synchronously.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The ping data to send.
+    ///
+    /// # Returns
+    ///
+    /// - `WebSocketResult` - Result indicating success or failure.
     pub fn send_ping(&mut self, data: &[u8]) -> WebSocketResult {
         let message: Message = Message::Ping(data.to_vec().into());
         self.send_message_sync(message)
     }
 
+    /// Sends a pong message synchronously.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The pong data to send.
+    ///
+    /// # Returns
+    ///
+    /// - `WebSocketResult` - Result indicating success or failure.
     pub fn send_pong(&mut self, data: &[u8]) -> WebSocketResult {
         let message: Message = Message::Pong(data.to_vec().into());
         self.send_message_sync(message)
     }
 
+    /// Receives a message synchronously.
+    ///
+    /// # Returns
+    ///
+    /// - `WebSocketMessageResult` - Result containing the received message or error.
     pub fn receive(&mut self) -> WebSocketMessageResult {
         self.receive_message_sync()
     }
 
+    /// Closes the WebSocket connection synchronously.
+    ///
+    /// # Returns
+    ///
+    /// - `WebSocketResult` - Result indicating success or failure.
     pub fn close(&mut self) -> WebSocketResult {
         self.close_sync()
     }
 
+    /// Checks if the WebSocket is currently connected.
+    ///
+    /// # Returns
+    ///
+    /// - `bool` - True if connected, false otherwise.
     pub fn is_connected(&self) -> bool {
         self.connected.load(Ordering::Relaxed)
     }
 
+    /// Sends a text message asynchronously.
+    ///
+    /// # Arguments
+    ///
+    /// - `&str` - The text message to send.
+    ///
+    /// # Returns
+    ///
+    /// - `WebSocketResult` - Result indicating success or failure.
     pub async fn send_text_async(&mut self, text: &str) -> WebSocketResult {
         let message: Message = Message::Text(text.into());
         self.send_message_async(message).await
     }
 
+    /// Sends a binary message asynchronously.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The binary data to send.
+    ///
+    /// # Returns
+    ///
+    /// - `WebSocketResult` - Result indicating success or failure.
     pub async fn send_binary_async(&mut self, data: &[u8]) -> WebSocketResult {
         let message: Message = Message::Binary(data.to_vec().into());
         self.send_message_async(message).await
     }
 
+    /// Sends a ping message asynchronously.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The ping data to send.
+    ///
+    /// # Returns
+    ///
+    /// - `WebSocketResult` - Result indicating success or failure.
     pub async fn send_ping_async(&mut self, data: &[u8]) -> WebSocketResult {
         let message: Message = Message::Ping(data.to_vec().into());
         self.send_message_async(message).await
     }
 
+    /// Sends a pong message asynchronously.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The pong data to send.
+    ///
+    /// # Returns
+    ///
+    /// - `WebSocketResult` - Result indicating success or failure.
     pub async fn send_pong_async(&mut self, data: &[u8]) -> WebSocketResult {
         let message: Message = Message::Pong(data.to_vec().into());
         self.send_message_async(message).await
     }
 
+    /// Receives a message asynchronously.
+    ///
+    /// # Returns
+    ///
+    /// - `WebSocketMessageResult` - Result containing the received message or error.
     pub async fn receive_async(&mut self) -> WebSocketMessageResult {
         self.receive_message_async().await
     }
 
+    /// Closes the WebSocket connection asynchronously.
+    ///
+    /// # Returns
+    ///
+    /// - `WebSocketResult` - Result indicating success or failure.
     pub async fn close_async_method(&mut self) -> WebSocketResult {
         self.close_async_internal().await
     }
 }
 
+/// Synchronous WebSocket trait implementation.
+///
+/// Provides synchronous methods for WebSocket operations including:
+/// - Sending messages (text, binary, ping, pong)
+/// - Receiving messages
+/// - Closing connections
+/// - Checking connection status
 impl WebSocketTrait for WebSocket {
     fn send_text(&mut self, text: &str) -> WebSocketResult {
         self.send_text(text)
@@ -542,6 +646,13 @@ impl WebSocketTrait for WebSocket {
     }
 }
 
+/// Asynchronous WebSocket trait implementation.
+///
+/// Provides asynchronous methods for WebSocket operations including:
+/// - Sending messages (text, binary, ping, pong)
+/// - Receiving messages
+/// - Closing connections
+/// - Checking connection status
 impl AsyncWebSocketTrait for WebSocket {
     fn send_text<'a>(
         &'a mut self,

@@ -1,20 +1,40 @@
 use crate::*;
 
+/// Represents different types of WebSocket connections.
+///
+/// This enum encapsulates both direct and proxy-based WebSocket connections,
+/// providing a unified interface for WebSocket operations.
 #[derive(Debug)]
 pub enum WebSocketConnectionType {
     Direct(WebSocketStream<MaybeTlsStream<AsyncTcpStream>>),
     Proxy(WebSocketStream<WebSocketProxyTunnelStream>),
 }
 
+/// Represents a WebSocket client connection.
+///
+/// This struct manages the WebSocket lifecycle including:
+/// - Connection state
+/// - Message sending/receiving
+/// - Configuration
 #[derive(Debug)]
 pub struct WebSocket {
+    /// The WebSocket server URL.
     pub(crate) url: Arc<String>,
+    /// HTTP headers for the WebSocket handshake.
     pub(crate) header: Arc<RequestHeaders>,
+    /// Configuration settings for the WebSocket connection.
     pub(crate) config: ArcRwLock<WebSocketConfig>,
+    /// Atomic flag indicating connection status.
     pub(crate) connected: Arc<AtomicBool>,
+    /// The underlying WebSocket connection.
     pub(crate) connection: WebSocketConnection,
 }
 
+/// Clone implementation for WebSocket.
+///
+/// Creates a new WebSocket instance with cloned configuration but resets:
+/// - Connection status to false
+/// - Connection to None
 impl Clone for WebSocket {
     fn clone(&self) -> Self {
         Self {
@@ -27,6 +47,14 @@ impl Clone for WebSocket {
     }
 }
 
+/// Default implementation for WebSocket.
+///
+/// Creates a WebSocket with:
+/// - Empty URL
+/// - Empty headers
+/// - Default configuration
+/// - Disconnected state
+/// - No active connection
 impl Default for WebSocket {
     fn default() -> Self {
         Self {
@@ -39,6 +67,10 @@ impl Default for WebSocket {
     }
 }
 
+/// Stream implementation for WebSocketConnectionType.
+///
+/// Allows polling for incoming WebSocket messages.
+/// Handles both direct and proxy connections uniformly.
 impl Stream for WebSocketConnectionType {
     type Item =
         Result<tokio_tungstenite::tungstenite::Message, tokio_tungstenite::tungstenite::Error>;
@@ -51,6 +83,10 @@ impl Stream for WebSocketConnectionType {
     }
 }
 
+/// Sink implementation for WebSocketConnectionType.
+///
+/// Allows sending WebSocket messages.
+/// Handles both direct and proxy connections uniformly.
 impl Sink<tokio_tungstenite::tungstenite::Message> for WebSocketConnectionType {
     type Error = tokio_tungstenite::tungstenite::Error;
 

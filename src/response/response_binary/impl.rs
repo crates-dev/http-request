@@ -11,6 +11,15 @@ use crate::*;
 impl ResponseTrait for HttpResponseBinary {
     type OutputText = HttpResponseText;
     type OutputBinary = HttpResponseBinary;
+    /// Creates a new HttpResponseBinary from raw response bytes.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The raw HTTP response bytes.
+    ///
+    /// # Returns
+    ///
+    /// - `Self` - The parsed HttpResponseBinary.
     fn from(response: &[u8]) -> Self
     where
         Self: Sized,
@@ -117,10 +126,20 @@ impl ResponseTrait for HttpResponseBinary {
         }
     }
 
+    /// Converts the response to binary format.
+    ///
+    /// # Returns
+    ///
+    /// - `Self::OutputBinary` - The binary representation of the response.
     fn binary(&self) -> Self::OutputBinary {
         self.clone()
     }
 
+    /// Converts the response to text format.
+    ///
+    /// # Returns
+    ///
+    /// - `HttpResponseText` - The text representation of the response.
     fn text(&self) -> HttpResponseText {
         let body: String = self.body.read().map_or(String::new(), |body_ref| {
             String::from_utf8_lossy(&body_ref).into_owned()
@@ -134,6 +153,15 @@ impl ResponseTrait for HttpResponseBinary {
         }
     }
 
+    /// Decodes the response body using the specified buffer size.
+    ///
+    /// # Arguments
+    ///
+    /// - `usize` - The buffer size for decoding.
+    ///
+    /// # Returns
+    ///
+    /// - `HttpResponseBinary` - The decoded binary response.
     fn decode(&self, buffer_size: usize) -> HttpResponseBinary {
         let decoded_body: Vec<u8> = {
             let headers_guard = self.headers.read();
@@ -169,6 +197,11 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `HttpVersion`: The HTTP version (e.g., HTTP/1.1, HTTP/2, etc.) used for the response.
+    /// Gets the HTTP version of the response.
+    ///
+    /// # Returns
+    ///
+    /// - `HttpVersion` - The HTTP version.
     pub fn get_http_version(&self) -> HttpVersion {
         if let Ok(http_version) = self.http_version.read() {
             return http_version
@@ -183,6 +216,11 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `ResponseStatusCode`: The HTTP status code as a usize (e.g., 200 for OK, 404 for Not Found).
+    /// Gets the HTTP status code of the response.
+    ///
+    /// # Returns
+    ///
+    /// - `ResponseStatusCode` - The status code.
     pub fn get_status_code(&self) -> ResponseStatusCode {
         self.status_code
     }
@@ -191,6 +229,11 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `String`: The human-readable status text (e.g., "OK" for status code 200, "Not Found" for status code 404).
+    /// Gets the HTTP status text of the response.
+    ///
+    /// # Returns
+    ///
+    /// - `String` - The status text.
     pub fn get_status_text(&self) -> String {
         if let Ok(status_text) = self.status_text.read() {
             return status_text.to_string();
@@ -202,6 +245,11 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `ResponseHeaders`: A map of header names and their corresponding values as key-value pairs.
+    /// Gets the HTTP response headers.
+    ///
+    /// # Returns
+    ///
+    /// - `ResponseHeaders` - The response headers.
     pub fn get_headers(&self) -> ResponseHeaders {
         if let Ok(headers) = self.headers.read() {
             return headers.clone();
@@ -213,6 +261,11 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `RequestBody`: The body of the response in binary form (could be raw bytes, a stream, etc.).
+    /// Gets the HTTP response body.
+    ///
+    /// # Returns
+    ///
+    /// - `RequestBody` - The response body.
     pub fn get_body(&self) -> RequestBody {
         if let Ok(body) = self.body.read() {
             return body.clone();
@@ -221,6 +274,11 @@ impl HttpResponseBinary {
     }
 }
 
+/// Default implementation for HttpResponseBinary.
+///
+/// # Returns
+///
+/// - `HttpResponseBinary` - Default initialized HttpResponseBinary.
 impl Default for HttpResponseBinary {
     fn default() -> Self {
         Self {

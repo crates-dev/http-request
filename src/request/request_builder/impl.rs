@@ -10,72 +10,64 @@ impl Default for RequestBuilder {
 }
 
 impl RequestBuilder {
-    /// Creates a new instance of the builder with default values.
-    ///
-    /// This method initializes the `RequestBuilder` with default values for all
-    /// fields.
+    /// Creates a new RequestBuilder instance.
     ///
     /// # Returns
-    /// Returns a new instance of `RequestBuilder`.
+    ///
+    /// - `RequestBuilder` - A new builder instance with default values.
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Sets the HTTP method for the request.
+    /// Sets the HTTP method to POST and the request URL.
     ///
-    /// This method allows you to specify the HTTP method (e.g., GET, POST) for the
-    /// request being built.
+    /// # Arguments
     ///
-    /// # Parameters
-    /// - `methods`: The HTTP method to be set for the request.
+    /// - `&str` - The request URL.
     ///
     /// # Returns
-    /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
+    ///
+    /// - `&mut RequestBuilder` - The builder for method chaining.
     pub fn post(&mut self, url: &str) -> &mut Self {
         self.http_request.methods = Arc::new(Method::POST);
         self.url(url);
         self
     }
 
-    /// Sets the HTTP method for the request.
+    /// Sets the HTTP method to GET and the request URL.
     ///
-    /// This method allows you to specify the HTTP method (e.g., GET, POST) for the
-    /// request being built.
+    /// # Arguments
     ///
-    /// # Parameters
-    /// - `methods`: The HTTP method to be set for the request.
+    /// - `&str` - The request URL.
     ///
     /// # Returns
-    /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
+    ///
+    /// - `&mut RequestBuilder` - The builder for method chaining.
     pub fn get(&mut self, url: &str) -> &mut Self {
         self.http_request.methods = Arc::new(Method::GET);
         self.url(url);
         self
     }
 
-    /// Sets the target URL of the request.
+    /// Sets the request URL.
     ///
-    /// This method allows you to specify the URL for the request being built.
+    /// # Arguments
     ///
-    /// # Parameters
-    /// - `url`: The target URL of the request.
+    /// - `&str` - The request URL.
     ///
     /// # Returns
-    /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
+    ///
+    /// - `&mut RequestBuilder` - The builder for method chaining.
     fn url(&mut self, url: &str) -> &mut Self {
         self.http_request.url = Arc::new(url.to_owned());
         self
     }
 
-    /// Sets the HTTP version to 1.1 for the request configuration.
-    ///
-    /// This method updates the HTTP version to `HTTP1_1` for the current
-    /// `http_request` configuration. It allows the user to force the
-    /// request to use HTTP 1.1 only, overriding any other version that may
-    /// have been previously set.
+    /// Forces HTTP/1.1 protocol version.
     ///
     /// # Returns
-    /// Returns a mutable reference to `self` to allow method chaining.
+    ///
+    /// - `&mut RequestBuilder` - The builder for method chaining.
     pub fn http1_1_only(&mut self) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.http_version = HttpVersion::HTTP1_1;
@@ -83,15 +75,11 @@ impl RequestBuilder {
         self
     }
 
-    /// Sets the HTTP version to 2.0 for the request configuration.
-    ///
-    /// This method updates the HTTP version to `HTTP2` for the current
-    /// `http_request` configuration. It allows the user to force the
-    /// request to use HTTP 2.0 only, overriding any other version that may
-    /// have been previously set.
+    /// Forces HTTP/2 protocol version.
     ///
     /// # Returns
-    /// Returns a mutable reference to `self` to allow method chaining.
+    ///
+    /// - `&mut RequestBuilder` - The builder for method chaining.
     pub fn http2_only(&mut self) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.http_version = HttpVersion::HTTP2;
@@ -99,17 +87,15 @@ impl RequestBuilder {
         self
     }
 
-    /// Sets the headers for the request.
+    /// Sets request headers.
     ///
-    /// This method allows you to specify the headers for the request being built.
-    /// Existing headers may be merged with the provided ones. If a header with the same name
-    /// (case-insensitive) already exists, it will be replaced.
+    /// # Arguments
     ///
-    /// # Parameters
-    /// - `header`: The headers to be set for the request.
+    /// - `HashMapXxHash3_64<K, V>` - The headers to set.
     ///
     /// # Returns
-    /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
+    ///
+    /// - `&mut RequestBuilder` - The builder for method chaining.
     pub fn headers<K, V>(&mut self, header: HashMapXxHash3_64<K, V>) -> &mut Self
     where
         K: ToString,
@@ -141,16 +127,15 @@ impl RequestBuilder {
         self
     }
 
-    /// Sets the JSON body of the request.
+    /// Sets JSON request body.
     ///
-    /// This method allows you to set the body of the request as JSON data. If there is existing
-    /// body data, it will be replaced with the provided JSON data.
+    /// # Arguments
     ///
-    /// # Parameters
-    /// - `body`: The JSON body data to be set for the request.
+    /// - `JsonValue` - The JSON body data.
     ///
     /// # Returns
-    /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
+    ///
+    /// - `&mut RequestBuilder` - The builder for method chaining.
     pub fn json(&mut self, body: JsonValue) -> &mut Self {
         if let JsonValue::Object(map) = body {
             let mut res_body: HashMapXxHash3_64<String, JsonValue> = hash_map_xx_hash3_64();
@@ -162,38 +147,29 @@ impl RequestBuilder {
         self
     }
 
-    /// Sets the text body of the request.
+    /// Sets plain text request body.
     ///
-    /// This method allows you to set the body of the request as plain text. If there is existing
-    /// body data, it will be replaced with the provided text data.
+    /// # Arguments
     ///
-    /// # Parameters
-    /// - `body`: The text body data to be set for the request.
+    /// - `T` - The text body data (must implement ToString).
     ///
     /// # Returns
-    /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
+    ///
+    /// - `&mut RequestBuilder` - The builder for method chaining.
     pub fn text<T: ToString>(&mut self, body: T) -> &mut Self {
         self.http_request.body = Arc::new(Body::Text(body.to_string()));
         self
     }
 
-    /// Sets the HTTP request body to the given binary content.
+    /// Sets binary request body.
     ///
-    /// This method assigns the provided binary data to the body of the HTTP request.
-    /// The body is wrapped in an `Arc` to enable shared ownership and safe concurrency.
+    /// # Arguments
     ///
-    /// # Parameters
-    ///
-    /// - `body` - A `BodyBinary` representing the binary content to be used as the HTTP request body.
+    /// - `T` - The binary body data (must implement Into<Vec<u8>>).
     ///
     /// # Returns
     ///
-    /// Returns a mutable reference to the current instance of the struct, allowing method chaining.
-    ///
-    /// # Notes
-    ///
-    /// This method overrides any previously set body. Use it when you want to assign binary content
-    /// specifically as the body of the HTTP request.
+    /// - `&mut RequestBuilder` - The builder for method chaining.
     pub fn body<T: Into<Vec<u8>>>(&mut self, body: T) -> &mut Self {
         self.http_request.body = Arc::new(Body::Binary(body.into()));
         self
