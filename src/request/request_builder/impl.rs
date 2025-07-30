@@ -23,7 +23,7 @@ impl RequestBuilder {
     ///
     /// # Arguments
     ///
-    /// - `&str` - The request URL.
+    /// - `str` - The request URL.
     ///
     /// # Returns
     ///
@@ -38,7 +38,7 @@ impl RequestBuilder {
     ///
     /// # Arguments
     ///
-    /// - `&str` - The request URL.
+    /// - `str` - The request URL.
     ///
     /// # Returns
     ///
@@ -182,13 +182,14 @@ impl RequestBuilder {
     /// as failed. The timeout value is stored in an `Arc` to allow it to be shared safely across
     /// multiple threads if needed.
     ///
-    /// # Parameters
+    /// # Arguments
     ///
-    /// - `timeout`: The timeout duration in seconds. This value will be used to configure the
+    /// - `u64` - The timeout duration in seconds. This value will be used to configure the
     ///   connection timeout.
     ///
     /// # Returns
-    /// Returns a mutable reference to the `RequestBuilder` to allow method chaining.
+    ///
+    /// - `&mut RequestBuilder` - The builder for method chaining.
     pub fn timeout(&mut self, timeout: u64) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.timeout = timeout;
@@ -199,7 +200,10 @@ impl RequestBuilder {
     /// Enables HTTP redirection for the request.
     ///
     /// This method sets the `redirect` property of the `http_request` to `true`.
-    /// It returns a mutable reference to the current instance, allowing method chaining.
+    ///
+    /// # Returns
+    ///
+    /// - `&mut RequestBuilder` - The builder for method chaining.
     pub fn redirect(&mut self) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.redirect = true;
@@ -210,7 +214,10 @@ impl RequestBuilder {
     /// Unenables HTTP redirection for the request.
     ///
     /// This method sets the `redirect` property of the `http_request` to `false`.
-    /// It returns a mutable reference to the current instance, allowing method chaining.
+    ///
+    /// # Returns
+    ///
+    /// - `&mut RequestBuilder` - The builder for method chaining.
     pub fn unredirect(&mut self) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.redirect = false;
@@ -223,13 +230,13 @@ impl RequestBuilder {
     /// This method updates the `max_redirect_times` field in the configuration and returns a mutable
     /// reference to `self` to enable method chaining.
     ///
-    /// # Parameters
+    /// # Arguments
     ///
-    /// - `num` - The maximum number of redirections allowed. A value of `0` disables redirection.
+    /// - `usize` - The maximum number of redirections allowed. A value of `0` disables redirection.
     ///
     /// # Returns
     ///
-    /// A mutable reference to the current instance for method chaining.
+    /// - `&mut RequestBuilder` - A mutable reference to the current instance for method chaining.
     ///
     /// # Notes
     ///
@@ -248,11 +255,13 @@ impl RequestBuilder {
     /// the HTTP response. It modifies the `buffer` field of the HTTP request's
     /// configuration, which will be used when processing the response data.
     ///
-    /// # Parameters
-    /// - `buffer`: The size of the buffer to be used, in bytes.
+    /// # Arguments
+    ///
+    /// - `usize` - The size of the buffer to be used, in bytes.
     ///
     /// # Returns
-    /// Returns a mutable reference to `self`, allowing for method chaining.
+    ///
+    /// - `&mut RequestBuilder` - Returns a mutable reference to `self`, allowing for method chaining.
     pub fn buffer(&mut self, buffer: usize) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.buffer = buffer;
@@ -266,7 +275,8 @@ impl RequestBuilder {
     /// using a supported compression format (e.g., `gzip`, `deflate`, `br`).
     ///
     /// # Returns
-    /// A mutable reference to the current instance, allowing for method chaining.
+    ///
+    /// - `&mut RequestBuilder` - A mutable reference to the current instance, allowing for method chaining.
     pub fn decode(&mut self) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.decode = true;
@@ -280,7 +290,8 @@ impl RequestBuilder {
     /// and the raw encoded data will be returned as-is.
     ///
     /// # Returns
-    /// A mutable reference to the current instance, allowing for method chaining.
+    ///
+    /// - `&mut RequestBuilder` - A mutable reference to the current instance, allowing for method chaining.
     pub fn undecode(&mut self) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.decode = false;
@@ -292,12 +303,14 @@ impl RequestBuilder {
     ///
     /// This method configures the request to use an HTTP proxy server.
     ///
-    /// # Parameters
-    /// - `host`: The hostname or IP address of the proxy server.
-    /// - `port`: The port number of the proxy server.
+    /// # Arguments
+    ///
+    /// - `str` - The hostname or IP address of the proxy server.
+    /// - `u16` - The port number of the proxy server.
     ///
     /// # Returns
-    /// A mutable reference to the current instance, allowing for method chaining.
+    ///
+    /// - `&mut RequestBuilder` - A mutable reference to the current instance, allowing for method chaining.
     pub fn http_proxy(&mut self, host: &str, port: u16) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.proxy = Some(ProxyConfig {
@@ -315,12 +328,14 @@ impl RequestBuilder {
     ///
     /// This method configures the request to use an HTTPS proxy server.
     ///
-    /// # Parameters
-    /// - `host`: The hostname or IP address of the proxy server.
-    /// - `port`: The port number of the proxy server.
+    /// # Arguments
+    ///
+    /// - `str` - The hostname or IP address of the proxy server.
+    /// - `u16` - The port number of the proxy server.
     ///
     /// # Returns
-    /// A mutable reference to the current instance, allowing for method chaining.
+    ///
+    /// - `&mut RequestBuilder` - A mutable reference to the current instance, allowing for method chaining.
     pub fn https_proxy(&mut self, host: &str, port: u16) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.proxy = Some(ProxyConfig {
@@ -338,12 +353,14 @@ impl RequestBuilder {
     ///
     /// This method configures the request to use a SOCKS5 proxy server.
     ///
-    /// # Parameters
-    /// - `host`: The hostname or IP address of the proxy server.
-    /// - `port`: The port number of the proxy server.
+    /// # Arguments
+    ///
+    /// - `str` - The hostname or IP address of the proxy server.
+    /// - `u16` - The port number of the proxy server.
     ///
     /// # Returns
-    /// A mutable reference to the current instance, allowing for method chaining.
+    ///
+    /// - `&mut RequestBuilder` - A mutable reference to the current instance, allowing for method chaining.
     pub fn socks5_proxy(&mut self, host: &str, port: u16) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
             config.proxy = Some(ProxyConfig {
@@ -361,14 +378,16 @@ impl RequestBuilder {
     ///
     /// This method configures the request to use an HTTP proxy server with username and password authentication.
     ///
-    /// # Parameters
-    /// - `host`: The hostname or IP address of the proxy server.
-    /// - `port`: The port number of the proxy server.
-    /// - `username`: The username for proxy authentication.
-    /// - `password`: The password for proxy authentication.
+    /// # Arguments
+    ///
+    /// - `str` - The hostname or IP address of the proxy server.
+    /// - `u16` - The port number of the proxy server.
+    /// - `str` - The username for proxy authentication.
+    /// - `str` - The password for proxy authentication.
     ///
     /// # Returns
-    /// A mutable reference to the current instance, allowing for method chaining.
+    ///
+    /// - `&mut RequestBuilder` - A mutable reference to the current instance, allowing for method chaining.
     pub fn http_proxy_auth(
         &mut self,
         host: &str,
@@ -392,14 +411,16 @@ impl RequestBuilder {
     ///
     /// This method configures the request to use an HTTPS proxy server with username and password authentication.
     ///
-    /// # Parameters
-    /// - `host`: The hostname or IP address of the proxy server.
-    /// - `port`: The port number of the proxy server.
-    /// - `username`: The username for proxy authentication.
-    /// - `password`: The password for proxy authentication.
+    /// # Arguments
+    ///
+    /// - `str` - The hostname or IP address of the proxy server.
+    /// - `u16` - The port number of the proxy server.
+    /// - `str` - The username for proxy authentication.
+    /// - `str` - The password for proxy authentication.
     ///
     /// # Returns
-    /// A mutable reference to the current instance, allowing for method chaining.
+    ///
+    /// - `&mut RequestBuilder` - A mutable reference to the current instance, allowing for method chaining.
     pub fn https_proxy_auth(
         &mut self,
         host: &str,
@@ -423,14 +444,16 @@ impl RequestBuilder {
     ///
     /// This method configures the request to use a SOCKS5 proxy server with username and password authentication.
     ///
-    /// # Parameters
-    /// - `host`: The hostname or IP address of the proxy server.
-    /// - `port`: The port number of the proxy server.
-    /// - `username`: The username for proxy authentication.
-    /// - `password`: The password for proxy authentication.
+    /// # Arguments
+    ///
+    /// - `str` - The hostname or IP address of the proxy server.
+    /// - `u16` - The port number of the proxy server.
+    /// - `str` - The username for proxy authentication.
+    /// - `str` - The password for proxy authentication.
     ///
     /// # Returns
-    /// A mutable reference to the current instance, allowing for method chaining.
+    ///
+    /// - `&mut RequestBuilder` - A mutable reference to the current instance, allowing for method chaining.
     pub fn socks5_proxy_auth(
         &mut self,
         host: &str,
@@ -457,7 +480,8 @@ impl RequestBuilder {
     /// state for further use.
     ///
     /// # Returns
-    /// Returns a fully constructed `BoxAsyncRequestTrait` instance based on the current builder state.
+    ///
+    /// - `BoxAsyncRequestTrait` - Returns a fully constructed `BoxAsyncRequestTrait` instance based on the current builder state.
     pub fn build_async(&mut self) -> BoxAsyncRequestTrait {
         self.builder = self.http_request.clone();
         self.http_request = HttpRequest::default();
@@ -471,7 +495,8 @@ impl RequestBuilder {
     /// state for further use.
     ///
     /// # Returns
-    /// Returns a fully constructed `BoxRequestTrait` instance based on the current builder state.
+    ///
+    /// - `BoxRequestTrait` - Returns a fully constructed `BoxRequestTrait` instance based on the current builder state.
     pub fn build_sync(&mut self) -> BoxRequestTrait {
         self.builder = self.http_request.clone();
         self.http_request = HttpRequest::default();

@@ -1,6 +1,19 @@
 use crate::*;
 
 impl SharedRequestBuilder {
+    /// Constructs an HTTP request byte vector.
+    ///
+    /// # Arguments
+    ///
+    /// - `&str` - The HTTP method (e.g., "GET", "POST").
+    /// - `String` - The request path.
+    /// - `Vec<u8>` - The raw bytes of the request headers.
+    /// - `Option<Vec<u8>>` - The optional raw bytes of the request body.
+    /// - `String` - The HTTP version string (e.g., "HTTP/1.1").
+    ///
+    /// # Returns
+    ///
+    /// - `Vec<u8>` - The complete HTTP request as a byte vector.
     pub(crate) fn build_http_request(
         method: &str,
         path: String,
@@ -26,6 +39,17 @@ impl SharedRequestBuilder {
         request
     }
 
+    /// Constructs an HTTP GET request byte vector.
+    ///
+    /// # Arguments
+    ///
+    /// - `String` - The request path.
+    /// - `Vec<u8>` - The raw bytes of the request headers.
+    /// - `String` - The HTTP version string (e.g., "HTTP/1.1").
+    ///
+    /// # Returns
+    ///
+    /// - `Vec<u8>` - The complete HTTP GET request as a byte vector.
     pub(crate) fn build_get_request(
         path: String,
         header_bytes: Vec<u8>,
@@ -34,6 +58,18 @@ impl SharedRequestBuilder {
         Self::build_http_request("GET", path, header_bytes, None, http_version_str)
     }
 
+    /// Constructs an HTTP POST request byte vector.
+    ///
+    /// # Arguments
+    ///
+    /// - `String` - The request path.
+    /// - `Vec<u8>` - The raw bytes of the request headers.
+    /// - `Vec<u8>` - The raw bytes of the request body.
+    /// - `String` - The HTTP version string (e.g., "HTTP/1.1").
+    ///
+    /// # Returns
+    ///
+    /// - `Vec<u8>` - The complete HTTP POST request as a byte vector.
     pub(crate) fn build_post_request(
         path: String,
         header_bytes: Vec<u8>,
@@ -51,6 +87,19 @@ impl SharedRequestBuilder {
 }
 
 impl SharedResponseHandler {
+    /// Parses response headers to extract status code, content length, and redirect URL.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The raw bytes of the response headers.
+    /// - `&[u8]` - The raw bytes of the HTTP version (e.g., "HTTP/1.1").
+    /// - `&[u8]` - The byte pattern to identify the "Location" header.
+    /// - `&mut usize` - A mutable reference to store the content length.
+    /// - `&mut Option<Vec<u8>>` - A mutable reference to store the redirect URL if present.
+    ///
+    /// # Returns
+    ///
+    /// - `Result<(), RequestError>` - Ok if parsing is successful, Err otherwise.
     pub(crate) fn parse_response_headers(
         headers_bytes: &[u8],
         http_version_bytes: &[u8],
@@ -85,6 +134,17 @@ impl SharedResponseHandler {
         Ok(())
     }
 
+    /// Finds a pattern within a byte slice, ignoring case.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The haystack (the byte slice to search within).
+    /// - `&[u8]` - The needle (the byte slice to search for).
+    ///
+    /// # Returns
+    ///
+    /// - `Option<usize>` - The starting index of the first occurrence of the needle in the haystack,
+    ///   or None if not found.
     pub(crate) fn find_pattern_case_insensitive(haystack: &[u8], needle: &[u8]) -> Option<usize> {
         if needle.is_empty() || haystack.len() < needle.len() {
             return None;
@@ -106,6 +166,18 @@ impl SharedResponseHandler {
         None
     }
 
+    /// Finds the position of the Carriage Return Line Feed (CRLF) sequence in a byte slice.
+    ///
+    /// Searches for `\r\n` starting from the specified index.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The data to search within.
+    /// - `usize` - The starting index for the search.
+    ///
+    /// # Returns
+    ///
+    /// - `Option<usize>` - The index where the CRLF sequence starts, or None if not found.
     pub(crate) fn find_crlf(data: &[u8], start: usize) -> Option<usize> {
         let search_data: &[u8] = &data[start..];
         for i in 0..search_data.len().saturating_sub(1) {
@@ -116,6 +188,18 @@ impl SharedResponseHandler {
         None
     }
 
+    /// Finds the position of the double Carriage Return Line Feed (CRLF) sequence in a byte slice.
+    ///
+    /// Searches for `\r\n\r\n` starting from the specified index.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The data to search within.
+    /// - `usize` - The starting index for the search.
+    ///
+    /// # Returns
+    ///
+    /// - `Option<usize>` - The index where the double CRLF sequence starts, or None if not found.
     pub(crate) fn find_double_crlf(data: &[u8], start: usize) -> Option<usize> {
         let search_data: &[u8] = &data[start..];
         for i in 0..search_data.len().saturating_sub(3) {
@@ -130,6 +214,17 @@ impl SharedResponseHandler {
         None
     }
 
+    /// Extracts the Content-Length value from response bytes.
+    ///
+    /// Searches for the "Content-Length" header and parses its value.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The raw bytes of the HTTP response.
+    ///
+    /// # Returns
+    ///
+    /// - `usize` - The content length value, or 0 if not found or parsing fails.
     pub(crate) fn get_content_length(response_bytes: &[u8]) -> usize {
         if let Some(pos) =
             Self::find_pattern_case_insensitive(response_bytes, CONTENT_LENGTH_PATTERN)
@@ -148,6 +243,17 @@ impl SharedResponseHandler {
         0
     }
 
+    /// Parses a byte slice representing a decimal number into a `usize`.
+    ///
+    /// Skips leading whitespace and stops at the first non-digit character.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The byte slice containing the decimal number.
+    ///
+    /// # Returns
+    ///
+    /// - `usize` - The parsed decimal value.
     pub(crate) fn parse_decimal_bytes(bytes: &[u8]) -> usize {
         let mut result: usize = 0;
         let mut started: bool = false;
@@ -164,6 +270,17 @@ impl SharedResponseHandler {
         result
     }
 
+    /// Parses a byte slice representing an HTTP status code into a `usize`.
+    ///
+    /// Expects a 3-digit status code.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The byte slice containing the status code.
+    ///
+    /// # Returns
+    ///
+    /// - `usize` - The parsed status code, or 0 if parsing fails or the input is invalid.
     pub(crate) fn parse_status_code(status_bytes: &[u8]) -> usize {
         if status_bytes.len() != 3 {
             return 0;
@@ -179,6 +296,20 @@ impl SharedResponseHandler {
         result
     }
 
+    /// Calculates a new buffer capacity based on current capacity and needed size.
+    ///
+    /// This function determines an appropriate buffer size, typically doubling the current
+    /// capacity or increasing it by 50% of the needed capacity, ensuring efficient memory allocation.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The current response bytes.
+    /// - `usize` - The number of additional bytes needed.
+    /// - `usize` - The current buffer capacity.
+    ///
+    /// # Returns
+    ///
+    /// - `usize` - The recommended new buffer capacity. Returns 0 if no increase is needed.
     pub(crate) fn calculate_buffer_capacity(
         response_bytes: &[u8],
         n: usize,

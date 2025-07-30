@@ -38,7 +38,7 @@ impl Display for Body {
 ///
 /// # Arguments
 ///
-/// - `S` -
+/// - `S` - The type of the serializer.
 ///
 /// # Returns
 ///
