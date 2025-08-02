@@ -5,7 +5,7 @@
 [![](https://img.shields.io/crates/v/http-request.svg)](https://crates.io/crates/http-request)
 [![](https://img.shields.io/crates/d/http-request.svg)](https://img.shields.io/crates/d/http-request.svg)
 [![](https://docs.rs/http-request/badge.svg)](https://docs.rs/http-request)
-[![](https://github.com/eastspire/http-request/workflows/Rust/badge.svg)](https://github.com/eastspire/http-request/actions?query=workflow:Rust)
+[![](https://github.com/crates-dev/http-request/workflows/Rust/badge.svg)](https://github.com/crates-dev/http-request/actions?query=workflow:Rust)
 [![](https://img.shields.io/crates/l/http-request.svg)](./LICENSE)
 
 </center>
