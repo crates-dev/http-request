@@ -5,11 +5,11 @@ impl SharedRequestBuilder {
     ///
     /// # Arguments
     ///
-    /// - `&str` - The HTTP method (e.g., "GET", "POST").
+    /// - `&str` - The HTTP method.
     /// - `String` - The request path.
     /// - `Vec<u8>` - The raw bytes of the request headers.
     /// - `Option<Vec<u8>>` - The optional raw bytes of the request body.
-    /// - `String` - The HTTP version string (e.g., "HTTP/1.1").
+    /// - `String` - The HTTP version string.
     ///
     /// # Returns
     ///
@@ -45,7 +45,7 @@ impl SharedRequestBuilder {
     ///
     /// - `String` - The request path.
     /// - `Vec<u8>` - The raw bytes of the request headers.
-    /// - `String` - The HTTP version string (e.g., "HTTP/1.1").
+    /// - `String` - The HTTP version string.
     ///
     /// # Returns
     ///
@@ -65,7 +65,7 @@ impl SharedRequestBuilder {
     /// - `String` - The request path.
     /// - `Vec<u8>` - The raw bytes of the request headers.
     /// - `Vec<u8>` - The raw bytes of the request body.
-    /// - `String` - The HTTP version string (e.g., "HTTP/1.1").
+    /// - `String` - The HTTP version string.
     ///
     /// # Returns
     ///
@@ -92,7 +92,7 @@ impl SharedResponseHandler {
     /// # Arguments
     ///
     /// - `&[u8]` - The raw bytes of the response headers.
-    /// - `&[u8]` - The raw bytes of the HTTP version (e.g., "HTTP/1.1").
+    /// - `&[u8]` - The raw bytes of the HTTP version.
     /// - `&[u8]` - The byte pattern to identify the "Location" header.
     /// - `&mut usize` - A mutable reference to store the content length.
     /// - `&mut Option<Vec<u8>>` - A mutable reference to store the redirect URL if present.

@@ -103,7 +103,7 @@ impl HttpResponseText {
     /// Retrieves the HTTP version associated with this response.
     ///
     /// # Returns
-    /// - `HttpVersion`: The HTTP version (e.g., HTTP/1.1, HTTP/2, etc.) used for the response.
+    /// - `HttpVersion`: The HTTP version used for the response.
     /// Gets the HTTP version of the response.
     ///
     /// # Returns
@@ -122,7 +122,7 @@ impl HttpResponseText {
     /// Retrieves the HTTP status code associated with this response.
     ///
     /// # Returns
-    /// - `ResponseStatusCode`: The HTTP status code as a usize (e.g., 200 for OK, 404 for Not Found).
+    /// - `ResponseStatusCode`: The HTTP status code as a usize.
     /// Gets the HTTP status code of the response.
     ///
     /// # Returns
@@ -135,7 +135,7 @@ impl HttpResponseText {
     /// Retrieves the status text associated with the HTTP status code.
     ///
     /// # Returns
-    /// - `String`: The human-readable status text (e.g., "OK" for status code 200, "Not Found" for status code 404).
+    /// - `String`: The human-readable status text.
     /// Gets the HTTP status text of the response.
     ///
     /// # Returns

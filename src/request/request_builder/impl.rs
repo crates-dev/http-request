@@ -272,7 +272,7 @@ impl RequestBuilder {
     /// Enables automatic response decoding.
     ///
     /// When enabled, the response body will be automatically decompressed if it is encoded
-    /// using a supported compression format (e.g., `gzip`, `deflate`, `br`).
+    /// using a supported compression format.
     ///
     /// # Returns
     ///

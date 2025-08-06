@@ -87,7 +87,7 @@ impl Default for HttpRequest {
 /// Implements methods for the `HttpRequest` struct.
 ///
 /// These methods provide functionality for managing HTTP requests, including:
-/// - Retrieving or setting HTTP attributes (e.g., URL, headers, protocol).
+/// - Retrieving or setting HTTP attributes.
 /// - Constructing and sending HTTP GET or POST requests.
 /// - Parsing responses and handling redirects.
 impl HttpRequest {
