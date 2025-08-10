@@ -758,12 +758,9 @@ impl HttpRequest {
                         ClientConnection::new(Arc::clone(&client_config), dns_name)
                             .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
 
-                    let tunnel_stream =
-                        crate::request::SyncProxyTunnelStream::new(proxy_stream, pre_read_data);
-                    let tls_stream: StreamOwned<
-                        ClientConnection,
-                        crate::request::SyncProxyTunnelStream,
-                    > = StreamOwned::new(session, tunnel_stream);
+                    let tunnel_stream = SyncProxyTunnelStream::new(proxy_stream, pre_read_data);
+                    let tls_stream: StreamOwned<ClientConnection, SyncProxyTunnelStream> =
+                        StreamOwned::new(session, tunnel_stream);
                     return Ok(Box::new(tls_stream));
                 }
                 Err(err) => {
@@ -774,8 +771,9 @@ impl HttpRequest {
                 }
             }
         }
-
-        Ok(proxy_stream)
+        let tunnel_stream: SyncProxyTunnelStream =
+            SyncProxyTunnelStream::new(proxy_stream, pre_read_data);
+        Ok(Box::new(tunnel_stream))
     }
 
     /// Establishes a SOCKS5 proxy connection.
@@ -927,12 +925,9 @@ impl HttpRequest {
                         ClientConnection::new(Arc::clone(&client_config), dns_name)
                             .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
 
-                    let tunnel_stream =
-                        crate::request::SyncProxyTunnelStream::new(proxy_stream, vec![]);
-                    let tls_stream: StreamOwned<
-                        ClientConnection,
-                        crate::request::SyncProxyTunnelStream,
-                    > = StreamOwned::new(session, tunnel_stream);
+                    let tunnel_stream = SyncProxyTunnelStream::new(proxy_stream, vec![]);
+                    let tls_stream: StreamOwned<ClientConnection, SyncProxyTunnelStream> =
+                        StreamOwned::new(session, tunnel_stream);
                     return Ok(Box::new(tls_stream));
                 }
                 Err(err) => {
@@ -1386,16 +1381,16 @@ impl HttpRequest {
             let connector: TlsConnector = TlsConnector::from(Arc::new(tls_config));
             let dns_name: ServerName<'_> = ServerName::try_from(target_host.clone())
                 .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
-            let tunnel_stream: crate::request::ProxyTunnelStream =
-                crate::request::ProxyTunnelStream::new(proxy_stream, pre_read_data);
-            let tls_stream: TlsStream<crate::request::ProxyTunnelStream> = connector
+            let tunnel_stream: ProxyTunnelStream =
+                ProxyTunnelStream::new(proxy_stream, pre_read_data);
+            let tls_stream: TlsStream<ProxyTunnelStream> = connector
                 .connect(dns_name, tunnel_stream)
                 .await
                 .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
             return Ok(Box::new(tls_stream));
         }
-
-        Ok(proxy_stream)
+        let tunnel_stream: ProxyTunnelStream = ProxyTunnelStream::new(proxy_stream, pre_read_data);
+        Ok(Box::new(tunnel_stream))
     }
 
     /// Establishes an async SOCKS5 proxy connection.
@@ -1570,15 +1565,13 @@ impl HttpRequest {
             let connector: TlsConnector = TlsConnector::from(Arc::new(tls_config));
             let dns_name: ServerName<'_> = ServerName::try_from(target_host.clone())
                 .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
-            let tunnel_stream: crate::request::ProxyTunnelStream =
-                crate::request::ProxyTunnelStream::new(proxy_stream, vec![]);
-            let tls_stream: TlsStream<crate::request::ProxyTunnelStream> = connector
+            let tunnel_stream: ProxyTunnelStream = ProxyTunnelStream::new(proxy_stream, Vec::new());
+            let tls_stream: TlsStream<ProxyTunnelStream> = connector
                 .connect(dns_name, tunnel_stream)
                 .await
                 .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
             return Ok(Box::new(tls_stream));
         }
-
         Ok(proxy_stream)
     }
 
