@@ -11,8 +11,11 @@ impl ProxyTunnelStream {
     /// # Returns
     ///
     /// - `ProxyTunnelStream` - The new proxy tunnel stream.
-    pub(crate) fn new(stream: BoxAsyncReadWrite) -> Self {
-        Self { inner: stream }
+    pub(crate) fn new(stream: BoxAsyncReadWrite, pre_read_data: Vec<u8>) -> Self {
+        Self {
+            inner: stream,
+            pre_read_data,
+        }
     }
 }
 
@@ -25,6 +28,12 @@ impl AsyncRead for ProxyTunnelStream {
         cx: &mut Context<'_>,
         buf: &mut ReadBuf<'_>,
     ) -> Poll<std::io::Result<()>> {
+        if !self.pre_read_data.is_empty() {
+            let len: usize = std::cmp::min(self.pre_read_data.len(), buf.remaining());
+            buf.put_slice(&self.pre_read_data[..len]);
+            self.pre_read_data.drain(..len);
+            return Poll::Ready(Ok(()));
+        }
         Pin::new(&mut self.inner).poll_read(cx, buf)
     }
 }
@@ -69,8 +78,11 @@ impl SyncProxyTunnelStream {
     /// # Returns
     ///
     /// - `SyncProxyTunnelStream` - The new sync proxy tunnel stream.
-    pub(crate) fn new(stream: BoxReadWrite) -> Self {
-        Self { inner: stream }
+    pub(crate) fn new(stream: BoxReadWrite, pre_read_data: Vec<u8>) -> Self {
+        Self {
+            inner: stream,
+            pre_read_data,
+        }
     }
 }
 
@@ -79,6 +91,12 @@ impl SyncProxyTunnelStream {
 /// Delegates all operations to the underlying stream.
 impl Read for SyncProxyTunnelStream {
     fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        if !self.pre_read_data.is_empty() {
+            let len: usize = std::cmp::min(self.pre_read_data.len(), buf.len());
+            buf[..len].copy_from_slice(&self.pre_read_data[..len]);
+            self.pre_read_data.drain(..len);
+            return Ok(len);
+        }
         self.inner.read(buf)
     }
 }

@@ -717,13 +717,29 @@ impl HttpRequest {
         let bytes_read: usize = proxy_stream
             .read(&mut response_buffer)
             .map_err(|err| RequestError::Request(err.to_string()))?;
-        let response: Cow<'_, str> = String::from_utf8_lossy(&response_buffer[..bytes_read]);
-        if !response.starts_with("HTTP/1.1 200") && !response.starts_with("HTTP/1.0 200") {
-            return Err(RequestError::Request(format!(
-                "Proxy connection failed: {}",
-                response.lines().next().unwrap_or("Unknown error")
-            )));
-        }
+        let response_str: &str = std::str::from_utf8(&response_buffer[..bytes_read]).unwrap_or("");
+        let headers_end_pos: Option<usize> = response_str.find("\r\n\r\n");
+        let pre_read_data: Vec<u8> = if let Some(pos) = headers_end_pos {
+            let header_part: &str = &response_str[..pos];
+            if !header_part.starts_with("HTTP/1.1 200") && !header_part.starts_with("HTTP/1.0 200")
+            {
+                return Err(RequestError::Request(format!(
+                    "Proxy connection failed: {}",
+                    header_part.lines().next().unwrap_or("Unknown error")
+                )));
+            }
+            response_buffer[pos + 4..bytes_read].to_vec()
+        } else {
+            if !response_str.starts_with("HTTP/1.1 200")
+                && !response_str.starts_with("HTTP/1.0 200")
+            {
+                return Err(RequestError::Request(format!(
+                    "Proxy connection failed: {}",
+                    response_str.lines().next().unwrap_or("Unknown error")
+                )));
+            }
+            vec![]
+        };
         let config: Config = self
             .config
             .read()
@@ -742,7 +758,8 @@ impl HttpRequest {
                         ClientConnection::new(Arc::clone(&client_config), dns_name)
                             .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
 
-                    let tunnel_stream = crate::request::SyncProxyTunnelStream::new(proxy_stream);
+                    let tunnel_stream =
+                        crate::request::SyncProxyTunnelStream::new(proxy_stream, pre_read_data);
                     let tls_stream: StreamOwned<
                         ClientConnection,
                         crate::request::SyncProxyTunnelStream,
@@ -910,7 +927,8 @@ impl HttpRequest {
                         ClientConnection::new(Arc::clone(&client_config), dns_name)
                             .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
 
-                    let tunnel_stream = crate::request::SyncProxyTunnelStream::new(proxy_stream);
+                    let tunnel_stream =
+                        crate::request::SyncProxyTunnelStream::new(proxy_stream, vec![]);
                     let tls_stream: StreamOwned<
                         ClientConnection,
                         crate::request::SyncProxyTunnelStream,
@@ -1323,13 +1341,29 @@ impl HttpRequest {
             .read(&mut response_buffer)
             .await
             .map_err(|err| RequestError::Request(err.to_string()))?;
-        let response: Cow<'_, str> = String::from_utf8_lossy(&response_buffer[..bytes_read]);
-        if !response.starts_with("HTTP/1.1 200") && !response.starts_with("HTTP/1.0 200") {
-            return Err(RequestError::Request(format!(
-                "Proxy connection failed: {}",
-                response.lines().next().unwrap_or("Unknown error")
-            )));
-        }
+        let response_str: &str = std::str::from_utf8(&response_buffer[..bytes_read]).unwrap_or("");
+        let headers_end_pos: Option<usize> = response_str.find("\r\n\r\n");
+        let pre_read_data: Vec<u8> = if let Some(pos) = headers_end_pos {
+            let header_part: &str = &response_str[..pos];
+            if !header_part.starts_with("HTTP/1.1 200") && !header_part.starts_with("HTTP/1.0 200")
+            {
+                return Err(RequestError::Request(format!(
+                    "Proxy connection failed: {}",
+                    header_part.lines().next().unwrap_or("Unknown error")
+                )));
+            }
+            response_buffer[pos + 4..bytes_read].to_vec()
+        } else {
+            if !response_str.starts_with("HTTP/1.1 200")
+                && !response_str.starts_with("HTTP/1.0 200")
+            {
+                return Err(RequestError::Request(format!(
+                    "Proxy connection failed: {}",
+                    response_str.lines().next().unwrap_or("Unknown error")
+                )));
+            }
+            vec![]
+        };
         let config: Config = self
             .config
             .read()
@@ -1353,7 +1387,7 @@ impl HttpRequest {
             let dns_name: ServerName<'_> = ServerName::try_from(target_host.clone())
                 .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
             let tunnel_stream: crate::request::ProxyTunnelStream =
-                crate::request::ProxyTunnelStream::new(proxy_stream);
+                crate::request::ProxyTunnelStream::new(proxy_stream, pre_read_data);
             let tls_stream: TlsStream<crate::request::ProxyTunnelStream> = connector
                 .connect(dns_name, tunnel_stream)
                 .await
@@ -1537,7 +1571,7 @@ impl HttpRequest {
             let dns_name: ServerName<'_> = ServerName::try_from(target_host.clone())
                 .map_err(|err| RequestError::TlsConnectorBuild(err.to_string()))?;
             let tunnel_stream: crate::request::ProxyTunnelStream =
-                crate::request::ProxyTunnelStream::new(proxy_stream);
+                crate::request::ProxyTunnelStream::new(proxy_stream, vec![]);
             let tls_stream: TlsStream<crate::request::ProxyTunnelStream> = connector
                 .connect(dns_name, tunnel_stream)
                 .await

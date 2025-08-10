@@ -6,6 +6,8 @@ use crate::*;
 pub struct ProxyTunnelStream {
     /// The underlying asynchronous read/write stream.
     pub(super) inner: BoxAsyncReadWrite,
+    /// Pre-read data from the stream.
+    pub(super) pre_read_data: Vec<u8>,
 }
 
 /// Synchronous proxy tunnel stream wrapper.
@@ -14,4 +16,6 @@ pub struct ProxyTunnelStream {
 pub struct SyncProxyTunnelStream {
     /// The underlying synchronous read/write stream.
     pub(super) inner: BoxReadWrite,
+    /// Pre-read data from the stream.
+    pub(super) pre_read_data: Vec<u8>,
 }
