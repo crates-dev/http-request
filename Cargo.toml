@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.91.24"
+version = "8.91.25"
 readme = "README.md"
 edition = "2024"
 authors = ["root@ltpp.vip"]
@@ -17,10 +17,10 @@ exclude = [
 ]
 
 [dependencies]
-http-type = "5.2.3"
+http-type = "5.4.0"
 rustls = "0.23.31"
-serde = "1.0.219"
-serde_json = "1.0.143"
+serde = "1.0.221"
+serde_json = "1.0.144"
 webpki-roots = "1.0.2"
 tokio-rustls = "0.26.2"
 futures = "0.3.31"
