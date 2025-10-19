@@ -94,7 +94,7 @@ impl SharedWebSocketBuilder {
         url_obj.path = Some(if path.is_empty() {
             "/".to_string()
         } else {
-            format!("/{}", path)
+            format!("/{path}")
         });
         Ok(url_obj)
     }

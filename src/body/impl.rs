@@ -23,13 +23,13 @@ impl Default for Body {
 impl Display for Body {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Text(text) => write!(f, "{}", text),
+            Self::Text(text) => write!(f, "{text}"),
             Self::Json(json) => write!(
                 f,
                 "{}",
                 serde_json::to_string(json).unwrap_or_else(|_| String::from("{}"))
             ),
-            Self::Binary(binary) => write!(f, "{:?}", binary),
+            Self::Binary(binary) => write!(f, "{binary:?}"),
         }
     }
 }

@@ -617,8 +617,7 @@ impl HttpRequest {
                         return Ok(Box::new(tls_stream));
                     }
                     Err(err) => Err(RequestError::Unknown(format!(
-                        "error reading temporary configuration: {}",
-                        err
+                        "error reading temporary configuration: {err}"
                     ))),
                 }
             } else {
@@ -685,8 +684,7 @@ impl HttpRequest {
                 }
                 Err(err) => {
                     return Err(RequestError::Unknown(format!(
-                        "error reading temporary configuration: {}",
-                        err
+                        "error reading temporary configuration: {err}"
                     )));
                 }
             }
@@ -696,16 +694,14 @@ impl HttpRequest {
         let connect_request: String = if let (Some(username), Some(password)) =
             (&proxy_config.username, &proxy_config.password)
         {
-            let auth: String = format!("{}:{}", username, password);
+            let auth: String = format!("{username}:{password}");
             let auth_encoded: String = base64_encode(auth.as_bytes());
             format!(
-                "CONNECT {}:{} HTTP/1.1\r\nHost: {}:{}\r\nProxy-Authorization: Basic {}\r\n\r\n",
-                target_host, target_port, target_host, target_port, auth_encoded
+                "CONNECT {target_host}:{target_port} HTTP/1.1\r\nHost: {target_host}:{target_port}\r\nProxy-Authorization: Basic {auth_encoded}\r\n\r\n"
             )
         } else {
             format!(
-                "CONNECT {}:{} HTTP/1.1\r\nHost: {}:{}\r\n\r\n",
-                target_host, target_port, target_host, target_port
+                "CONNECT {target_host}:{target_port} HTTP/1.1\r\nHost: {target_host}:{target_port}\r\n\r\n"
             )
         };
         proxy_stream
@@ -766,8 +762,7 @@ impl HttpRequest {
                 }
                 Err(err) => {
                     return Err(RequestError::Unknown(format!(
-                        "error reading temporary configuration: {}",
-                        err
+                        "error reading temporary configuration: {err}"
                     )));
                 }
             }
@@ -933,8 +928,7 @@ impl HttpRequest {
                 }
                 Err(err) => {
                     return Err(RequestError::Unknown(format!(
-                        "error reading temporary configuration: {}",
-                        err
+                        "error reading temporary configuration: {err}"
                     )));
                 }
             }
@@ -961,8 +955,7 @@ impl HttpRequest {
             m if m.is_get() => self.send_get_request(&mut stream),
             m if m.is_post() => self.send_post_request(&mut stream),
             err => Err(RequestError::Request(format!(
-                "do not support {} method",
-                err
+                "do not support {err} method"
             ))),
         };
         res
@@ -1209,8 +1202,7 @@ impl HttpRequest {
                     Ok(tmp) => tmp.root_cert.clone(),
                     Err(err) => {
                         return Err(RequestError::Unknown(format!(
-                            "error reading temporary configuration: {}",
-                            err
+                            "error reading temporary configuration: {err}"
                         )));
                     }
                 }
@@ -1287,8 +1279,7 @@ impl HttpRequest {
                     Ok(tmp) => tmp.root_cert.clone(),
                     Err(err) => {
                         return Err(RequestError::Unknown(format!(
-                            "error reading temporary configuration: {}",
-                            err
+                            "error reading temporary configuration: {err}"
                         )));
                     }
                 }
@@ -1310,16 +1301,14 @@ impl HttpRequest {
         let connect_request: String = if let (Some(username), Some(password)) =
             (&proxy_config.username, &proxy_config.password)
         {
-            let auth: String = format!("{}:{}", username, password);
+            let auth: String = format!("{username}:{password}");
             let auth_encoded: String = base64_encode(auth.as_bytes());
             format!(
-                "CONNECT {}:{} HTTP/1.1\r\nHost: {}:{}\r\nProxy-Authorization: Basic {}\r\n\r\n",
-                target_host, target_port, target_host, target_port, auth_encoded
+                "CONNECT {target_host}:{target_port} HTTP/1.1\r\nHost: {target_host}:{target_port}\r\nProxy-Authorization: Basic {auth_encoded}\r\n\r\n"
             )
         } else {
             format!(
-                "CONNECT {}:{} HTTP/1.1\r\nHost: {}:{}\r\n\r\n",
-                target_host, target_port, target_host, target_port
+                "CONNECT {target_host}:{target_port} HTTP/1.1\r\nHost: {target_host}:{target_port}\r\n\r\n"
             )
         };
         proxy_stream
@@ -1368,8 +1357,7 @@ impl HttpRequest {
                     Ok(tmp) => tmp.root_cert.clone(),
                     Err(err) => {
                         return Err(RequestError::Unknown(format!(
-                            "error reading temporary configuration: {}",
-                            err
+                            "error reading temporary configuration: {err}"
                         )));
                     }
                 }
@@ -1552,8 +1540,7 @@ impl HttpRequest {
                     Ok(tmp) => tmp.root_cert.clone(),
                     Err(err) => {
                         return Err(RequestError::Unknown(format!(
-                            "error reading temporary configuration: {}",
-                            err
+                            "error reading temporary configuration: {err}"
                         )));
                     }
                 }
@@ -1598,8 +1585,7 @@ impl HttpRequest {
             m if m.is_get() => self.send_get_request_async(&mut stream).await,
             m if m.is_post() => self.send_post_request_async(&mut stream).await,
             err => Err(RequestError::Request(format!(
-                "do not support {} method",
-                err
+                "do not support {err} method"
             ))),
         };
         res

@@ -53,7 +53,7 @@ impl WebSocket {
         }
         let request: Request = request_builder
             .body(())
-            .map_err(|e| WebSocketError::invalid_url(format!("Failed to build request: {}", e)))?;
+            .map_err(|e| WebSocketError::invalid_url(format!("Failed to build request: {e}")))?;
         let proxy_config: Option<ProxyConfig> = self
             .config
             .read()
@@ -74,7 +74,7 @@ impl WebSocket {
                 WebSocketProxyTunnelStream::new(proxy_stream);
             let mut proxy_request_builder = Request::builder().uri(&url);
             proxy_request_builder = proxy_request_builder
-                .header(HOST, format!("{}:{}", target_host, target_port))
+                .header(HOST, format!("{target_host}:{target_port}"))
                 .header(UPGRADE, "websocket")
                 .header(CONNECTION, "Upgrade")
                 .header(SEC_WEBSOCKET_VERSION, "13")
@@ -92,7 +92,7 @@ impl WebSocket {
                     proxy_request_builder.header("Sec-WebSocket-Protocol", protocols.join(", "));
             }
             let proxy_request: Request = proxy_request_builder.body(()).map_err(|e| {
-                WebSocketError::invalid_url(format!("Failed to build proxy request: {}", e))
+                WebSocketError::invalid_url(format!("Failed to build proxy request: {e}"))
             })?;
             let connect_future = client_async_with_config(proxy_request, proxy_tunnel_stream, None);
             let (ws_stream, _) = timeout(timeout_duration, connect_future)
@@ -278,16 +278,14 @@ impl WebSocket {
         let connect_request: String = if let (Some(username), Some(password)) =
             (&proxy_config.username, &proxy_config.password)
         {
-            let auth: String = format!("{}:{}", username, password);
+            let auth: String = format!("{username}:{password}");
             let auth_encoded: String = base64_encode(auth.as_bytes());
             format!(
-                "CONNECT {}:{} HTTP/1.1\r\nHost: {}:{}\r\nProxy-Authorization: Basic {}\r\n\r\n",
-                target_host, target_port, target_host, target_port, auth_encoded
+                "CONNECT {target_host}:{target_port} HTTP/1.1\r\nHost: {target_host}:{target_port}\r\nProxy-Authorization: Basic {auth_encoded}\r\n\r\n"
             )
         } else {
             format!(
-                "CONNECT {}:{} HTTP/1.1\r\nHost: {}:{}\r\n\r\n",
-                target_host, target_port, target_host, target_port
+                "CONNECT {target_host}:{target_port} HTTP/1.1\r\nHost: {target_host}:{target_port}\r\n\r\n"
             )
         };
         proxy_stream
