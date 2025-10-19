@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.91.31"
+version = "8.91.32"
 readme = "README.md"
 edition = "2024"
 authors = ["root@ltpp.vip"]

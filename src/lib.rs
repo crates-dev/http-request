@@ -18,11 +18,9 @@ pub(crate) mod r#const;
 pub(crate) mod request;
 pub(crate) mod response;
 pub(crate) mod utils;
-pub(crate) mod websocket;
 
 pub use request::*;
 pub use response::*;
-pub use websocket::*;
 
 pub use http_type::{
     HashMapXxHash3_64, JsonDeserializer, JsonError, JsonMap, JsonNumber, JsonResult,
