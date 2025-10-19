@@ -104,6 +104,7 @@ impl HttpResponseText {
     ///
     /// # Returns
     /// - `HttpVersion`: The HTTP version used for the response.
+    ///
     /// Gets the HTTP version of the response.
     ///
     /// # Returns
@@ -116,13 +117,14 @@ impl HttpResponseText {
                 .parse::<HttpVersion>()
                 .unwrap_or_default();
         }
-        return HttpVersion::default();
+        HttpVersion::default()
     }
 
     /// Retrieves the HTTP status code associated with this response.
     ///
     /// # Returns
     /// - `ResponseStatusCode`: The HTTP status code as a usize.
+    ///
     /// Gets the HTTP status code of the response.
     ///
     /// # Returns
@@ -136,6 +138,7 @@ impl HttpResponseText {
     ///
     /// # Returns
     /// - `String`: The human-readable status text.
+    ///
     /// Gets the HTTP status text of the response.
     ///
     /// # Returns
@@ -145,13 +148,14 @@ impl HttpResponseText {
         if let Ok(status_text) = self.status_text.read() {
             return status_text.to_string();
         }
-        return HttpStatus::default().to_string();
+        HttpStatus::default().to_string()
     }
 
     /// Retrieves the headers of the HTTP response.
     ///
     /// # Returns
     /// - `ResponseHeaders`: A map of header names and their corresponding values as key-value pairs.
+    ///
     /// Gets the HTTP response headers.
     ///
     /// # Returns
@@ -161,7 +165,7 @@ impl HttpResponseText {
         if let Ok(headers) = self.headers.read() {
             return headers.clone();
         }
-        return hash_map_xx_hash3_64();
+        hash_map_xx_hash3_64()
     }
 
     /// Retrieves the body content of the HTTP response as a `String`.
@@ -172,6 +176,7 @@ impl HttpResponseText {
     /// # Returns
     /// - `RequestBodyString`: The body of the response as a string. If the body could not be read,
     ///   an empty string is returned.
+    ///
     /// Gets the HTTP response body.
     ///
     /// # Returns
@@ -181,7 +186,7 @@ impl HttpResponseText {
         if let Ok(body) = self.body.read() {
             return body.to_string();
         }
-        return RequestBodyString::new();
+        RequestBodyString::new()
     }
 }
 

@@ -23,7 +23,7 @@ impl Default for Body {
 impl Display for Body {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Text(text) => write!(f, "{}", text.to_string()),
+            Self::Text(text) => write!(f, "{}", text),
             Self::Json(json) => write!(
                 f,
                 "{}",

@@ -159,7 +159,7 @@ impl HttpRequest {
     /// - `Ok(HttpUrlComponents)` if parsing succeeds
     /// - `Err(RequestError::InvalidUrl)` if parsing fails
     pub(crate) fn parse_url(&self) -> Result<HttpUrlComponents, RequestError> {
-        match HttpUrlComponents::parse(&self.get_url()) {
+        match HttpUrlComponents::parse(self.get_url()) {
             Ok(parse_res) => Ok(parse_res),
             Err(err) => Err(RequestError::InvalidUrl(err.to_string())),
         }
@@ -272,26 +272,26 @@ impl HttpRequest {
     pub(crate) fn get_body_bytes(&self) -> Vec<u8> {
         let header: RequestHeaders = self.get_header();
         let body: Body = self.get_body();
-        if let Some(content_type_value) = header.get(CONTENT_TYPE) {
-            if let Some(first_value) = content_type_value.front() {
+        if let Some(content_type_value) = header.get(CONTENT_TYPE)
+            && let Some(first_value) = content_type_value.front()
+        {
+            let res: String = first_value
+                .to_lowercase()
+                .parse::<ContentType>()
+                .unwrap_or_default()
+                .get_body_string(&body);
+            return res.into_bytes();
+        }
+        for (key, value) in &header {
+            if key.eq_ignore_ascii_case(CONTENT_TYPE)
+                && let Some(first_value) = value.front()
+            {
                 let res: String = first_value
                     .to_lowercase()
                     .parse::<ContentType>()
                     .unwrap_or_default()
                     .get_body_string(&body);
                 return res.into_bytes();
-            }
-        }
-        for (key, value) in &header {
-            if key.eq_ignore_ascii_case(CONTENT_TYPE) {
-                if let Some(first_value) = value.front() {
-                    let res: String = first_value
-                        .to_lowercase()
-                        .parse::<ContentType>()
-                        .unwrap_or_default()
-                        .get_body_string(&body);
-                    return res.into_bytes();
-                }
             }
         }
         String::new().into_bytes()
@@ -313,6 +313,7 @@ impl HttpRequest {
     ///
     /// - `String` - The full path, including the query string if available, or just the
     ///   path if no query string is present.
+    ///
     /// Gets the full request path including query string.
     ///
     /// # Returns
@@ -495,19 +496,19 @@ impl HttpRequest {
         self.response = Arc::new(RwLock::new(<HttpResponseBinary as ResponseTrait>::from(
             &response_bytes,
         )));
-        if let Ok(config) = self.config.read() {
-            if !config.redirect || redirect_url.is_none() {
-                if config.decode {
-                    if let Ok(mut response) = self.response.write() {
-                        *response = response.decode(config.buffer);
-                    }
-                }
-                return Ok(Box::new(
-                    self.response
-                        .read()
-                        .map_or(HttpResponseBinary::default(), |response| response.clone()),
-                ));
+        if let Ok(config) = self.config.read()
+            && (!config.redirect || redirect_url.is_none())
+        {
+            if config.decode
+                && let Ok(mut response) = self.response.write()
+            {
+                *response = response.decode(config.buffer);
             }
+            return Ok(Box::new(
+                self.response
+                    .read()
+                    .map_or(HttpResponseBinary::default(), |response| response.clone()),
+            ));
         }
         let url: String = String::from_utf8(redirect_url.unwrap())
             .map_err(|err| RequestError::InvalidUrl(err.to_string()))?;
@@ -953,7 +954,7 @@ impl HttpRequest {
                 .parse_url()
                 .map_err(|err| RequestError::InvalidUrl(err.to_string()))?;
             host = config.url_obj.host.clone().unwrap_or_default();
-            port = self.get_port(config.url_obj.port.clone().unwrap_or_default(), &config);
+            port = self.get_port(config.url_obj.port.unwrap_or_default(), &config);
         }
         let mut stream: BoxReadWrite = self.get_connection_stream(host, port)?;
         let res: Result<BoxResponseTrait, RequestError> = match methods {
@@ -1124,10 +1125,8 @@ impl HttpRequest {
             }
         };
         if !should_redirect || redirect_url.is_none() {
-            if should_decode {
-                if let Ok(mut response) = self.response.write() {
-                    *response = response.decode(buffer_size);
-                }
+            if should_decode && let Ok(mut response) = self.response.write() {
+                *response = response.decode(buffer_size);
             }
             return Ok(Box::new(
                 self.response
@@ -1588,7 +1587,7 @@ impl HttpRequest {
                     .parse_url()
                     .map_err(|err| RequestError::InvalidUrl(err.to_string()))?;
                 let host: String = config.url_obj.host.clone().unwrap_or_default();
-                let port = self.get_port(config.url_obj.port.clone().unwrap_or_default(), &config);
+                let port = self.get_port(config.url_obj.port.unwrap_or_default(), &config);
                 (host, port)
             } else {
                 (String::new(), 0u16)

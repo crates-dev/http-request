@@ -259,7 +259,7 @@ impl WebSocket {
             .map_err(|err| WebSocketError::connection(err.to_string()))?;
         let mut proxy_stream: BoxAsyncReadWrite = if proxy_config.proxy_type == ProxyType::Https {
             let roots: RootCertStore = RootCertStore {
-                roots: TLS_SERVER_ROOTS.iter().cloned().collect(),
+                roots: TLS_SERVER_ROOTS.to_vec(),
             };
             let tls_config: ClientConfig = ClientConfig::builder()
                 .with_root_certificates(roots)

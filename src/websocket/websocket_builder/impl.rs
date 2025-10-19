@@ -28,10 +28,8 @@ impl WebSocketBuilder {
                         break;
                     }
                 }
-                if found_existing {
-                    if let Some(existing_key) = existing_key {
-                        tmp_header.remove(&existing_key);
-                    }
+                if found_existing && let Some(existing_key) = existing_key {
+                    tmp_header.remove(&existing_key);
                 }
                 let mut value_deque: VecDeque<String> = VecDeque::new();
                 value_deque.push_front(value_str);

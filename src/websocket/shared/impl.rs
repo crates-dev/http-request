@@ -74,8 +74,8 @@ impl SharedWebSocketBuilder {
         } else {
             return Err(WebSocketError::invalid_url("Invalid WebSocket URL scheme"));
         }
-        let without_protocol: &str = if url.starts_with("ws://") {
-            &url[5..]
+        let without_protocol: &str = if let Some(stripped) = url.strip_prefix("ws://") {
+            stripped
         } else {
             &url[6..]
         };

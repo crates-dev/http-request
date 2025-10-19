@@ -116,16 +116,15 @@ impl SharedResponseHandler {
                 let status_code: usize =
                     Self::parse_status_code(&headers_bytes[status_code_start..status_code_end]);
 
-                if (300..=399).contains(&status_code) {
-                    if let Some(location_pos) =
+                if (300..=399).contains(&status_code)
+                    && let Some(location_pos) =
                         Self::find_pattern_case_insensitive(headers_bytes, location_sign_key)
-                    {
-                        let start: usize = location_pos + location_sign_key.len();
-                        if let Some(end_pos) = Self::find_crlf(headers_bytes, start) {
-                            let mut url_vec = Vec::with_capacity(end_pos - start);
-                            url_vec.extend_from_slice(&headers_bytes[start..end_pos]);
-                            *redirect_url = Some(url_vec);
-                        }
+                {
+                    let start: usize = location_pos + location_sign_key.len();
+                    if let Some(end_pos) = Self::find_crlf(headers_bytes, start) {
+                        let mut url_vec = Vec::with_capacity(end_pos - start);
+                        url_vec.extend_from_slice(&headers_bytes[start..end_pos]);
+                        *redirect_url = Some(url_vec);
                     }
                 }
             }
@@ -157,7 +156,7 @@ impl SharedResponseHandler {
                 continue;
             }
             for j in 1..needle_len {
-                if haystack[i + j].to_ascii_lowercase() != needle[j].to_ascii_lowercase() {
+                if !haystack[i + j].eq_ignore_ascii_case(&needle[j]) {
                     continue 'outer;
                 }
             }
@@ -287,7 +286,7 @@ impl SharedResponseHandler {
         }
         let mut result: usize = 0;
         for &byte in status_bytes {
-            if byte >= b'0' && byte <= b'9' {
+            if byte.is_ascii_digit() {
                 result = result * 10 + (byte - b'0') as usize;
             } else {
                 return 0;

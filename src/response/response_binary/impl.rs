@@ -27,9 +27,9 @@ impl ResponseTrait for HttpResponseBinary {
         let split_lines: Vec<&[u8]> = split_multi_byte(response, HTTP_BR_BYTES);
         let mut lines: IntoIter<&[u8]> = split_lines.into_iter();
         let status_line: &[u8] = lines.next().unwrap_or(&[]);
-        let status_parts: Vec<&[u8]> = split_whitespace(&status_line);
+        let status_parts: Vec<&[u8]> = split_whitespace(status_line);
         let http_version: HttpVersion = status_parts
-            .get(0)
+            .first()
             .and_then(|part: &&[u8]| from_utf8(part).ok())
             .and_then(|version_str: &str| version_str.parse::<HttpVersion>().ok())
             .unwrap_or_default();
@@ -71,22 +71,22 @@ impl ResponseTrait for HttpResponseBinary {
                     break;
                 }
             }
-            if let Some(pos) = colon_pos {
-                if pos > 0 && pos + 1 < line.len() {
-                    let key_bytes: &[u8] = &line[..pos];
-                    let value_start: usize = if line.get(pos + 1) == Some(&b' ') {
-                        pos + 2
-                    } else {
-                        pos + 1
-                    };
-                    let value_bytes: &[u8] = &line[value_start..];
-                    if let (Ok(key_str), Ok(value_str)) =
-                        (from_utf8(key_bytes), from_utf8(value_bytes))
-                    {
-                        let mut value_deque: VecDeque<String> = VecDeque::new();
-                        value_deque.push_front(value_str.trim().to_string());
-                        headers.insert(key_str.trim().to_string(), value_deque);
-                    }
+            if let Some(pos) = colon_pos
+                && pos > 0
+                && pos + 1 < line.len()
+            {
+                let key_bytes: &[u8] = &line[..pos];
+                let value_start: usize = if line.get(pos + 1) == Some(&b' ') {
+                    pos + 2
+                } else {
+                    pos + 1
+                };
+                let value_bytes: &[u8] = &line[value_start..];
+                if let (Ok(key_str), Ok(value_str)) = (from_utf8(key_bytes), from_utf8(value_bytes))
+                {
+                    let mut value_deque: VecDeque<String> = VecDeque::new();
+                    value_deque.push_front(value_str.trim().to_string());
+                    headers.insert(key_str.trim().to_string(), value_deque);
                 }
             }
         }
@@ -176,7 +176,7 @@ impl ResponseTrait for HttpResponseBinary {
                         }
                     }
                     Compress::from(&string_headers)
-                        .decode(&*body_ref, buffer_size)
+                        .decode(&body_ref, buffer_size)
                         .into_owned()
                 }
                 _ => Vec::new(),
@@ -197,6 +197,7 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `HttpVersion`: The HTTP version used for the response.
+    ///
     /// Gets the HTTP version of the response.
     ///
     /// # Returns
@@ -209,13 +210,14 @@ impl HttpResponseBinary {
                 .parse::<HttpVersion>()
                 .unwrap_or_default();
         }
-        return HttpVersion::default();
+        HttpVersion::default()
     }
 
     /// Retrieves the HTTP status code associated with this response.
     ///
     /// # Returns
     /// - `ResponseStatusCode`: The HTTP status code as a usize.
+    ///
     /// Gets the HTTP status code of the response.
     ///
     /// # Returns
@@ -229,6 +231,7 @@ impl HttpResponseBinary {
     ///
     /// # Returns
     /// - `String`: The human-readable status text.
+    ///
     /// Gets the HTTP status text of the response.
     ///
     /// # Returns
@@ -238,13 +241,14 @@ impl HttpResponseBinary {
         if let Ok(status_text) = self.status_text.read() {
             return status_text.to_string();
         }
-        return HttpStatus::default().to_string();
+        HttpStatus::default().to_string()
     }
 
     /// Retrieves the headers of the HTTP response.
     ///
     /// # Returns
     /// - `ResponseHeaders`: A map of header names and their corresponding values as key-value pairs.
+    ///
     /// Gets the HTTP response headers.
     ///
     /// # Returns
@@ -254,13 +258,14 @@ impl HttpResponseBinary {
         if let Ok(headers) = self.headers.read() {
             return headers.clone();
         }
-        return hash_map_xx_hash3_64();
+        hash_map_xx_hash3_64()
     }
 
     /// Retrieves the body content of the HTTP response.
     ///
     /// # Returns
     /// - `RequestBody`: The body of the response in binary form (could be raw bytes, a stream, etc.).
+    ///
     /// Gets the HTTP response body.
     ///
     /// # Returns
@@ -270,7 +275,7 @@ impl HttpResponseBinary {
         if let Ok(body) = self.body.read() {
             return body.clone();
         }
-        return RequestBody::new();
+        RequestBody::new()
     }
 }
 
