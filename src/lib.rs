@@ -40,7 +40,7 @@ pub(crate) use http_type::{
     ACCEPT, ACCEPT_ANY, BR_BYTES, CONNECTION, CONTENT_LENGTH, CONTENT_TYPE, Compress, ContentType,
     DEFAULT_BUFFER_SIZE, DEFAULT_HTTP_PATH, DEFAULT_MAX_REDIRECT_TIMES, DEFAULT_TIMEOUT, EMPTY_STR,
     HOST, HTTP_BR_BYTES, HttpStatus, HttpUrlComponents, HttpVersion, LOCATION, Method, Protocol,
-    QUERY_SYMBOL, RequestBody, RequestBodyString, RequestError, RequestHeaders, ResponseHeaders,
+    QUERY, RequestBody, RequestBodyString, RequestError, RequestHeaders, ResponseHeaders,
     ResponseStatusCode, SEC_WEBSOCKET_KEY, SEC_WEBSOCKET_VERSION, SPACE_U8, TAB_U8, UPGRADE,
     USER_AGENT,
     tokio::{

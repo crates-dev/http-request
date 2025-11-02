@@ -332,7 +332,7 @@ impl HttpRequest {
                 format!(
                     "{}{}{}",
                     config.url_obj.path.clone().unwrap_or_default(),
-                    QUERY_SYMBOL,
+                    QUERY,
                     query
                 )
             }
