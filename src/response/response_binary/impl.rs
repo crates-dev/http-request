@@ -66,7 +66,7 @@ impl ResponseTrait for HttpResponseBinary {
             }
             let mut colon_pos: Option<usize> = None;
             for (i, &byte) in line.iter().enumerate() {
-                if byte == b':' {
+                if byte == COLON_U8 {
                     colon_pos = Some(i);
                     break;
                 }
@@ -76,7 +76,7 @@ impl ResponseTrait for HttpResponseBinary {
                 && pos + 1 < line.len()
             {
                 let key_bytes: &[u8] = &line[..pos];
-                let value_start: usize = if line.get(pos + 1) == Some(&b' ') {
+                let value_start: usize = if line.get(pos + 1) == Some(&SPACE_U8) {
                     pos + 2
                 } else {
                     pos + 1
