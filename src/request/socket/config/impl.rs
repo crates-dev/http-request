@@ -1,6 +1,7 @@
 use crate::*;
 
 impl Default for WebSocketConfig {
+    #[inline(always)]
     fn default() -> Self {
         Self {
             timeout: DEFAULT_TIMEOUT,

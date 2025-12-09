@@ -285,6 +285,7 @@ impl HttpResponseBinary {
 ///
 /// - `HttpResponseBinary` - Default initialized HttpResponseBinary.
 impl Default for HttpResponseBinary {
+    #[inline(always)]
     fn default() -> Self {
         Self {
             http_version: Arc::new(RwLock::new(HttpVersion::Unknown(String::new()))),

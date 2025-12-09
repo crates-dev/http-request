@@ -6,6 +6,7 @@ use crate::*;
 ///
 /// - `Body` - Returns a Body with empty text content.
 impl Default for Body {
+    #[inline(always)]
     fn default() -> Self {
         Self::Text(EMPTY_STR.to_owned())
     }
@@ -21,6 +22,7 @@ impl Default for Body {
 ///
 /// - `fmt::Result` - Result of the formatting operation.
 impl Display for Body {
+    #[inline(always)]
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             Self::Text(text) => write!(f, "{text}"),

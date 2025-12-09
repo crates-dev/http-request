@@ -1,6 +1,7 @@
 use crate::*;
 
 impl Default for Tmp {
+    #[inline(always)]
     fn default() -> Self {
         Self {
             visit_url: HashSet::new(),

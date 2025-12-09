@@ -56,6 +56,7 @@ impl Clone for WebSocket {
 /// - Disconnected state
 /// - No active connection
 impl Default for WebSocket {
+    #[inline(always)]
     fn default() -> Self {
         Self {
             url: Arc::new(String::new()),

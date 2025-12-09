@@ -71,6 +71,7 @@ impl RequestTrait for HttpRequest {
 ///   - Default tmp storage
 ///   - Default response
 impl Default for HttpRequest {
+    #[inline(always)]
     fn default() -> Self {
         Self {
             methods: Arc::new(Method::new()),
@@ -100,6 +101,7 @@ impl HttpRequest {
     /// # Returns
     ///
     /// - `Protocol` - The HTTP protocol.
+    #[inline(always)]
     pub(crate) fn get_protocol(config: &Config) -> Protocol {
         config.url_obj.protocol.clone()
     }
@@ -109,6 +111,7 @@ impl HttpRequest {
     /// # Returns
     ///
     /// - `Method` - The HTTP methods.
+    #[inline(always)]
     pub(crate) fn get_methods(&self) -> Method {
         self.methods.as_ref().clone()
     }
@@ -118,6 +121,7 @@ impl HttpRequest {
     /// # Returns
     ///
     /// - `String` - The request URL.
+    #[inline(always)]
     fn get_url(&self) -> String {
         self.url.as_ref().clone()
     }
@@ -127,6 +131,7 @@ impl HttpRequest {
     /// # Returns
     ///
     /// - `RequestHeaders` - The request headers.
+    #[inline(always)]
     fn get_header(&self) -> RequestHeaders {
         self.header.as_ref().clone()
     }
@@ -136,6 +141,7 @@ impl HttpRequest {
     /// # Returns
     ///
     /// - `Body` - The request body.
+    #[inline(always)]
     fn get_body(&self) -> Body {
         self.body.as_ref().clone()
     }
@@ -145,6 +151,7 @@ impl HttpRequest {
     /// # Arguments
     ///
     /// - `String` - The new URL to set.
+    #[inline(always)]
     pub(crate) fn url(&mut self, url: String) {
         self.url = Arc::new(url);
     }

@@ -196,6 +196,7 @@ impl HttpResponseText {
 ///
 /// - `HttpResponseText` - Default initialized HttpResponseText.
 impl Default for HttpResponseText {
+    #[inline(always)]
     fn default() -> Self {
         Self {
             http_version: Arc::new(RwLock::new(HttpVersion::Unknown(String::new()))),

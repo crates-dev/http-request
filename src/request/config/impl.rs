@@ -11,6 +11,7 @@ use crate::*;
 ///   - buffer: DEFAULT_BUFFER_SIZE
 ///   - decode: true
 impl Default for Config {
+    #[inline(always)]
     fn default() -> Self {
         Self {
             timeout: DEFAULT_TIMEOUT,
