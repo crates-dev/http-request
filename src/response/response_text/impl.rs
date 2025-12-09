@@ -148,7 +148,7 @@ impl HttpResponseText {
         if let Ok(status_text) = self.status_text.read() {
             return status_text.to_string();
         }
-        HttpStatus::Unknown(String::new()).to_string()
+        HttpStatus::Unknown.to_string()
     }
 
     /// Retrieves the headers of the HTTP response.
