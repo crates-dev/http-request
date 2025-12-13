@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.91.47"
+version = "8.91.48"
 readme = "README.md"
 edition = "2024"
 authors = ["root@ltpp.vip"]
@@ -9,15 +9,10 @@ description = """http-request is a lightweight, efficient library for building, 
 keywords = ["http", "request", "response", "tcp", "redirect"]
 repository = "https://github.com/crates-dev/http-request.git"
 categories = ["network-programming", "web-programming"]
-exclude = [
-    "target",
-    "Cargo.lock",
-    "sh",
-    ".github"
-]
+exclude = ["target", "Cargo.lock", "sh", ".github"]
 
 [dependencies]
-http-type = "5.11.3"
+http-type = "5.11.4"
 rustls = "0.23.35"
 serde = "1.0.228"
 serde_json = "1.0.145"
