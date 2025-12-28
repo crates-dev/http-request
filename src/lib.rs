@@ -80,7 +80,7 @@ pub(crate) use webpki_roots::TLS_SERVER_ROOTS;
 
 #[cfg(test)]
 use std::{
-    sync::{Mutex, MutexGuard},
+    sync::Mutex,
     thread::{JoinHandle, spawn},
     time::Instant,
 };

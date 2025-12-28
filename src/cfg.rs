@@ -256,42 +256,10 @@ fn test_thread_https_get_request() {
             .build_sync(),
     ));
     for _ in 0..num_threads {
-        let request_builder: Arc<
-            Mutex<
-                Box<
-                    dyn RequestTrait<
-                            RequestResult = Result<
-                                Box<
-                                    dyn ResponseTrait<
-                                            OutputText = HttpResponseText,
-                                            OutputBinary = HttpResponseBinary,
-                                        > + 'static,
-                                >,
-                                RequestError,
-                            >,
-                        > + 'static,
-                >,
-            >,
-        > = Arc::clone(&request_builder);
+        let request_builder: Arc<Mutex<BoxRequestTrait>> = Arc::clone(&request_builder);
         let handle: JoinHandle<()> = spawn(move || {
-            let mut request_builder: MutexGuard<
-                '_,
-                Box<
-                    dyn RequestTrait<
-                            RequestResult = Result<
-                                Box<
-                                    dyn ResponseTrait<
-                                            OutputText = HttpResponseText,
-                                            OutputBinary = HttpResponseBinary,
-                                        > + 'static,
-                                >,
-                                RequestError,
-                            >,
-                        > + 'static,
-                >,
-            > = request_builder.lock().unwrap();
             let start_time: Instant = Instant::now();
-            match request_builder.send() {
+            match request_builder.lock().unwrap().send() {
                 Ok(response) => {
                     let duration: Duration = start_time.elapsed();
                     let response_text: HttpResponseText = response.text();
@@ -327,42 +295,10 @@ fn test_thread_http_get_request() {
             .build_sync(),
     ));
     for _ in 0..num_threads {
-        let request_builder: Arc<
-            Mutex<
-                Box<
-                    dyn RequestTrait<
-                            RequestResult = Result<
-                                Box<
-                                    dyn ResponseTrait<
-                                            OutputText = HttpResponseText,
-                                            OutputBinary = HttpResponseBinary,
-                                        > + 'static,
-                                >,
-                                RequestError,
-                            >,
-                        > + 'static,
-                >,
-            >,
-        > = Arc::clone(&request_builder);
+        let request_builder: Arc<Mutex<BoxRequestTrait>> = Arc::clone(&request_builder);
         let handle: JoinHandle<()> = spawn(move || {
-            let mut request_builder: MutexGuard<
-                '_,
-                Box<
-                    dyn RequestTrait<
-                            RequestResult = Result<
-                                Box<
-                                    dyn ResponseTrait<
-                                            OutputText = HttpResponseText,
-                                            OutputBinary = HttpResponseBinary,
-                                        > + 'static,
-                                >,
-                                RequestError,
-                            >,
-                        > + 'static,
-                >,
-            > = request_builder.lock().unwrap();
             let start_time: Instant = Instant::now();
-            match request_builder.send() {
+            match request_builder.lock().unwrap().send() {
                 Ok(response) => {
                     let duration: Duration = start_time.elapsed();
                     println!("Thread finished in: {duration:?}");
