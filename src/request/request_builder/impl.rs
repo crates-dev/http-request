@@ -20,7 +20,7 @@ impl RequestBuilder {
     ///
     /// - `&mut RequestBuilder` - The builder for method chaining.
     pub fn post(&mut self, url: &str) -> &mut Self {
-        self.http_request.methods = Arc::new(Method::POST);
+        self.http_request.methods = Arc::new(Method::Post);
         self.url(url);
         self
     }
@@ -35,7 +35,7 @@ impl RequestBuilder {
     ///
     /// - `&mut RequestBuilder` - The builder for method chaining.
     pub fn get(&mut self, url: &str) -> &mut Self {
-        self.http_request.methods = Arc::new(Method::GET);
+        self.http_request.methods = Arc::new(Method::Get);
         self.url(url);
         self
     }
@@ -61,7 +61,7 @@ impl RequestBuilder {
     /// - `&mut RequestBuilder` - The builder for method chaining.
     pub fn http1_1_only(&mut self) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
-            config.http_version = HttpVersion::HTTP1_1;
+            config.http_version = HttpVersion::Http1_1;
         }
         self
     }
@@ -73,7 +73,7 @@ impl RequestBuilder {
     /// - `&mut RequestBuilder` - The builder for method chaining.
     pub fn http2_only(&mut self) -> &mut Self {
         if let Ok(mut config) = self.http_request.config.write() {
-            config.http_version = HttpVersion::HTTP2;
+            config.http_version = HttpVersion::Http2;
         }
         self
     }
@@ -120,14 +120,14 @@ impl RequestBuilder {
     ///
     /// # Arguments
     ///
-    /// - `JsonValue` - The JSON body data.
+    /// - `Value` - The JSON body data.
     ///
     /// # Returns
     ///
     /// - `&mut RequestBuilder` - The builder for method chaining.
-    pub fn json(&mut self, body: JsonValue) -> &mut Self {
-        if let JsonValue::Object(map) = body {
-            let mut res_body: HashMapXxHash3_64<String, JsonValue> = hash_map_xx_hash3_64();
+    pub fn json(&mut self, body: serde_json::Value) -> &mut Self {
+        if let serde_json::Value::Object(map) = body {
+            let mut res_body: HashMapXxHash3_64<String, serde_json::Value> = hash_map_xx_hash3_64();
             for (k, v) in map.iter() {
                 res_body.insert(k.to_string(), v.clone());
             }

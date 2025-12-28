@@ -21,7 +21,7 @@ async fn test_async_http_get_request() {
         Ok(response) => {
             println!("Async GET ResponseTrait => {:?}", response.text());
         }
-        Err(e) => println!("Async GET Error => {}", e),
+        Err(e) => println!("Async GET Error => {e}"),
     }
 }
 
@@ -32,7 +32,7 @@ fn test_http_post_request() {
     header.insert("Content-Type", "application/json");
     header.insert("Connection", "keep-alive");
     header.insert("Accept-Encoding", "gzip, deflate");
-    let body: JsonValue = json_value!({
+    let body: Value = json!({
         "code": "fn main() {\r\n    println!(\"hello world\");\r\n}",
         "language": "rust",
         "testin": ""
@@ -49,11 +49,10 @@ fn test_http_post_request() {
         .build_sync();
     request_builder
         .send()
-        .and_then(|response| {
+        .map(|response| {
             println!("ResponseTrait => {:?}", response.text());
-            Ok(())
         })
-        .unwrap_or_else(|e| println!("Error => {}", e));
+        .unwrap_or_else(|e| println!("Error => {e}"));
 }
 
 #[test]
@@ -73,11 +72,10 @@ fn test_http_get_request() {
         .build_sync();
     request_builder
         .send()
-        .and_then(|response| {
+        .map(|response| {
             println!("ResponseTrait => {:?}", response.text());
-            Ok(())
         })
-        .unwrap_or_else(|e| println!("Error => {}", e));
+        .unwrap_or_else(|e| println!("Error => {e}"));
 }
 
 #[test]
@@ -87,7 +85,7 @@ fn test_https_post_request() {
     header.insert("Content-Type", "application/json");
     header.insert("Connection", "keep-alive");
     header.insert("Accept-Encoding", "gzip, deflate");
-    let body: JsonValue = json_value!({
+    let body: Value = json!({
         "code": "fn main() {\r\n    println!(\"hello world\");\r\n}",
         "language": "rust",
         "testin": ""
@@ -104,11 +102,10 @@ fn test_https_post_request() {
         .build_sync();
     request_builder
         .send()
-        .and_then(|response| {
+        .map(|response| {
             println!("ResponseTrait => {:?}", response.text());
-            Ok(())
         })
-        .unwrap_or_else(|e| println!("Error => {}", e));
+        .unwrap_or_else(|e| println!("Error => {e}"));
 }
 
 #[test]
@@ -128,11 +125,10 @@ fn test_https_get_request() {
         .build_sync();
     request_builder
         .send()
-        .and_then(|response| {
+        .map(|response| {
             println!("ResponseTrait => {:?}", response.text());
-            Ok(())
         })
-        .unwrap_or_else(|e| println!("Error => {}", e));
+        .unwrap_or_else(|e| println!("Error => {e}"));
 }
 
 #[test]
@@ -152,11 +148,10 @@ fn test_http_post_text_request() {
         .build_sync();
     request_builder
         .send()
-        .and_then(|response| {
+        .map(|response| {
             println!("ResponseTrait => {:?}", response.text());
-            Ok(())
         })
-        .unwrap_or_else(|e| println!("Error => {}", e));
+        .unwrap_or_else(|e| println!("Error => {e}"));
 }
 
 #[test]
@@ -176,11 +171,10 @@ fn test_http_post_binary_request() {
         .build_sync();
     request_builder
         .send()
-        .and_then(|response| {
+        .map(|response| {
             println!("ResponseTrait => {:?}", response.text());
-            Ok(())
         })
-        .unwrap_or_else(|e| println!("Error => {}", e));
+        .unwrap_or_else(|e| println!("Error => {e}"));
 }
 
 #[test]
@@ -196,11 +190,10 @@ fn test_auto_gzip_get() {
         .build_sync();
     request_builder
         .send()
-        .and_then(|response| {
+        .map(|response| {
             println!("ResponseTrait => {:?}", response.text());
-            Ok(())
         })
-        .unwrap_or_else(|e| println!("Error => {}", e));
+        .unwrap_or_else(|e| println!("Error => {e}"));
 }
 
 #[test]
@@ -215,11 +208,10 @@ fn test_gzip_get() {
         .build_sync();
     request_builder
         .send()
-        .and_then(|response| {
+        .map(|response| {
             println!("ResponseTrait => {:?}", response.decode(4096).text());
-            Ok(())
         })
-        .unwrap_or_else(|e| println!("Error => {}", e));
+        .unwrap_or_else(|e| println!("Error => {e}"));
 }
 
 #[test]
@@ -234,11 +226,10 @@ fn test_unredirect_get() {
         .build_sync();
     request_builder
         .send()
-        .and_then(|response| {
-            println!("ResponseTrait => {:?}", response);
-            Ok(())
+        .map(|response| {
+            println!("ResponseTrait => {response:?}");
         })
-        .unwrap_or_else(|e| println!("Error => {}", e));
+        .unwrap_or_else(|e| println!("Error => {e}"));
 }
 
 #[test]
@@ -304,13 +295,13 @@ fn test_thread_https_get_request() {
                 Ok(response) => {
                     let duration: Duration = start_time.elapsed();
                     let response_text: HttpResponseText = response.text();
-                    println!("Thread finished in: {:?}", duration);
-                    println!("ResponseTrait => {:?}", response_text);
+                    println!("Thread finished in: {duration:?}");
+                    println!("ResponseTrait => {response_text:?}");
                 }
                 Err(e) => {
                     let duration: Duration = start_time.elapsed();
-                    println!("Thread finished in: {:?}", duration);
-                    println!("Error => {}", e);
+                    println!("Thread finished in: {duration:?}");
+                    println!("Error => {e}");
                 }
             }
         });
@@ -374,14 +365,14 @@ fn test_thread_http_get_request() {
             match request_builder.send() {
                 Ok(response) => {
                     let duration: Duration = start_time.elapsed();
-                    println!("Thread finished in: {:?}", duration);
+                    println!("Thread finished in: {duration:?}");
                     let response_text: HttpResponseText = response.text();
-                    println!("ResponseTrait => {:?}", response_text);
+                    println!("ResponseTrait => {response_text:?}");
                 }
                 Err(e) => {
                     let duration: Duration = start_time.elapsed();
-                    println!("Thread finished in: {:?}", duration);
-                    println!("Error => {}", e);
+                    println!("Thread finished in: {duration:?}");
+                    println!("Error => {e}");
                 }
             }
         });
@@ -408,18 +399,17 @@ fn test_readme_sync_get_request() {
         .build_sync();
     request_builder
         .send()
-        .and_then(|response| {
+        .map(|response| {
             println!("{:?}", response.text());
-            Ok(())
         })
-        .unwrap_or_else(|e| println!("Error => {}", e));
+        .unwrap_or_else(|e| println!("Error => {e}"));
 }
 
 #[test]
 fn test_readme_sync_post_json_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("header-key", "header-value");
-    let body: JsonValue = json_value!({
+    let body: Value = json!({
         "test": 1
     });
     let mut request_builder: BoxRequestTrait = RequestBuilder::new()
@@ -434,11 +424,10 @@ fn test_readme_sync_post_json_request() {
         .build_sync();
     request_builder
         .send()
-        .and_then(|response| {
+        .map(|response| {
             println!("{:?}", response.decode(4096).text());
-            Ok(())
         })
-        .unwrap_or_else(|e| println!("Error => {}", e));
+        .unwrap_or_else(|e| println!("Error => {e}"));
 }
 
 #[test]
@@ -458,11 +447,10 @@ fn test_readme_sync_post_text_request() {
         .build_sync();
     request_builder
         .send()
-        .and_then(|response| {
+        .map(|response| {
             println!("{:?}", response.text());
-            Ok(())
         })
-        .unwrap_or_else(|e| println!("Error => {}", e));
+        .unwrap_or_else(|e| println!("Error => {e}"));
 }
 
 #[test]
@@ -481,11 +469,10 @@ fn test_readme_sync_post_binary_request() {
         .build_sync();
     request_builder
         .send()
-        .and_then(|response| {
+        .map(|response| {
             println!("{:?}", response.decode(4096).text());
-            Ok(())
         })
-        .unwrap_or_else(|e| println!("Error => {}", e));
+        .unwrap_or_else(|e| println!("Error => {e}"));
 }
 
 #[cfg(test)]
@@ -510,26 +497,26 @@ async fn test_async_websocket_connection() {
                     println!("Async WebSocket binary message sent successfully");
                     match websocket_builder.receive_async().await {
                         Ok(message) => match message {
-                            WebSocketMessage::Text(text) => println!("Received text: {}", text),
+                            WebSocketMessage::Text(text) => println!("Received text: {text}"),
                             WebSocketMessage::Binary(data) => {
-                                println!("Received binary: {:?}", data)
+                                println!("Received binary: {data:?}")
                             }
                             WebSocketMessage::Close => println!("Connection closed"),
                             _ => println!("Received other message type"),
                         },
-                        Err(e) => println!("Error receiving message: {}", e),
+                        Err(e) => println!("Error receiving message: {e}"),
                     }
                 }
-                Err(e) => println!("Error sending binary: {}", e),
+                Err(e) => println!("Error sending binary: {e}"),
             }
         }
-        Err(e) => println!("Error sending text: {}", e),
+        Err(e) => println!("Error sending text: {e}"),
     }
 
     websocket_builder
         .close_async_method()
         .await
-        .unwrap_or_else(|e| println!("Error closing: {}", e));
+        .unwrap_or_else(|e| println!("Error closing: {e}"));
 }
 
 #[test]
@@ -551,21 +538,20 @@ fn test_sync_websocket_connection() {
             println!("Sync WebSocket text message sent successfully");
             websocket_builder.send_binary(b"binary data")
         })
-        .and_then(|_| {
+        .map(|_| {
             println!("Sync WebSocket binary message sent successfully");
             match websocket_builder.receive() {
                 Ok(message) => match message {
-                    WebSocketMessage::Text(text) => println!("Received text: {}", text),
-                    WebSocketMessage::Binary(data) => println!("Received binary: {:?}", data),
+                    WebSocketMessage::Text(text) => println!("Received text: {text}"),
+                    WebSocketMessage::Binary(data) => println!("Received binary: {data:?}"),
                     WebSocketMessage::Close => println!("Connection closed"),
                     _ => println!("Received other message type"),
                 },
-                Err(e) => println!("Error receiving message: {}", e),
+                Err(e) => println!("Error receiving message: {e}"),
             }
-            Ok(())
         })
         .and_then(|_| websocket_builder.close())
-        .unwrap_or_else(|e| println!("Error => {}", e));
+        .unwrap_or_else(|e| println!("Error => {e}"));
 }
 
 #[test]
@@ -580,7 +566,7 @@ fn test_websocket_with_http_proxy() {
     match websocket_builder.send_text("Hello WebSocket with HTTP proxy!") {
         Ok(_) => println!("WebSocket HTTP proxy test unexpectedly succeeded"),
         Err(e) => {
-            println!("WebSocket HTTP proxy test correctly failed: {}", e);
+            println!("WebSocket HTTP proxy test correctly failed: {e}");
         }
     }
 }
@@ -597,7 +583,7 @@ fn test_websocket_with_https_proxy() {
     match websocket_builder.send_text("Hello WebSocket with HTTPS proxy!") {
         Ok(_) => println!("WebSocket HTTPS proxy test unexpectedly succeeded"),
         Err(e) => {
-            println!("WebSocket HTTPS proxy test correctly failed: {}", e);
+            println!("WebSocket HTTPS proxy test correctly failed: {e}");
         }
     }
 }
@@ -614,7 +600,7 @@ fn test_websocket_with_socks5_proxy() {
     match websocket_builder.send_text("Hello WebSocket with SOCKS5 proxy!") {
         Ok(_) => println!("WebSocket SOCKS5 proxy test unexpectedly succeeded"),
         Err(e) => {
-            println!("WebSocket SOCKS5 proxy test correctly failed: {}", e);
+            println!("WebSocket SOCKS5 proxy test correctly failed: {e}");
         }
     }
 }
@@ -631,7 +617,7 @@ fn test_websocket_with_http_proxy_auth() {
     match websocket_builder.send_text("Hello WebSocket with HTTP proxy auth!") {
         Ok(_) => println!("WebSocket HTTP proxy auth test unexpectedly succeeded"),
         Err(e) => {
-            println!("WebSocket HTTP proxy auth test correctly failed: {}", e);
+            println!("WebSocket HTTP proxy auth test correctly failed: {e}");
         }
     }
 }
@@ -652,10 +638,7 @@ async fn test_websocket_with_socks5_proxy_auth_async() {
     {
         Ok(_) => println!("WebSocket SOCKS5 proxy auth async test unexpectedly succeeded"),
         Err(e) => {
-            println!(
-                "WebSocket SOCKS5 proxy auth async test correctly failed: {}",
-                e
-            );
+            println!("WebSocket SOCKS5 proxy auth async test correctly failed: {e}");
         }
     }
 }
@@ -676,10 +659,7 @@ async fn test_websocket_with_https_proxy_auth_async() {
     {
         Ok(_) => println!("WebSocket HTTPS proxy auth async test unexpectedly succeeded"),
         Err(e) => {
-            println!(
-                "WebSocket HTTPS proxy auth async test correctly failed: {}",
-                e
-            );
+            println!("WebSocket HTTPS proxy auth async test correctly failed: {e}");
         }
     }
 }
@@ -703,7 +683,7 @@ async fn test_readme_async_get_request() {
         Ok(response) => {
             println!("{:?}", response.text());
         }
-        Err(e) => println!("Error => {}", e),
+        Err(e) => println!("Error => {e}"),
     }
 }
 
@@ -763,7 +743,7 @@ fn test_http_proxy_get_request() {
         Ok(response) => {
             println!("HTTP Proxy GET Response => {:?}", response.text());
         }
-        Err(e) => println!("HTTP Proxy GET Error (expected) => {}", e),
+        Err(e) => println!("HTTP Proxy GET Error (expected) => {e}"),
     }
 }
 
@@ -786,7 +766,7 @@ fn test_http_proxy_auth_get_request() {
         Ok(response) => {
             println!("HTTP Proxy Auth GET Response => {:?}", response.text());
         }
-        Err(e) => println!("HTTP Proxy Auth GET Error (expected) => {}", e),
+        Err(e) => println!("HTTP Proxy Auth GET Error (expected) => {e}"),
     }
 }
 
@@ -809,7 +789,7 @@ fn test_socks5_proxy_get_request() {
         Ok(response) => {
             println!("SOCKS5 Proxy GET Response => {:?}", response.text());
         }
-        Err(e) => println!("SOCKS5 Proxy GET Error (expected) => {}", e),
+        Err(e) => println!("SOCKS5 Proxy GET Error (expected) => {e}"),
     }
 }
 
@@ -834,7 +814,7 @@ async fn test_async_http_proxy_get_request() {
         Ok(response) => {
             println!("Async HTTP Proxy GET Response => {:?}", response.text());
         }
-        Err(e) => println!("Async HTTP Proxy GET Error (expected) => {}", e),
+        Err(e) => println!("Async HTTP Proxy GET Error (expected) => {e}"),
     }
 }
 
@@ -862,7 +842,7 @@ async fn test_async_socks5_proxy_auth_get_request() {
                 response.text()
             );
         }
-        Err(e) => println!("Async SOCKS5 Proxy Auth GET Error (expected) => {}", e),
+        Err(e) => println!("Async SOCKS5 Proxy Auth GET Error (expected) => {e}"),
     }
 }
 
@@ -871,7 +851,7 @@ async fn test_async_socks5_proxy_auth_get_request() {
 async fn test_readme_async_post_json_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("header-key", "header-value");
-    let body: JsonValue = json_value!({
+    let body: Value = json!({
         "test": 1
     });
     let mut request_builder: BoxAsyncRequestTrait = RequestBuilder::new()
@@ -888,7 +868,7 @@ async fn test_readme_async_post_json_request() {
         Ok(response) => {
             println!("{:?}", response.decode(4096).text());
         }
-        Err(e) => println!("Error => {}", e),
+        Err(e) => println!("Error => {e}"),
     }
 }
 
@@ -912,7 +892,7 @@ async fn test_readme_async_post_text_request() {
         Ok(response) => {
             println!("{:?}", response.text());
         }
-        Err(e) => println!("Error => {}", e),
+        Err(e) => println!("Error => {e}"),
     }
 }
 
@@ -935,7 +915,7 @@ async fn test_readme_async_post_binary_request() {
         Ok(response) => {
             println!("{:?}", response.decode(4096).text());
         }
-        Err(e) => println!("Error => {}", e),
+        Err(e) => println!("Error => {e}"),
     }
 }
 
@@ -960,7 +940,7 @@ async fn test_https_over_http_proxy_async() {
             );
         }
         Err(e) => {
-            println!("HTTPS over HTTP proxy test failed (expected): {}", e);
+            println!("HTTPS over HTTP proxy test failed (expected): {e}");
         }
     }
 }
@@ -986,7 +966,7 @@ async fn test_https_over_socks5_proxy_async() {
             );
         }
         Err(e) => {
-            println!("HTTPS over SOCKS5 proxy test failed (expected): {}", e);
+            println!("HTTPS over SOCKS5 proxy test failed (expected): {e}");
         }
     }
 }
@@ -1011,7 +991,7 @@ fn test_https_over_http_proxy_sync() {
             );
         }
         Err(e) => {
-            println!("Sync HTTPS over HTTP proxy test failed (expected): {}", e);
+            println!("Sync HTTPS over HTTP proxy test failed (expected): {e}");
         }
     }
 }
@@ -1036,7 +1016,7 @@ fn test_https_over_socks5_proxy_sync() {
             );
         }
         Err(e) => {
-            println!("Sync HTTPS over SOCKS5 proxy test failed (expected): {}", e);
+            println!("Sync HTTPS over SOCKS5 proxy test failed (expected): {e}");
         }
     }
 }

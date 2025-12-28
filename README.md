@@ -77,7 +77,7 @@ use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
-let body: JsonValue = json_value!({
+let body: Value = json!({
     "test": 1
 });
 let mut request_builder = RequestBuilder::new()
@@ -407,7 +407,7 @@ use http_request::*;
 
 let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
 header.insert("header-key", "header-value");
-let body: JsonValue = json_value!({
+let body: Value = json!({
     "test": 1
 });
 let mut request_builder = RequestBuilder::new()

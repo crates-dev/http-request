@@ -66,10 +66,10 @@ impl SharedWebSocketBuilder {
         }
         let mut url_obj: HttpUrlComponents = HttpUrlComponents::default();
         if url.starts_with("ws://") {
-            url_obj.protocol = Protocol::HTTP;
+            url_obj.protocol = Protocol::Http;
             url_obj.port = Some(80);
         } else if url.starts_with("wss://") {
-            url_obj.protocol = Protocol::HTTPS;
+            url_obj.protocol = Protocol::Https;
             url_obj.port = Some(443);
         } else {
             return Err(WebSocketError::invalid_url("Invalid WebSocket URL scheme"));
