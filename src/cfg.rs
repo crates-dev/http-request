@@ -260,16 +260,16 @@ fn test_thread_https_get_request() {
             Mutex<
                 Box<
                     dyn RequestTrait<
-                        RequestResult = Result<
-                            Box<
-                                dyn ResponseTrait<
-                                        OutputText = HttpResponseText,
-                                        OutputBinary = HttpResponseBinary,
-                                    >,
+                            RequestResult = Result<
+                                Box<
+                                    dyn ResponseTrait<
+                                            OutputText = HttpResponseText,
+                                            OutputBinary = HttpResponseBinary,
+                                        > + 'static,
+                                >,
+                                RequestError,
                             >,
-                            RequestError,
-                        >,
-                    >,
+                        > + 'static,
                 >,
             >,
         > = Arc::clone(&request_builder);
@@ -278,16 +278,16 @@ fn test_thread_https_get_request() {
                 '_,
                 Box<
                     dyn RequestTrait<
-                        RequestResult = Result<
-                            Box<
-                                dyn ResponseTrait<
-                                        OutputText = HttpResponseText,
-                                        OutputBinary = HttpResponseBinary,
-                                    >,
+                            RequestResult = Result<
+                                Box<
+                                    dyn ResponseTrait<
+                                            OutputText = HttpResponseText,
+                                            OutputBinary = HttpResponseBinary,
+                                        > + 'static,
+                                >,
+                                RequestError,
                             >,
-                            RequestError,
-                        >,
-                    >,
+                        > + 'static,
                 >,
             > = request_builder.lock().unwrap();
             let start_time: Instant = Instant::now();
@@ -331,16 +331,16 @@ fn test_thread_http_get_request() {
             Mutex<
                 Box<
                     dyn RequestTrait<
-                        RequestResult = Result<
-                            Box<
-                                dyn ResponseTrait<
-                                        OutputText = HttpResponseText,
-                                        OutputBinary = HttpResponseBinary,
-                                    >,
+                            RequestResult = Result<
+                                Box<
+                                    dyn ResponseTrait<
+                                            OutputText = HttpResponseText,
+                                            OutputBinary = HttpResponseBinary,
+                                        > + 'static,
+                                >,
+                                RequestError,
                             >,
-                            RequestError,
-                        >,
-                    >,
+                        > + 'static,
                 >,
             >,
         > = Arc::clone(&request_builder);
@@ -349,16 +349,16 @@ fn test_thread_http_get_request() {
                 '_,
                 Box<
                     dyn RequestTrait<
-                        RequestResult = Result<
-                            Box<
-                                dyn ResponseTrait<
-                                        OutputText = HttpResponseText,
-                                        OutputBinary = HttpResponseBinary,
-                                    >,
+                            RequestResult = Result<
+                                Box<
+                                    dyn ResponseTrait<
+                                            OutputText = HttpResponseText,
+                                            OutputBinary = HttpResponseBinary,
+                                        > + 'static,
+                                >,
+                                RequestError,
                             >,
-                            RequestError,
-                        >,
-                    >,
+                        > + 'static,
                 >,
             > = request_builder.lock().unwrap();
             let start_time: Instant = Instant::now();
