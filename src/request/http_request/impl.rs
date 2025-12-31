@@ -168,7 +168,7 @@ impl HttpRequest {
     pub(crate) fn parse_url(&self) -> Result<HttpUrlComponents, RequestError> {
         match HttpUrlComponents::parse(self.get_url()) {
             Ok(parse_res) => Ok(parse_res),
-            Err(err) => Err(RequestError::Request(format!("Invalid URL: {err}"))),
+            Err(_) => Err(RequestError::InvalidUrl(HttpStatus::BadRequest)),
         }
     }
 
@@ -359,8 +359,8 @@ impl HttpRequest {
     ///   for sending and receiving data.
     ///
     /// # Returns
-    /// Returns a `Result<HttpResponseBinary, RequestError>`, where:
-    /// - `Ok(HttpResponseBinary)` contains the HTTP response received from the server.
+    /// Returns a `Result<BoxResponseTrait, RequestError>`, where:
+    /// - `Ok(BoxResponseTrait)` contains the HTTP response received from the server.
     /// - `Err(RequestError)` indicates that an error occurred while sending the request or reading the response.
     fn send_get_request(
         &mut self,
@@ -394,8 +394,8 @@ impl HttpRequest {
     ///   for sending and receiving data.
     ///
     /// # Returns
-    /// Returns a `Result<HttpResponseBinary, RequestError>`, where:
-    /// - `Ok(HttpResponseBinary)` contains the HTTP response received from the server.
+    /// Returns a `Result<BoxResponseTrait, RequestError>`, where:
+    /// - `Ok(BoxResponseTrait)` contains the HTTP response received from the server.
     /// - `Err(RequestError)` indicates that an error occurred while sending the request or reading the response.
     fn send_post_request(
         &mut self,
@@ -435,8 +435,8 @@ impl HttpRequest {
     ///   for receiving the response.
     ///
     /// # Returns
-    /// Returns a `Result<HttpResponseBinary, RequestError>`, where:
-    /// - `Ok(HttpResponseBinary)` contains the complete HTTP response after processing headers and body.
+    /// Returns a `Result<BoxResponseTrait, RequestError>`, where:
+    /// - `Ok(BoxResponseTrait)` contains the complete HTTP response after processing headers and body.
     /// - `Err(RequestError)` indicates that an error occurred while reading the response.
     fn read_response(
         &mut self,
@@ -511,11 +511,12 @@ impl HttpRequest {
             {
                 *response = response.decode(config.buffer);
             }
-            return Ok(Box::new(
+            let response: BoxResponseTrait = Box::new(
                 self.response
                     .read()
                     .map_or(HttpResponseBinary::default(), |response| response.clone()),
-            ));
+            );
+            return Ok(response);
         }
         let url: String = String::from_utf8(redirect_url.unwrap())
             .map_err(|_| RequestError::InvalidUrl(HttpStatus::BadRequest))?;
@@ -528,7 +529,7 @@ impl HttpRequest {
     ///
     /// - `url`: The redirection URL to follow.
     ///
-    /// Returns `Ok(HttpResponseBinary)` if the redirection is successful, or `Err(RequestError)` otherwise.
+    /// Returns `Ok(BoxResponseTrait)` if the redirection is successful, or `Err(RequestError)` otherwise.
     fn handle_redirect(&mut self, url: String) -> Result<BoxResponseTrait, RequestError> {
         if let Ok(mut config) = self.config.write() {
             if !config.redirect {
@@ -598,13 +599,13 @@ impl HttpRequest {
         let host_port: (String, u16) = (host.clone(), port);
         let timeout: Duration = Duration::from_millis(config.timeout);
         let tcp_stream: TcpStream = TcpStream::connect(host_port.clone())
-            .map_err(|err| RequestError::TcpStreamConnectString(err.to_string()))?;
+            .map_err(|_| RequestError::TcpStreamConnectString(HttpStatus::InternalServerError))?;
         tcp_stream
             .set_read_timeout(Some(timeout))
-            .map_err(|err| RequestError::SetReadTimeoutString(err.to_string()))?;
+            .map_err(|_| RequestError::SetReadTimeoutString(HttpStatus::InternalServerError))?;
         tcp_stream
             .set_write_timeout(Some(timeout))
-            .map_err(|err| RequestError::SetWriteTimeoutString(err.to_string()))?;
+            .map_err(|_| RequestError::SetWriteTimeoutString(HttpStatus::InternalServerError))?;
         let stream: Result<Box<dyn ReadWrite>, RequestError> = if Self::get_protocol(&config)
             .is_https()
         {
@@ -615,19 +616,24 @@ impl HttpRequest {
                         .with_root_certificates(roots)
                         .with_no_client_auth();
                     let client_config: Arc<ClientConfig> = Arc::new(tls_config);
-                    let dns_name: ServerName<'_> = ServerName::try_from(host.clone())
-                        .map_err(|err| RequestError::TlsConnectorBuildString(err.to_string()))?;
-                    let session: ClientConnection =
-                        ClientConnection::new(Arc::clone(&client_config), dns_name).map_err(
-                            |err| RequestError::TlsConnectorBuildString(err.to_string()),
-                        )?;
+                    let dns_name: ServerName<'_> =
+                        ServerName::try_from(host.clone()).map_err(|_| {
+                            RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+                        })?;
+                    let session: ClientConnection = ClientConnection::new(
+                        Arc::clone(&client_config),
+                        dns_name,
+                    )
+                    .map_err(|_| {
+                        RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+                    })?;
                     let tls_stream: StreamOwned<ClientConnection, TcpStream> =
                         StreamOwned::new(session, tcp_stream);
                     return Ok(Box::new(tls_stream));
                 }
-                Err(err) => Err(RequestError::Request(format!(
-                    "error reading temporary configuration: {err}"
-                ))),
+                Err(_) => Err(RequestError::ConfigReadError(
+                    HttpStatus::InternalServerError,
+                )),
             }
         } else {
             Ok(Box::new(tcp_stream))
@@ -667,13 +673,13 @@ impl HttpRequest {
     ) -> Result<Box<dyn ReadWrite>, RequestError> {
         let proxy_host_port: (String, u16) = (proxy_config.host.clone(), proxy_config.port);
         let tcp_stream: TcpStream = TcpStream::connect(proxy_host_port)
-            .map_err(|err| RequestError::TcpStreamConnectString(err.to_string()))?;
+            .map_err(|_| RequestError::TcpStreamConnectString(HttpStatus::InternalServerError))?;
         tcp_stream
             .set_read_timeout(Some(timeout))
-            .map_err(|err| RequestError::SetReadTimeoutString(err.to_string()))?;
+            .map_err(|_| RequestError::SetReadTimeoutString(HttpStatus::InternalServerError))?;
         tcp_stream
             .set_write_timeout(Some(timeout))
-            .map_err(|err| RequestError::SetWriteTimeoutString(err.to_string()))?;
+            .map_err(|_| RequestError::SetWriteTimeoutString(HttpStatus::InternalServerError))?;
         let mut proxy_stream: Box<dyn ReadWrite> = if proxy_config.proxy_type == ProxyType::Https {
             match self.tmp.clone().read() {
                 Ok(tmp) => {
@@ -683,19 +689,24 @@ impl HttpRequest {
                         .with_no_client_auth();
                     let client_config: Arc<ClientConfig> = Arc::new(tls_config);
                     let dns_name: ServerName<'_> = ServerName::try_from(proxy_config.host.clone())
-                        .map_err(|err| RequestError::TlsConnectorBuildString(err.to_string()))?;
-                    let session: ClientConnection =
-                        ClientConnection::new(Arc::clone(&client_config), dns_name).map_err(
-                            |err| RequestError::TlsConnectorBuildString(err.to_string()),
-                        )?;
+                        .map_err(|_| {
+                            RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+                        })?;
+                    let session: ClientConnection = ClientConnection::new(
+                        Arc::clone(&client_config),
+                        dns_name,
+                    )
+                    .map_err(|_| {
+                        RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+                    })?;
                     let tls_stream: StreamOwned<ClientConnection, TcpStream> =
                         StreamOwned::new(session, tcp_stream);
                     Box::new(tls_stream)
                 }
-                Err(err) => {
-                    return Err(RequestError::Request(format!(
-                        "error reading temporary configuration: {err}"
-                    )));
+                Err(_) => {
+                    return Err(RequestError::ConfigReadError(
+                        HttpStatus::InternalServerError,
+                    ));
                 }
             }
         } else {
@@ -754,21 +765,26 @@ impl HttpRequest {
                         .with_no_client_auth();
                     let client_config: Arc<ClientConfig> = Arc::new(tls_config);
                     let dns_name: ServerName<'_> = ServerName::try_from(target_host.clone())
-                        .map_err(|err| RequestError::TlsConnectorBuildString(err.to_string()))?;
-                    let session: ClientConnection =
-                        ClientConnection::new(Arc::clone(&client_config), dns_name).map_err(
-                            |err| RequestError::TlsConnectorBuildString(err.to_string()),
-                        )?;
+                        .map_err(|_| {
+                            RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+                        })?;
+                    let session: ClientConnection = ClientConnection::new(
+                        Arc::clone(&client_config),
+                        dns_name,
+                    )
+                    .map_err(|_| {
+                        RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+                    })?;
 
                     let tunnel_stream = SyncProxyTunnelStream::new(proxy_stream, pre_read_data);
                     let tls_stream: StreamOwned<ClientConnection, SyncProxyTunnelStream> =
                         StreamOwned::new(session, tunnel_stream);
                     return Ok(Box::new(tls_stream));
                 }
-                Err(err) => {
-                    return Err(RequestError::Request(format!(
-                        "error reading temporary configuration: {err}"
-                    )));
+                Err(_) => {
+                    return Err(RequestError::ConfigReadError(
+                        HttpStatus::InternalServerError,
+                    ));
                 }
             }
         }
@@ -787,13 +803,13 @@ impl HttpRequest {
     ) -> Result<Box<dyn ReadWrite>, RequestError> {
         let proxy_host_port: (String, u16) = (proxy_config.host.clone(), proxy_config.port);
         let mut tcp_stream: TcpStream = TcpStream::connect(proxy_host_port)
-            .map_err(|err| RequestError::TcpStreamConnectString(err.to_string()))?;
+            .map_err(|_| RequestError::TcpStreamConnectString(HttpStatus::InternalServerError))?;
         tcp_stream
             .set_read_timeout(Some(timeout))
-            .map_err(|err| RequestError::SetReadTimeoutString(err.to_string()))?;
+            .map_err(|_| RequestError::SetReadTimeoutString(HttpStatus::InternalServerError))?;
         tcp_stream
             .set_write_timeout(Some(timeout))
-            .map_err(|err| RequestError::SetWriteTimeoutString(err.to_string()))?;
+            .map_err(|_| RequestError::SetWriteTimeoutString(HttpStatus::InternalServerError))?;
         let auth_methods: Vec<u8> =
             if proxy_config.username.is_some() && proxy_config.password.is_some() {
                 vec![0x05, 0x02, 0x00, 0x02]
@@ -908,21 +924,26 @@ impl HttpRequest {
                         .with_no_client_auth();
                     let client_config: Arc<ClientConfig> = Arc::new(tls_config);
                     let dns_name: ServerName<'_> = ServerName::try_from(target_host.clone())
-                        .map_err(|err| RequestError::TlsConnectorBuildString(err.to_string()))?;
-                    let session: ClientConnection =
-                        ClientConnection::new(Arc::clone(&client_config), dns_name).map_err(
-                            |err| RequestError::TlsConnectorBuildString(err.to_string()),
-                        )?;
+                        .map_err(|_| {
+                            RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+                        })?;
+                    let session: ClientConnection = ClientConnection::new(
+                        Arc::clone(&client_config),
+                        dns_name,
+                    )
+                    .map_err(|_| {
+                        RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+                    })?;
 
                     let tunnel_stream = SyncProxyTunnelStream::new(proxy_stream, vec![]);
                     let tls_stream: StreamOwned<ClientConnection, SyncProxyTunnelStream> =
                         StreamOwned::new(session, tunnel_stream);
                     return Ok(Box::new(tls_stream));
                 }
-                Err(err) => {
-                    return Err(RequestError::Request(format!(
-                        "error reading temporary configuration: {err}"
-                    )));
+                Err(_) => {
+                    return Err(RequestError::ConfigReadError(
+                        HttpStatus::InternalServerError,
+                    ));
                 }
             }
         }
@@ -947,9 +968,9 @@ impl HttpRequest {
         let res: Result<BoxResponseTrait, RequestError> = match methods {
             m if m.is_get() => self.send_get_request(&mut stream),
             m if m.is_post() => self.send_post_request(&mut stream),
-            err => Err(RequestError::Request(format!(
-                "do not support {err} method"
-            ))),
+            _err => Err(RequestError::MethodsNotSupport(
+                HttpStatus::MethodNotAllowed,
+            )),
         };
         res
     }
@@ -1114,11 +1135,12 @@ impl HttpRequest {
             if should_decode && let Ok(mut response) = self.response.write() {
                 *response = response.decode(buffer_size);
             }
-            return Ok(Box::new(
+            let response: BoxResponseTrait = Box::new(
                 self.response
                     .read()
                     .map_or(HttpResponseBinary::default(), |response| response.clone()),
-            ));
+            );
+            return Ok(response);
         }
         let url: String = String::from_utf8(redirect_url.unwrap())
             .map_err(|_| RequestError::InvalidUrl(HttpStatus::BadRequest))?;
@@ -1188,15 +1210,15 @@ impl HttpRequest {
         let host_port: (String, u16) = (host.clone(), port);
         let tcp_stream: AsyncTcpStream = AsyncTcpStream::connect(host_port.clone())
             .await
-            .map_err(|err| RequestError::TcpStreamConnectString(err.to_string()))?;
+            .map_err(|_| RequestError::TcpStreamConnectString(HttpStatus::InternalServerError))?;
         if Self::get_protocol(&config).is_https() {
             let roots: RootCertStore = {
                 match self.tmp.clone().read() {
                     Ok(tmp) => tmp.root_cert.clone(),
-                    Err(err) => {
-                        return Err(RequestError::Request(format!(
-                            "error reading temporary configuration: {err}"
-                        )));
+                    Err(_) => {
+                        return Err(RequestError::ConfigReadError(
+                            HttpStatus::InternalServerError,
+                        ));
                     }
                 }
             };
@@ -1204,12 +1226,13 @@ impl HttpRequest {
                 .with_root_certificates(roots)
                 .with_no_client_auth();
             let connector: TlsConnector = TlsConnector::from(Arc::new(tls_config));
-            let dns_name: ServerName<'_> = ServerName::try_from(host.clone())
-                .map_err(|err| RequestError::TlsConnectorBuildString(err.to_string()))?;
-            let tls_stream: TlsStream<AsyncTcpStream> = connector
-                .connect(dns_name, tcp_stream)
-                .await
-                .map_err(|err| RequestError::TlsConnectorBuildString(err.to_string()))?;
+            let dns_name: ServerName<'_> = ServerName::try_from(host.clone()).map_err(|_| {
+                RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+            })?;
+            let tls_stream: TlsStream<AsyncTcpStream> =
+                connector.connect(dns_name, tcp_stream).await.map_err(|_| {
+                    RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+                })?;
             Ok(Box::new(tls_stream))
         } else {
             Ok(Box::new(tcp_stream))
@@ -1265,15 +1288,15 @@ impl HttpRequest {
         let proxy_host_port: (String, u16) = (proxy_config.host.clone(), proxy_config.port);
         let tcp_stream: AsyncTcpStream = AsyncTcpStream::connect(proxy_host_port)
             .await
-            .map_err(|err| RequestError::TcpStreamConnectString(err.to_string()))?;
+            .map_err(|_| RequestError::TcpStreamConnectString(HttpStatus::InternalServerError))?;
         let mut proxy_stream: BoxAsyncReadWrite = if proxy_config.proxy_type == ProxyType::Https {
             let roots: RootCertStore = {
                 match self.tmp.clone().read() {
                     Ok(tmp) => tmp.root_cert.clone(),
-                    Err(err) => {
-                        return Err(RequestError::Request(format!(
-                            "error reading temporary configuration: {err}"
-                        )));
+                    Err(_) => {
+                        return Err(RequestError::ConfigReadError(
+                            HttpStatus::InternalServerError,
+                        ));
                     }
                 }
             };
@@ -1282,11 +1305,13 @@ impl HttpRequest {
                 .with_no_client_auth();
             let connector: TlsConnector = TlsConnector::from(Arc::new(tls_config));
             let dns_name: ServerName<'_> = ServerName::try_from(proxy_config.host.clone())
-                .map_err(|err| RequestError::TlsConnectorBuildString(err.to_string()))?;
-            let tls_stream: TlsStream<AsyncTcpStream> = connector
-                .connect(dns_name, tcp_stream)
-                .await
-                .map_err(|err| RequestError::TlsConnectorBuildString(err.to_string()))?;
+                .map_err(|_| {
+                    RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+                })?;
+            let tls_stream: TlsStream<AsyncTcpStream> =
+                connector.connect(dns_name, tcp_stream).await.map_err(|_| {
+                    RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+                })?;
             Box::new(tls_stream)
         } else {
             Box::new(tcp_stream)
@@ -1342,10 +1367,10 @@ impl HttpRequest {
             let roots: RootCertStore = {
                 match self.tmp.clone().read() {
                     Ok(tmp) => tmp.root_cert.clone(),
-                    Err(err) => {
-                        return Err(RequestError::Request(format!(
-                            "error reading temporary configuration: {err}"
-                        )));
+                    Err(_) => {
+                        return Err(RequestError::ConfigReadError(
+                            HttpStatus::InternalServerError,
+                        ));
                     }
                 }
             };
@@ -1353,18 +1378,22 @@ impl HttpRequest {
                 .with_root_certificates(roots)
                 .with_no_client_auth();
             let connector: TlsConnector = TlsConnector::from(Arc::new(tls_config));
-            let dns_name: ServerName<'_> = ServerName::try_from(target_host.clone())
-                .map_err(|err| RequestError::TlsConnectorBuildString(err.to_string()))?;
+            let dns_name: ServerName<'_> =
+                ServerName::try_from(target_host.clone()).map_err(|_| {
+                    RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+                })?;
             let tunnel_stream: ProxyTunnelStream =
                 ProxyTunnelStream::new(proxy_stream, pre_read_data);
             let tls_stream: TlsStream<ProxyTunnelStream> = connector
                 .connect(dns_name, tunnel_stream)
                 .await
-                .map_err(|err| RequestError::TlsConnectorBuildString(err.to_string()))?;
-            return Ok(Box::new(tls_stream));
+                .map_err(|_| {
+                    RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+                })?;
+            return Ok(Box::new(tls_stream) as BoxAsyncReadWrite);
         }
         let tunnel_stream: ProxyTunnelStream = ProxyTunnelStream::new(proxy_stream, pre_read_data);
-        Ok(Box::new(tunnel_stream))
+        Ok(Box::new(tunnel_stream) as BoxAsyncReadWrite)
     }
 
     /// Establishes an async SOCKS5 proxy connection.
@@ -1387,7 +1416,7 @@ impl HttpRequest {
         let proxy_host_port: (String, u16) = (proxy_config.host.clone(), proxy_config.port);
         let mut tcp_stream: AsyncTcpStream = AsyncTcpStream::connect(proxy_host_port)
             .await
-            .map_err(|err| RequestError::TcpStreamConnectString(err.to_string()))?;
+            .map_err(|_| RequestError::TcpStreamConnectString(HttpStatus::InternalServerError))?;
         let auth_methods: Vec<u8> =
             if proxy_config.username.is_some() && proxy_config.password.is_some() {
                 vec![0x05, 0x02, 0x00, 0x02]
@@ -1512,10 +1541,10 @@ impl HttpRequest {
             let roots: RootCertStore = {
                 match self.tmp.clone().read() {
                     Ok(tmp) => tmp.root_cert.clone(),
-                    Err(err) => {
-                        return Err(RequestError::Request(format!(
-                            "error reading temporary configuration: {err}"
-                        )));
+                    Err(_) => {
+                        return Err(RequestError::ConfigReadError(
+                            HttpStatus::InternalServerError,
+                        ));
                     }
                 }
             };
@@ -1523,14 +1552,18 @@ impl HttpRequest {
                 .with_root_certificates(roots)
                 .with_no_client_auth();
             let connector: TlsConnector = TlsConnector::from(Arc::new(tls_config));
-            let dns_name: ServerName<'_> = ServerName::try_from(target_host.clone())
-                .map_err(|err| RequestError::TlsConnectorBuildString(err.to_string()))?;
+            let dns_name: ServerName<'_> =
+                ServerName::try_from(target_host.clone()).map_err(|_| {
+                    RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+                })?;
             let tunnel_stream: ProxyTunnelStream = ProxyTunnelStream::new(proxy_stream, Vec::new());
             let tls_stream: TlsStream<ProxyTunnelStream> = connector
                 .connect(dns_name, tunnel_stream)
                 .await
-                .map_err(|err| RequestError::TlsConnectorBuildString(err.to_string()))?;
-            return Ok(Box::new(tls_stream));
+                .map_err(|_| {
+                    RequestError::TlsConnectorBuildString(HttpStatus::InternalServerError)
+                })?;
+            return Ok(Box::new(tls_stream) as BoxAsyncReadWrite);
         }
         Ok(proxy_stream)
     }
@@ -1558,9 +1591,9 @@ impl HttpRequest {
         let res: Result<BoxResponseTrait, RequestError> = match methods {
             m if m.is_get() => self.send_get_request_async(&mut stream).await,
             m if m.is_post() => self.send_post_request_async(&mut stream).await,
-            err => Err(RequestError::Request(format!(
-                "do not support {err} method"
-            ))),
+            _err => Err(RequestError::MethodsNotSupport(
+                HttpStatus::MethodNotAllowed,
+            )),
         };
         res
     }

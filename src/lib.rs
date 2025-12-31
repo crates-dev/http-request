@@ -22,7 +22,7 @@ pub(crate) mod utils;
 pub use request::*;
 pub use response::*;
 
-pub use http_type::{HashMapXxHash3_64, hash_map_xx_hash3_64};
+pub use http_type::{HashMapXxHash3_64, RequestError, hash_map_xx_hash3_64};
 pub use serde_json::{
     Deserializer, Error, Map, Number, StreamDeserializer, Value, from_reader, from_slice, from_str,
     from_value, to_string, to_string_pretty, to_value, to_vec, to_vec_pretty, to_writer,
@@ -70,7 +70,7 @@ pub(crate) use http_type::{
 pub(crate) use rustls::{
     ClientConfig, ClientConnection, RootCertStore, StreamOwned, pki_types::ServerName,
 };
-pub(crate) use serde::{Deserialize, Serialize, Serializer};
+pub(crate) use serde::{Serialize, Serializer};
 pub(crate) use tokio_rustls::{TlsConnector, client::TlsStream};
 pub(crate) use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream, client_async_with_config, connect_async_with_config,
