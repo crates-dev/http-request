@@ -14,7 +14,7 @@ impl RequestBuilder {
     ///
     /// # Arguments
     ///
-    /// - `str` - The request URL.
+    /// - `&str` - The request URL.
     ///
     /// # Returns
     ///
@@ -29,7 +29,7 @@ impl RequestBuilder {
     ///
     /// # Arguments
     ///
-    /// - `str` - The request URL.
+    /// - `&str` - The request URL.
     ///
     /// # Returns
     ///
@@ -173,7 +173,7 @@ impl RequestBuilder {
     ///
     /// # Arguments
     ///
-    /// - `u64` - The timeout duration in seconds. This value will be used to configure the
+    /// - `u64` - The timeout duration in milliseconds. This value will be used to configure the
     ///   connection timeout.
     ///
     /// # Returns
@@ -294,7 +294,7 @@ impl RequestBuilder {
     ///
     /// # Arguments
     ///
-    /// - `str` - The hostname or IP address of the proxy server.
+    /// - `&str` - The hostname or IP address of the proxy server.
     /// - `u16` - The port number of the proxy server.
     ///
     /// # Returns
@@ -319,7 +319,7 @@ impl RequestBuilder {
     ///
     /// # Arguments
     ///
-    /// - `str` - The hostname or IP address of the proxy server.
+    /// - `&str` - The hostname or IP address of the proxy server.
     /// - `u16` - The port number of the proxy server.
     ///
     /// # Returns
@@ -344,7 +344,7 @@ impl RequestBuilder {
     ///
     /// # Arguments
     ///
-    /// - `str` - The hostname or IP address of the proxy server.
+    /// - `&str` - The hostname or IP address of the proxy server.
     /// - `u16` - The port number of the proxy server.
     ///
     /// # Returns
@@ -369,10 +369,10 @@ impl RequestBuilder {
     ///
     /// # Arguments
     ///
-    /// - `str` - The hostname or IP address of the proxy server.
+    /// - `&str` - The hostname or IP address of the proxy server.
     /// - `u16` - The port number of the proxy server.
-    /// - `str` - The username for proxy authentication.
-    /// - `str` - The password for proxy authentication.
+    /// - `&str` - The username for proxy authentication.
+    /// - `&str` - The password for proxy authentication.
     ///
     /// # Returns
     ///
@@ -402,10 +402,10 @@ impl RequestBuilder {
     ///
     /// # Arguments
     ///
-    /// - `str` - The hostname or IP address of the proxy server.
+    /// - `&str` - The hostname or IP address of the proxy server.
     /// - `u16` - The port number of the proxy server.
-    /// - `str` - The username for proxy authentication.
-    /// - `str` - The password for proxy authentication.
+    /// - `&str` - The username for proxy authentication.
+    /// - `&str` - The password for proxy authentication.
     ///
     /// # Returns
     ///
@@ -435,10 +435,10 @@ impl RequestBuilder {
     ///
     /// # Arguments
     ///
-    /// - `str` - The hostname or IP address of the proxy server.
+    /// - `&str` - The hostname or IP address of the proxy server.
     /// - `u16` - The port number of the proxy server.
-    /// - `str` - The username for proxy authentication.
-    /// - `str` - The password for proxy authentication.
+    /// - `&str` - The username for proxy authentication.
+    /// - `&str` - The password for proxy authentication.
     ///
     /// # Returns
     ///

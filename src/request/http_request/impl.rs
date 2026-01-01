@@ -354,12 +354,13 @@ impl HttpRequest {
     /// via the provided `stream`. After sending the request, it waits for the response and reads
     /// the result.
     ///
-    /// # Parameters
+    /// # Arguments
     /// - `stream`: A mutable reference to a `Box<dyn ReadWrite>`, representing the stream used
     ///   for sending and receiving data.
     ///
     /// # Returns
-    /// Returns a `Result<BoxResponseTrait, RequestError>`, where:
+    ///
+    /// - `Result<BoxResponseTrait, RequestError>` -
     /// - `Ok(BoxResponseTrait)` contains the HTTP response received from the server.
     /// - `Err(RequestError)` indicates that an error occurred while sending the request or reading the response.
     fn send_get_request(
@@ -389,12 +390,13 @@ impl HttpRequest {
     /// and sends the body content along with the headers to the server via the provided `stream`. After
     /// sending the request, it waits for the response and reads the result.
     ///
-    /// # Parameters
+    /// # Arguments
     /// - `stream`: A mutable reference to a `Box<dyn ReadWrite>`, representing the stream used
     ///   for sending and receiving data.
     ///
     /// # Returns
-    /// Returns a `Result<BoxResponseTrait, RequestError>`, where:
+    ///
+    /// - `Result<BoxResponseTrait, RequestError>` -
     /// - `Ok(BoxResponseTrait)` contains the HTTP response received from the server.
     /// - `Err(RequestError)` indicates that an error occurred while sending the request or reading the response.
     fn send_post_request(
@@ -430,12 +432,13 @@ impl HttpRequest {
     /// If a redirect is detected, it follows the redirection URL. The method ensures that the entire
     /// response is read before returning.
     ///
-    /// # Parameters
+    /// # Arguments
     /// - `stream`: A mutable reference to a `Box<dyn ReadWrite>`, representing the stream used
     ///   for receiving the response.
     ///
     /// # Returns
-    /// Returns a `Result<BoxResponseTrait, RequestError>`, where:
+    ///
+    /// - `Result<BoxResponseTrait, RequestError>` -
     /// - `Ok(BoxResponseTrait)` contains the complete HTTP response after processing headers and body.
     /// - `Err(RequestError)` indicates that an error occurred while reading the response.
     fn read_response(
@@ -525,7 +528,7 @@ impl HttpRequest {
 
     /// Handles HTTP redirects by following the redirection URL.
     ///
-    /// # Parameters
+    /// # Arguments
     ///
     /// - `url`: The redirection URL to follow.
     ///
@@ -554,10 +557,10 @@ impl HttpRequest {
 
     /// Determines the appropriate port for the HTTP request.
     ///
-    /// # Parameters
+    /// # Arguments
     ///
     /// - `port`: The default port (if any).
-    /// - `config`: Config
+    /// - `config`: Configuration for HTTP requests
     ///
     /// Returns the resolved port.
     pub(crate) fn get_port(&self, port: u16, config: &Config) -> u16 {
@@ -576,7 +579,7 @@ impl HttpRequest {
     /// use the `TlsConnector` to establish a secure TLS connection. For both cases,
     /// it ensures a read timeout is set on the stream.
     ///
-    /// # Parameters
+    /// # Arguments
     ///
     /// - `host`: The hostname or IP address to connect to.
     /// - `port`: The port number to connect to.
