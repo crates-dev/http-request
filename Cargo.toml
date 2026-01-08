@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.91.71"
+version = "8.91.72"
 readme = "README.md"
 edition = "2024"
 authors = ["root@ltpp.vip"]
@@ -12,15 +12,15 @@ categories = ["network-programming", "web-programming"]
 exclude = ["target", "Cargo.lock", "sh", ".github"]
 
 [dependencies]
-http-type = "5.33.1"
-rustls = "0.23.36"
 serde = "1.0.228"
+rustls = "0.23.36"
+futures = "0.3.31"
+http-type = "5.33.2"
 serde_json = "1.0.149"
+tungstenite = "0.28.0"
 webpki-roots = "1.0.5"
 tokio-rustls = "0.26.4"
-futures = "0.3.31"
 tokio-tungstenite = "0.28.0"
-tungstenite = "0.28.0"
 
 [profile.dev]
 incremental = true
