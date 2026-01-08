@@ -74,7 +74,7 @@ impl Default for HttpRequest {
     #[inline(always)]
     fn default() -> Self {
         Self {
-            methods: Arc::new(Method::new()),
+            methods: Arc::new(Method::default()),
             url: Arc::new(String::new()),
             header: Arc::new(hash_map_xx_hash3_64()),
             body: Arc::new(Body::default()),
