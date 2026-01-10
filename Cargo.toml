@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.91.72"
+version = "8.91.73"
 readme = "README.md"
 edition = "2024"
 authors = ["root@ltpp.vip"]
@@ -15,7 +15,7 @@ exclude = ["target", "Cargo.lock", "sh", ".github"]
 serde = "1.0.228"
 rustls = "0.23.36"
 futures = "0.3.31"
-http-type = "5.33.2"
+http-type = "5.33.3"
 serde_json = "1.0.149"
 tungstenite = "0.28.0"
 webpki-roots = "1.0.5"
