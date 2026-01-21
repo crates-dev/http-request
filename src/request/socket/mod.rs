@@ -1,9 +1,9 @@
-pub(crate) mod config;
-pub(crate) mod message;
-pub(crate) mod proxy;
-pub(crate) mod shared;
-pub(crate) mod websocket;
-pub(crate) mod websocket_builder;
+mod config;
+mod message;
+mod proxy;
+mod shared;
+mod websocket;
+mod websocket_builder;
 
 pub use {shared::*, websocket::*, websocket_builder::*};
 

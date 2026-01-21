@@ -1,7 +1,7 @@
-pub(crate) mod response_binary;
-pub(crate) mod response_text;
-pub(crate) mod r#trait;
-pub(crate) mod r#type;
+mod response_binary;
+mod response_text;
+mod r#trait;
+mod r#type;
 
 pub use response_binary::*;
 pub use response_text::*;

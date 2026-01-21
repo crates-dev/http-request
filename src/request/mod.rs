@@ -1,10 +1,10 @@
-pub(crate) mod config;
-pub(crate) mod http_request;
-pub(crate) mod proxy;
-pub(crate) mod request_builder;
-pub(crate) mod shared;
-pub(crate) mod socket;
-pub(crate) mod tmp;
+mod config;
+mod http_request;
+mod proxy;
+mod request_builder;
+mod shared;
+mod socket;
+mod tmp;
 
 pub use {http_request::*, request_builder::*, socket::*};
 

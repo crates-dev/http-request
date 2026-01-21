@@ -1,4 +1,4 @@
-pub(crate) mod encode;
-pub(crate) mod vec;
+mod encode;
+mod vec;
 
 pub(crate) use {encode::*, vec::*};

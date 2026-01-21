@@ -1,7 +1,7 @@
-pub(crate) mod r#impl;
-pub(crate) mod r#struct;
-pub(crate) mod r#trait;
-pub(crate) mod r#type;
+mod r#impl;
+mod r#struct;
+mod r#trait;
+mod r#type;
 
 pub use {r#trait::*, r#type::*};
 
