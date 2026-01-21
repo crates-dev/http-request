@@ -5,5 +5,4 @@ pub(crate) mod r#type;
 
 pub use response_binary::*;
 pub use response_text::*;
-pub use r#trait::*;
-pub use r#type::*;
+pub use {r#trait::*, r#type::*};

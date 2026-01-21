@@ -5,10 +5,6 @@ pub(crate) mod shared;
 pub(crate) mod websocket;
 pub(crate) mod websocket_builder;
 
-pub use shared::*;
-pub use websocket::*;
-pub use websocket_builder::*;
+pub use {shared::*, websocket::*, websocket_builder::*};
 
-pub(crate) use config::*;
-pub(crate) use message::*;
-pub(crate) use proxy::*;
+pub(crate) use {config::*, message::*, proxy::*};

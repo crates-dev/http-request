@@ -3,7 +3,6 @@ pub(crate) mod r#struct;
 pub(crate) mod r#trait;
 pub(crate) mod r#type;
 
-pub use r#trait::*;
-pub use r#type::*;
+pub use {r#trait::*, r#type::*};
 
 pub(crate) use r#struct::*;

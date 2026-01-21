@@ -6,12 +6,6 @@ pub(crate) mod shared;
 pub(crate) mod socket;
 pub(crate) mod tmp;
 
-pub use http_request::*;
-pub use socket::*;
+pub use {http_request::*, request_builder::*, socket::*};
 
-pub(crate) use config::*;
-pub(crate) use proxy::*;
-pub(crate) use shared::*;
-pub(crate) use tmp::*;
-
-pub use request_builder::*;
+pub(crate) use {config::*, proxy::*, shared::*, tmp::*};

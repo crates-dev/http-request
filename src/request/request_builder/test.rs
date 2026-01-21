@@ -1,7 +1,5 @@
-#[cfg(test)]
 use crate::*;
 
-#[cfg(test)]
 #[tokio::test]
 async fn test_async_http_get_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -411,7 +409,6 @@ fn test_readme_sync_post_binary_request() {
         .unwrap_or_else(|e| println!("Error => {e}"));
 }
 
-#[cfg(test)]
 #[tokio::test]
 async fn test_async_websocket_connection() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -558,7 +555,6 @@ fn test_websocket_with_http_proxy_auth() {
     }
 }
 
-#[cfg(test)]
 #[tokio::test]
 async fn test_websocket_with_socks5_proxy_auth_async() {
     let mut websocket_builder: WebSocket = WebSocketBuilder::new()
@@ -579,7 +575,6 @@ async fn test_websocket_with_socks5_proxy_auth_async() {
     }
 }
 
-#[cfg(test)]
 #[tokio::test]
 async fn test_websocket_with_https_proxy_auth_async() {
     let mut websocket_builder: WebSocket = WebSocketBuilder::new()
@@ -600,7 +595,6 @@ async fn test_websocket_with_https_proxy_auth_async() {
     }
 }
 
-#[cfg(test)]
 #[tokio::test]
 async fn test_readme_async_get_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -729,7 +723,6 @@ fn test_socks5_proxy_get_request() {
     }
 }
 
-#[cfg(test)]
 #[tokio::test]
 async fn test_async_http_proxy_get_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -754,7 +747,6 @@ async fn test_async_http_proxy_get_request() {
     }
 }
 
-#[cfg(test)]
 #[tokio::test]
 async fn test_async_socks5_proxy_auth_get_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -782,7 +774,6 @@ async fn test_async_socks5_proxy_auth_get_request() {
     }
 }
 
-#[cfg(test)]
 #[tokio::test]
 async fn test_readme_async_post_json_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -808,7 +799,6 @@ async fn test_readme_async_post_json_request() {
     }
 }
 
-#[cfg(test)]
 #[tokio::test]
 async fn test_readme_async_post_text_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -832,7 +822,6 @@ async fn test_readme_async_post_text_request() {
     }
 }
 
-#[cfg(test)]
 #[tokio::test]
 async fn test_readme_async_post_binary_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -855,7 +844,6 @@ async fn test_readme_async_post_binary_request() {
     }
 }
 
-#[cfg(test)]
 #[tokio::test]
 async fn test_https_over_http_proxy_async() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
@@ -881,7 +869,6 @@ async fn test_https_over_http_proxy_async() {
     }
 }
 
-#[cfg(test)]
 #[tokio::test]
 async fn test_https_over_socks5_proxy_async() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
