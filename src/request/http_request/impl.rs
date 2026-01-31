@@ -1,3 +1,5 @@
+use http_type::HTTPS_LOWERCASE;
+
 use crate::*;
 
 /// Blanket implementation for AsyncReadWrite trait.
@@ -100,10 +102,10 @@ impl HttpRequest {
     ///
     /// # Returns
     ///
-    /// - `Protocol` - The HTTP protocol.
+    /// - `String` - The HTTP protocol.
     #[inline(always)]
-    pub(crate) fn get_protocol(config: &Config) -> Protocol {
-        config.url_obj.protocol.clone()
+    pub(crate) fn get_protocol(config: &Config) -> String {
+        config.url_obj.protocol.to_lowercase()
     }
 
     /// Gets the HTTP methods.
@@ -567,8 +569,8 @@ impl HttpRequest {
         if port != 0 {
             return port;
         }
-        let protocol: Protocol = Self::get_protocol(config);
-        protocol.get_port()
+        let protocol: String = Self::get_protocol(config);
+        Protocol::get_port(&protocol)
     }
 
     /// Establishes a connection stream to the specified host and port.
@@ -612,7 +614,7 @@ impl HttpRequest {
             .set_write_timeout(Some(timeout))
             .map_err(|error| RequestError::Request(error.to_string()))?;
         let stream: Result<Box<dyn ReadWrite>, RequestError> =
-            if Self::get_protocol(&config).is_https() {
+            if Self::get_protocol(&config) == HTTPS_LOWERCASE {
                 match self.tmp.clone().read() {
                     Ok(tmp) => {
                         let roots: RootCertStore = tmp.root_cert.clone();
@@ -647,7 +649,9 @@ impl HttpRequest {
         let timeout: Duration = Duration::from_millis(
             self.config
                 .read()
-                .map_or(DEFAULT_TIMEOUT, |config| config.timeout),
+                .map_or(DEFAULT_HIGH_SECURITY_HTTP_READ_TIMEOUT_MS, |config| {
+                    config.timeout
+                }),
         );
         match proxy_config.proxy_type {
             ProxyType::Http | ProxyType::Https => {
@@ -744,7 +748,7 @@ impl HttpRequest {
             .config
             .read()
             .map_or(Config::default(), |config| config.clone());
-        if Self::get_protocol(&config).is_https() {
+        if Self::get_protocol(&config) == HTTPS_LOWERCASE {
             match self.tmp.clone().read() {
                 Ok(tmp) => {
                     let roots: RootCertStore = tmp.root_cert.clone();
@@ -894,7 +898,7 @@ impl HttpRequest {
             .config
             .read()
             .map_or(Config::default(), |config| config.clone());
-        if Self::get_protocol(&config).is_https() {
+        if Self::get_protocol(&config) == HTTPS_LOWERCASE {
             match self.tmp.clone().read() {
                 Ok(tmp) => {
                     let roots: RootCertStore = tmp.root_cert.clone();
@@ -1184,7 +1188,7 @@ impl HttpRequest {
         let tcp_stream: AsyncTcpStream = AsyncTcpStream::connect(host_port.clone())
             .await
             .map_err(|error| RequestError::Request(error.to_string()))?;
-        if Self::get_protocol(&config).is_https() {
+        if Self::get_protocol(&config) == HTTPS_LOWERCASE {
             let roots: RootCertStore = {
                 match self.tmp.clone().read() {
                     Ok(tmp) => tmp.root_cert.clone(),
@@ -1329,7 +1333,7 @@ impl HttpRequest {
             .config
             .read()
             .map_or(Config::default(), |config| config.clone());
-        if Self::get_protocol(&config).is_https() {
+        if Self::get_protocol(&config) == HTTPS_LOWERCASE {
             let roots: RootCertStore = {
                 match self.tmp.clone().read() {
                     Ok(tmp) => tmp.root_cert.clone(),
@@ -1497,7 +1501,7 @@ impl HttpRequest {
             .config
             .read()
             .map_or(Config::default(), |config| config.clone());
-        if Self::get_protocol(&config).is_https() {
+        if Self::get_protocol(&config) == HTTPS_LOWERCASE {
             let roots: RootCertStore = {
                 match self.tmp.clone().read() {
                     Ok(tmp) => tmp.root_cert.clone(),

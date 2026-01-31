@@ -1,10 +1,12 @@
+use http_type::{HTTP_LOWERCASE, HTTP_UPPERCASE};
+
 use crate::*;
 
 impl std::fmt::Display for WebSocketError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self.kind {
             WebSocketErrorKind::Connection => write!(f, "Connection error: {}", self.message),
-            WebSocketErrorKind::Protocol => write!(f, "Protocol error: {}", self.message),
+            WebSocketErrorKind::String => write!(f, "String error: {}", self.message),
             WebSocketErrorKind::Timeout => write!(f, "Timeout error: {}", self.message),
             WebSocketErrorKind::InvalidUrl => write!(f, "Invalid URL: {}", self.message),
             WebSocketErrorKind::Io => write!(f, "IO error: {}", self.message),
@@ -25,7 +27,7 @@ impl WebSocketError {
 
     pub(crate) fn protocol<T: ToString>(message: T) -> Self {
         Self {
-            kind: WebSocketErrorKind::Protocol,
+            kind: WebSocketErrorKind::String,
             message: message.to_string(),
         }
     }
@@ -66,10 +68,10 @@ impl SharedWebSocketBuilder {
         }
         let mut url_obj: HttpUrlComponents = HttpUrlComponents::default();
         if url.starts_with("ws://") {
-            url_obj.protocol = Protocol::Http;
+            url_obj.protocol = HTTP_LOWERCASE.to_string();
             url_obj.port = Some(80);
         } else if url.starts_with("wss://") {
-            url_obj.protocol = Protocol::Https;
+            url_obj.protocol = HTTP_UPPERCASE.to_string();
             url_obj.port = Some(443);
         } else {
             return Err(WebSocketError::invalid_url("Invalid WebSocket URL scheme"));

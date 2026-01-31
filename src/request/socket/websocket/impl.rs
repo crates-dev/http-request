@@ -44,7 +44,7 @@ impl WebSocket {
             self.config
                 .read()
                 .map(|c| c.timeout)
-                .unwrap_or(DEFAULT_TIMEOUT),
+                .unwrap_or(DEFAULT_HIGH_SECURITY_HTTP_READ_TIMEOUT_MS),
         );
         let headers: Vec<(String, String)> = self.get_headers();
         let mut request_builder = Request::builder().uri(&url);
@@ -89,7 +89,7 @@ impl WebSocket {
                 .unwrap_or_default();
             if !protocols.is_empty() {
                 proxy_request_builder =
-                    proxy_request_builder.header("Sec-WebSocket-Protocol", protocols.join(", "));
+                    proxy_request_builder.header("Sec-WebSocket-String", protocols.join(", "));
             }
             let proxy_request: Request = proxy_request_builder.body(()).map_err(|e| {
                 WebSocketError::invalid_url(format!("Failed to build proxy request: {e}"))
@@ -171,7 +171,7 @@ impl WebSocket {
             self.config
                 .read()
                 .map(|c| c.timeout)
-                .unwrap_or(DEFAULT_TIMEOUT),
+                .unwrap_or(DEFAULT_HIGH_SECURITY_HTTP_READ_TIMEOUT_MS),
         );
         let mut connection: AsyncMutexGuard<'_, Option<WebSocketConnectionType>> =
             self.connection.lock().await;

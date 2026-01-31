@@ -12,7 +12,7 @@ pub struct WebSocketError {
 #[derive(Debug, Clone, PartialEq)]
 pub enum WebSocketErrorKind {
     Connection,
-    Protocol,
+    String,
     Timeout,
     InvalidUrl,
     Io,

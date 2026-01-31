@@ -4,17 +4,12 @@ use crate::*;
 ///
 /// # Returns
 ///
-/// - `Config` - A configuration instance with default values:
-///   - timeout: DEFAULT_TIMEOUT
-///   - redirect: false
-///   - max_redirect_times: DEFAULT_MAX_REDIRECT_TIMES
-///   - buffer: DEFAULT_BUFFER_SIZE
-///   - decode: true
+/// - `Config` - A configuration instance with default values
 impl Default for Config {
     #[inline(always)]
     fn default() -> Self {
         Self {
-            timeout: DEFAULT_TIMEOUT,
+            timeout: DEFAULT_HIGH_SECURITY_HTTP_READ_TIMEOUT_MS,
             url_obj: HttpUrlComponents::default(),
             redirect: false,
             max_redirect_times: DEFAULT_MAX_REDIRECT_TIMES,
