@@ -2,7 +2,7 @@ use crate::*;
 
 /// Represents an HTTP request, encapsulating various components such as the method, URL, protocol,
 /// headers, body, and additional metadata.
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct HttpRequest {
     /// HTTP request methods.
     pub(crate) methods: Arc<Method>,

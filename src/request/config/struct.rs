@@ -3,7 +3,7 @@ use crate::*;
 /// Configuration for HTTP requests.
 ///
 /// Contains settings like timeout, redirect handling, and proxy configuration.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct Config {
     /// Request timeout in milliseconds.
     pub(crate) timeout: u64,
@@ -28,7 +28,7 @@ pub(crate) struct Config {
 /// Proxy server configuration.
 ///
 /// Contains proxy type, host/port, and optional authentication.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct ProxyConfig {
     /// Type of proxy (HTTP/HTTPS/SOCKS5).
     pub(crate) proxy_type: ProxyType,
@@ -43,7 +43,7 @@ pub(crate) struct ProxyConfig {
 }
 
 /// Supported proxy types.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum ProxyType {
     /// HTTP proxy.
     Http,

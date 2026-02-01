@@ -1,15 +1,15 @@
 use crate::*;
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct SharedWebSocketBuilder;
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct WebSocketError {
     pub(crate) kind: WebSocketErrorKind,
     pub(crate) message: String,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum WebSocketErrorKind {
     Connection,
     String,

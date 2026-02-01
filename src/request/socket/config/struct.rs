@@ -1,6 +1,6 @@
 use crate::*;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct WebSocketConfig {
     pub(crate) timeout: u64,
     pub(crate) url_obj: HttpUrlComponents,

@@ -3,7 +3,7 @@ use crate::*;
 /// Represents the body content of an HTTP request/response.
 ///
 /// Can be text, JSON or binary data.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum Body {
     /// Text content body.
     Text(BodyText),

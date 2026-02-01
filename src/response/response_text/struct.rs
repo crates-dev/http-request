@@ -13,7 +13,7 @@ use crate::*;
 /// - `headers`: A `HashMap<String, String>` containing the headers of the response, where each key is the header name
 ///   and the value is the corresponding header value.
 /// - `body`: A `Vec<u8>` representing the body of the HTTP response, which contains the content being returned.
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct HttpResponseText {
     /// HTTP protocol version.
     pub(crate) http_version: ArcRwLock<HttpVersion>,
