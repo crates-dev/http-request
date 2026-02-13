@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.91.97"
+version = "8.91.98"
 readme = "README.md"
 edition = "2024"
 authors = ["root@ltpp.vip"]
@@ -17,7 +17,7 @@ futures = "0.3.31"
 http-type = "15.1.0"
 serde_json = "1.0.149"
 tungstenite = "0.28.0"
-webpki-roots = "1.0.5"
+webpki-roots = "1.0.6"
 tokio-tungstenite = "0.28.0"
 rustls = { version = "0.23.36", default-features = false, features = ["ring"] }
 tokio-rustls = { version = "0.26.4", default-features = false, features = [
