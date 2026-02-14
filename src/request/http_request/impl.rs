@@ -649,7 +649,7 @@ impl HttpRequest {
         let timeout: Duration = Duration::from_millis(
             self.config
                 .read()
-                .map_or(DEFAULT_HIGH_SECURITY_HTTP_READ_TIMEOUT_MS, |config| {
+                .map_or(DEFAULT_HIGH_SECURITY_READ_TIMEOUT_MS, |config| {
                     config.timeout
                 }),
         );

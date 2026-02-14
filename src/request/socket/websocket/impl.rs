@@ -44,7 +44,7 @@ impl WebSocket {
             self.config
                 .read()
                 .map(|c| c.timeout)
-                .unwrap_or(DEFAULT_HIGH_SECURITY_HTTP_READ_TIMEOUT_MS),
+                .unwrap_or(DEFAULT_HIGH_SECURITY_READ_TIMEOUT_MS),
         );
         let headers: Vec<(String, String)> = self.get_headers();
         let mut request_builder = Request::builder().uri(&url);
@@ -171,7 +171,7 @@ impl WebSocket {
             self.config
                 .read()
                 .map(|c| c.timeout)
-                .unwrap_or(DEFAULT_HIGH_SECURITY_HTTP_READ_TIMEOUT_MS),
+                .unwrap_or(DEFAULT_HIGH_SECURITY_READ_TIMEOUT_MS),
         );
         let mut connection: AsyncMutexGuard<'_, Option<WebSocketConnectionType>> =
             self.connection.lock().await;

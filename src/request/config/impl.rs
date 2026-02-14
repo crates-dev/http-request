@@ -9,7 +9,7 @@ impl Default for Config {
     #[inline(always)]
     fn default() -> Self {
         Self {
-            timeout: DEFAULT_HIGH_SECURITY_HTTP_READ_TIMEOUT_MS,
+            timeout: DEFAULT_HIGH_SECURITY_READ_TIMEOUT_MS,
             url_obj: HttpUrlComponents::default(),
             redirect: false,
             max_redirect_times: DEFAULT_MAX_REDIRECT_TIMES,

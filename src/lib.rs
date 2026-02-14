@@ -56,10 +56,10 @@ use {
     futures::{Future, Sink, SinkExt, Stream, StreamExt},
     http_type::{
         ACCEPT, ACCEPT_ANY, BR_BYTES, COLON_U8, CONNECTION, CONTENT_LENGTH, CONTENT_TYPE, Compress,
-        ContentType, DEFAULT_BUFFER_SIZE, DEFAULT_HIGH_SECURITY_HTTP_READ_TIMEOUT_MS,
-        DEFAULT_HTTP_PATH, DEFAULT_MAX_REDIRECT_TIMES, EMPTY_STR, HOST, HTTP_BR_BYTES, HttpStatus,
-        HttpUrlComponents, HttpVersion, LOCATION, Method, Protocol, QUERY, RequestBody,
-        RequestBodyString, RequestHeaders, ResponseHeaders, ResponseStatusCode, SEC_WEBSOCKET_KEY,
+        ContentType, DEFAULT_BUFFER_SIZE, DEFAULT_HIGH_SECURITY_READ_TIMEOUT_MS, DEFAULT_HTTP_PATH,
+        DEFAULT_MAX_REDIRECT_TIMES, EMPTY_STR, HOST, HTTP_BR_BYTES, HttpStatus, HttpUrlComponents,
+        HttpVersion, LOCATION, Method, Protocol, QUERY, RequestBody, RequestBodyString,
+        RequestHeaders, ResponseHeaders, ResponseStatusCode, SEC_WEBSOCKET_KEY,
         SEC_WEBSOCKET_VERSION, SPACE_U8, TAB_U8, UPGRADE, USER_AGENT,
         tokio::{
             io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, ReadBuf},
