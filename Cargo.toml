@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.91.107"
+version = "8.91.108"
 readme = "README.md"
 edition = "2024"
 authors = ["root@ltpp.vip"]
@@ -14,11 +14,11 @@ exclude = ["target", "Cargo.lock", "sh", ".github"]
 [dependencies]
 serde = "1.0.228"
 futures = "0.3.32"
-http-type = "17.3.1"
+http-type = "17.5.0"
 serde_json = "1.0.149"
-tungstenite = "0.28.0"
+tungstenite = "0.29.0"
 webpki-roots = "1.0.6"
-tokio-tungstenite = "0.28.0"
+tokio-tungstenite = "0.29.0"
 rustls = { version = "0.23.37", default-features = false, features = ["ring"] }
 tokio-rustls = { version = "0.26.4", default-features = false, features = [
     "ring",
