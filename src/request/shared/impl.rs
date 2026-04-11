@@ -87,7 +87,7 @@ impl SharedRequestBuilder {
 }
 
 impl SharedResponseHandler {
-    /// Parses response headers to extract status code, content length, and redirect URL.
+    /// Parses response headers to extract status code, content length, redirect URL, and chunked encoding.
     ///
     /// # Arguments
     ///
@@ -96,6 +96,7 @@ impl SharedResponseHandler {
     /// - `&[u8]` - The byte pattern to identify the "Location" header.
     /// - `&mut usize` - A mutable reference to store the content length.
     /// - `&mut Option<Vec<u8>>` - A mutable reference to store the redirect URL if present.
+    /// - `&mut bool` - A mutable reference to store whether chunked encoding is used.
     ///
     /// # Returns
     ///
@@ -106,6 +107,7 @@ impl SharedResponseHandler {
         location_sign_key: &[u8],
         content_length: &mut usize,
         redirect_url: &mut Option<Vec<u8>>,
+        is_chunked: &mut bool,
     ) -> Result<(), RequestError> {
         if let Some(status_pos) =
             Self::find_pattern_case_insensitive(headers_bytes, http_version_bytes)
@@ -130,6 +132,7 @@ impl SharedResponseHandler {
             }
         }
         *content_length = Self::get_content_length(headers_bytes);
+        *is_chunked = Self::is_chunked_encoding(headers_bytes);
         Ok(())
     }
 
@@ -240,6 +243,81 @@ impl SharedResponseHandler {
             }
         }
         0
+    }
+
+    /// Checks if the response uses chunked transfer encoding.
+    ///
+    /// Searches for the "Transfer-Encoding: chunked" header.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The raw bytes of the HTTP response headers.
+    ///
+    /// # Returns
+    ///
+    /// - `bool` - True if chunked transfer encoding is used, false otherwise.
+    pub(crate) fn is_chunked_encoding(headers_bytes: &[u8]) -> bool {
+        if let Some(pos) =
+            Self::find_pattern_case_insensitive(headers_bytes, TRANSFER_ENCODING_PATTERN)
+        {
+            let value_start: usize = pos + TRANSFER_ENCODING_PATTERN.len();
+            let value_start: usize = if headers_bytes.get(value_start) == Some(&b' ') {
+                value_start + 1
+            } else {
+                value_start
+            };
+            if let Some(end_pos) = Self::find_crlf(headers_bytes, value_start) {
+                let value_bytes: &[u8] = &headers_bytes[value_start..end_pos];
+                return Self::find_pattern_case_insensitive(value_bytes, CHUNKED_PATTERN).is_some();
+            }
+        }
+        false
+    }
+
+    /// Parses a chunked transfer encoded body.
+    ///
+    /// Decodes the chunked encoding and returns the decoded body bytes.
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The raw bytes of the chunked body (starting after headers).
+    ///
+    /// # Returns
+    ///
+    /// - `Vec<u8>` - The decoded body bytes.
+    pub(crate) fn parse_chunked_body(body_bytes: &[u8]) -> Vec<u8> {
+        let mut result: Vec<u8> = Vec::new();
+        let mut pos: usize = 0;
+        while pos < body_bytes.len() {
+            let chunk_size_end: usize =
+                match body_bytes[pos..].windows(2).position(|w| w == b"\r\n") {
+                    Some(p) => pos + p,
+                    None => break,
+                };
+            let chunk_size_str: &[u8] = &body_bytes[pos..chunk_size_end];
+            let chunk_size_str: &[u8] = match chunk_size_str.iter().position(|&b| b == b';') {
+                Some(p) => &chunk_size_str[..p],
+                None => chunk_size_str,
+            };
+            let chunk_size: usize = match std::str::from_utf8(chunk_size_str) {
+                Ok(s) => match usize::from_str_radix(s.trim(), 16) {
+                    Ok(n) => n,
+                    Err(_) => break,
+                },
+                Err(_) => break,
+            };
+            if chunk_size == 0 {
+                break;
+            }
+            let chunk_data_start: usize = chunk_size_end + 2;
+            let chunk_data_end: usize = chunk_data_start + chunk_size;
+            if chunk_data_end > body_bytes.len() {
+                break;
+            }
+            result.extend_from_slice(&body_bytes[chunk_data_start..chunk_data_end]);
+            pos = chunk_data_end + 2;
+        }
+        result
     }
 
     /// Parses a byte slice representing a decimal number into a `usize`.

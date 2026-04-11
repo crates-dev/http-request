@@ -458,6 +458,7 @@ impl HttpRequest {
         let mut content_length: usize = 0;
         let mut redirect_url: Option<Vec<u8>> = None;
         let mut headers_end_pos: usize = 0;
+        let mut is_chunked: bool = false;
         let http_version: String = self
             .config
             .read()
@@ -487,23 +488,35 @@ impl HttpRequest {
                 {
                     headers_done = true;
                     headers_end_pos = pos + 4;
-
                     SharedResponseHandler::parse_response_headers(
                         &response_bytes[..headers_end_pos],
                         &http_version_bytes,
                         &location_sign_key,
                         &mut content_length,
                         &mut redirect_url,
+                        &mut is_chunked,
                     )?;
                 }
             }
             if headers_done {
-                let total_expected_length: usize = headers_end_pos + content_length;
-                if response_bytes.len() >= total_expected_length {
-                    response_bytes.truncate(total_expected_length);
-                    break 'read_loop;
+                if is_chunked {
+                    if Self::is_chunked_response_complete(&response_bytes[headers_end_pos..]) {
+                        break 'read_loop;
+                    }
+                } else {
+                    let total_expected_length: usize = headers_end_pos + content_length;
+                    if response_bytes.len() >= total_expected_length {
+                        response_bytes.truncate(total_expected_length);
+                        break 'read_loop;
+                    }
                 }
             }
+        }
+        if is_chunked {
+            let body_bytes: Vec<u8> = response_bytes[headers_end_pos..].to_vec();
+            let decoded_body: Vec<u8> = SharedResponseHandler::parse_chunked_body(&body_bytes);
+            response_bytes.truncate(headers_end_pos);
+            response_bytes.extend_from_slice(&decoded_body);
         }
         self.response = Arc::new(RwLock::new(<HttpResponseBinary as ResponseTrait>::from(
             &response_bytes,
@@ -555,6 +568,51 @@ impl HttpRequest {
         }
         self.url(url.clone());
         self.send_sync()
+    }
+
+    /// Checks if a chunked response is complete.
+    ///
+    /// A chunked response is complete when it contains a chunk with size 0
+    /// (the terminating chunk).
+    ///
+    /// # Arguments
+    ///
+    /// - `&[u8]` - The raw bytes of the chunked body.
+    ///
+    /// # Returns
+    ///
+    /// - `bool` - True if the chunked response is complete, false otherwise.
+    fn is_chunked_response_complete(body_bytes: &[u8]) -> bool {
+        let mut pos: usize = 0;
+        while pos < body_bytes.len() {
+            let chunk_size_end: usize =
+                match body_bytes[pos..].windows(2).position(|w| w == b"\r\n") {
+                    Some(p) => pos + p,
+                    None => return false,
+                };
+            let chunk_size_str: &[u8] = &body_bytes[pos..chunk_size_end];
+            let chunk_size_str: &[u8] = match chunk_size_str.iter().position(|&b| b == b';') {
+                Some(p) => &chunk_size_str[..p],
+                None => chunk_size_str,
+            };
+            let chunk_size: usize = match std::str::from_utf8(chunk_size_str) {
+                Ok(s) => match usize::from_str_radix(s.trim(), 16) {
+                    Ok(n) => n,
+                    Err(_) => return false,
+                },
+                Err(_) => return false,
+            };
+            if chunk_size == 0 {
+                return true;
+            }
+            let chunk_data_start: usize = chunk_size_end + 2;
+            let chunk_data_end: usize = chunk_data_start + chunk_size;
+            if chunk_data_end + 2 > body_bytes.len() {
+                return false;
+            }
+            pos = chunk_data_end + 2;
+        }
+        false
     }
 
     /// Determines the appropriate port for the HTTP request.
@@ -1044,6 +1102,7 @@ impl HttpRequest {
         let mut content_length: usize = 0;
         let mut redirect_url: Option<Vec<u8>> = None;
         let mut headers_end_pos: usize = 0;
+        let mut is_chunked: bool = false;
         let http_version: String = self
             .config
             .read()
@@ -1083,16 +1142,29 @@ impl HttpRequest {
                         &location_sign_key,
                         &mut content_length,
                         &mut redirect_url,
+                        &mut is_chunked,
                     )?;
                 }
             }
             if headers_done {
-                let total_expected_length: usize = headers_end_pos + content_length;
-                if response_bytes.len() >= total_expected_length {
-                    response_bytes.truncate(total_expected_length);
-                    break 'read_loop;
+                if is_chunked {
+                    if Self::is_chunked_response_complete(&response_bytes[headers_end_pos..]) {
+                        break 'read_loop;
+                    }
+                } else {
+                    let total_expected_length: usize = headers_end_pos + content_length;
+                    if response_bytes.len() >= total_expected_length {
+                        response_bytes.truncate(total_expected_length);
+                        break 'read_loop;
+                    }
                 }
             }
+        }
+        if is_chunked {
+            let body_bytes: Vec<u8> = response_bytes[headers_end_pos..].to_vec();
+            let decoded_body: Vec<u8> = SharedResponseHandler::parse_chunked_body(&body_bytes);
+            response_bytes.truncate(headers_end_pos);
+            response_bytes.extend_from_slice(&decoded_body);
         }
         self.response = Arc::new(RwLock::new(<HttpResponseBinary as ResponseTrait>::from(
             &response_bytes,
