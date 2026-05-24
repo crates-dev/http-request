@@ -1,6 +1,6 @@
 [package]
 name = "http-request"
-version = "8.91.115"
+version = "8.91.116"
 readme = "README.md"
 edition = "2024"
 authors = ["root@ltpp.vip"]
@@ -14,8 +14,8 @@ exclude = ["target", "Cargo.lock", "sh", ".github"]
 [dependencies]
 serde = "1.0.228"
 futures = "0.3.32"
-http-type = "20.0.0"
-serde_json = "1.0.149"
+http-type = "20.0.1"
+serde_json = "1.0.150"
 tungstenite = "0.29.0"
 webpki-roots = "1.0.7"
 tokio-tungstenite = "0.29.0"
