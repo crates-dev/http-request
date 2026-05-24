@@ -45,12 +45,6 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
     vec::IntoIter,
 };
-#[cfg(test)]
-use std::{
-    sync::Mutex,
-    thread::{JoinHandle, spawn},
-    time::Instant,
-};
 
 use {
     futures::{Future, Sink, SinkExt, Stream, StreamExt},
@@ -78,5 +72,3 @@ use {
     },
     webpki_roots::TLS_SERVER_ROOTS,
 };
-#[cfg(test)]
-use {http_type::tokio, serde_json::json};

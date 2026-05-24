@@ -30,7 +30,7 @@ fn test_http_post_request() {
     header.insert("Content-Type", "application/json");
     header.insert("Connection", "keep-alive");
     header.insert("Accept-Encoding", "gzip, deflate");
-    let body: Value = json!({
+    let body: Value = serde_json::json!({
         "code": "fn main() {\r\n    println!(\"hello world\");\r\n}",
         "language": "rust",
         "testin": ""
@@ -83,7 +83,7 @@ fn test_https_post_request() {
     header.insert("Content-Type", "application/json");
     header.insert("Connection", "keep-alive");
     header.insert("Accept-Encoding", "gzip, deflate");
-    let body: Value = json!({
+    let body: Value = serde_json::json!({
         "code": "fn main() {\r\n    println!(\"hello world\");\r\n}",
         "language": "rust",
         "testin": ""
@@ -299,8 +299,8 @@ fn test_thread_http_get_request() {
             match request_builder.lock().unwrap().send() {
                 Ok(response) => {
                     let duration: Duration = start_time.elapsed();
-                    println!("Thread finished in: {duration:?}");
                     let response_text: HttpResponseText = response.text();
+                    println!("Thread finished in: {duration:?}");
                     println!("ResponseTrait => {response_text:?}");
                 }
                 Err(e) => {
@@ -343,7 +343,7 @@ fn test_readme_sync_get_request() {
 fn test_readme_sync_post_json_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("header-key", "header-value");
-    let body: Value = json!({
+    let body: Value = serde_json::json!({
         "test": 1
     });
     let mut request_builder: BoxRequestTrait = RequestBuilder::new()
@@ -778,7 +778,7 @@ async fn test_async_socks5_proxy_auth_get_request() {
 async fn test_readme_async_post_json_request() {
     let mut header: HashMapXxHash3_64<&str, &str> = hash_map_xx_hash3_64();
     header.insert("header-key", "header-value");
-    let body: Value = json!({
+    let body: Value = serde_json::json!({
         "test": 1
     });
     let mut request_builder: BoxAsyncRequestTrait = RequestBuilder::new()
