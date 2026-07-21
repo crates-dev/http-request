@@ -1,4 +1,6 @@
-use crate::*;
+use super::*;
+
+use crate::IoError;
 
 impl WebSocket {
     fn get_url(&self) -> String {
@@ -43,7 +45,7 @@ impl WebSocket {
         let timeout_duration: Duration = Duration::from_millis(
             self.config
                 .read()
-                .map(|c| c.timeout)
+                .map(|config| config.timeout)
                 .unwrap_or(DEFAULT_HIGH_SECURITY_READ_TIMEOUT_MS),
         );
         let headers: Vec<(String, String)> = self.get_headers();
@@ -51,9 +53,9 @@ impl WebSocket {
         for (key, value) in &headers {
             request_builder = request_builder.header(key, value);
         }
-        let request: Request = request_builder
-            .body(())
-            .map_err(|e| WebSocketError::invalid_url(format!("Failed to build request: {e}")))?;
+        let request: Request = request_builder.body(()).map_err(|error| {
+            WebSocketError::invalid_url(format!("Failed to build request: {error}"))
+        })?;
         let proxy_config: Option<ProxyConfig> = self
             .config
             .read()
@@ -63,7 +65,7 @@ impl WebSocket {
             let url_obj: HttpUrlComponents = self
                 .config
                 .read()
-                .map(|c| c.url_obj.clone())
+                .map(|config| config.url_obj.clone())
                 .unwrap_or_default();
             let target_host: String = url_obj.host.clone().unwrap_or_default();
             let target_port: u16 = url_obj.port.unwrap_or_default();
@@ -85,7 +87,7 @@ impl WebSocket {
             let protocols: Vec<String> = self
                 .config
                 .read()
-                .map(|c| c.protocols.clone())
+                .map(|config| config.protocols.clone())
                 .unwrap_or_default();
             if !protocols.is_empty() {
                 proxy_request_builder =
@@ -151,7 +153,7 @@ impl WebSocket {
             ws_stream
                 .send(message)
                 .await
-                .map_err(|e| WebSocketError::protocol(e.to_string()))?;
+                .map_err(|error: TungsteniteError| WebSocketError::protocol(error.to_string()))?;
         } else {
             return Err(WebSocketError::connection("Not connected"));
         }
@@ -159,7 +161,8 @@ impl WebSocket {
     }
 
     fn send_message_sync(&self, message: Message) -> Result<(), WebSocketError> {
-        let rt: Runtime = Runtime::new().map_err(|e| WebSocketError::io(e.to_string()))?;
+        let rt: Runtime = Runtime::new()
+            .map_err(|error: std::io::Error| WebSocketError::io(error.to_string()))?;
         rt.block_on(self.send_message_async(message))
     }
 
@@ -170,7 +173,7 @@ impl WebSocket {
         let timeout_duration: Duration = Duration::from_millis(
             self.config
                 .read()
-                .map(|c| c.timeout)
+                .map(|config| config.timeout)
                 .unwrap_or(DEFAULT_HIGH_SECURITY_READ_TIMEOUT_MS),
         );
         let mut connection: AsyncMutexGuard<'_, Option<WebSocketConnectionType>> =
@@ -181,8 +184,9 @@ impl WebSocket {
                 .await
                 .map_err(|_| WebSocketError::timeout("Receive timeout"))?
             {
-                let message: Message =
-                    msg_result.map_err(|e| WebSocketError::protocol(e.to_string()))?;
+                let message: Message = msg_result.map_err(|error: TungsteniteError| {
+                    WebSocketError::protocol(error.to_string())
+                })?;
                 return Ok(self.convert_message(message));
             }
         }
@@ -190,7 +194,8 @@ impl WebSocket {
     }
 
     fn receive_message_sync(&self) -> Result<WebSocketMessage, WebSocketError> {
-        let rt: Runtime = Runtime::new().map_err(|e| WebSocketError::io(e.to_string()))?;
+        let rt: Runtime = Runtime::new()
+            .map_err(|error: std::io::Error| WebSocketError::io(error.to_string()))?;
         rt.block_on(self.receive_message_async())
     }
 
@@ -212,12 +217,12 @@ impl WebSocket {
             ws_stream
                 .send(Message::Close(None))
                 .await
-                .map_err(|e| WebSocketError::protocol(e.to_string()))?;
+                .map_err(|error: TungsteniteError| WebSocketError::protocol(error.to_string()))?;
             use futures::SinkExt;
             ws_stream
                 .close()
                 .await
-                .map_err(|e| WebSocketError::protocol(e.to_string()))?;
+                .map_err(|error: TungsteniteError| WebSocketError::protocol(error.to_string()))?;
         }
         *connection = None;
         self.connected.store(false, Ordering::Relaxed);
@@ -225,7 +230,8 @@ impl WebSocket {
     }
 
     fn close_sync(&self) -> Result<(), WebSocketError> {
-        let rt: Runtime = Runtime::new().map_err(|e| WebSocketError::io(e.to_string()))?;
+        let rt: Runtime = Runtime::new()
+            .map_err(|error: std::io::Error| WebSocketError::io(error.to_string()))?;
         rt.block_on(self.close_async_internal())
     }
 
@@ -291,16 +297,16 @@ impl WebSocket {
         proxy_stream
             .write_all(connect_request.as_bytes())
             .await
-            .map_err(|err| WebSocketError::protocol(err.to_string()))?;
+            .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
         proxy_stream
             .flush()
             .await
-            .map_err(|err| WebSocketError::protocol(err.to_string()))?;
+            .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
         let mut response_buffer: [u8; 1024] = [0u8; 1024];
         let bytes_read: usize = proxy_stream
             .read(&mut response_buffer)
             .await
-            .map_err(|err| WebSocketError::protocol(err.to_string()))?;
+            .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
         let response: Cow<'_, str> = String::from_utf8_lossy(&response_buffer[..bytes_read]);
         if !response.starts_with("HTTP/1.1 200") && !response.starts_with("HTTP/1.0 200") {
             return Err(WebSocketError::connection(format!(
@@ -330,12 +336,12 @@ impl WebSocket {
         tcp_stream
             .write_all(&auth_methods)
             .await
-            .map_err(|err| WebSocketError::protocol(err.to_string()))?;
+            .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
         let mut response: [u8; 2] = [0u8; 2];
         tcp_stream
             .read_exact(&mut response)
             .await
-            .map_err(|err| WebSocketError::protocol(err.to_string()))?;
+            .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
         if response[0] != 0x05 {
             return Err(WebSocketError::protocol("Invalid SOCKS5 response"));
         }
@@ -354,13 +360,13 @@ impl WebSocket {
                     tcp_stream
                         .write_all(&auth_request)
                         .await
-                        .map_err(|err| WebSocketError::protocol(err.to_string()))?;
+                        .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
 
                     let mut auth_response = [0u8; 2];
                     tcp_stream
                         .read_exact(&mut auth_response)
                         .await
-                        .map_err(|err| WebSocketError::protocol(err.to_string()))?;
+                        .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
 
                     if auth_response[1] != 0x00 {
                         return Err(WebSocketError::protocol("SOCKS5 authentication failed"));
@@ -400,13 +406,13 @@ impl WebSocket {
         tcp_stream
             .write_all(&connect_request)
             .await
-            .map_err(|err| WebSocketError::protocol(err.to_string()))?;
+            .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
 
         let mut connect_response: [u8; 4] = [0u8; 4];
         tcp_stream
             .read_exact(&mut connect_response)
             .await
-            .map_err(|err| WebSocketError::protocol(err.to_string()))?;
+            .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
 
         if connect_response[0] != 0x05 || connect_response[1] != 0x00 {
             return Err(WebSocketError::protocol(format!(
@@ -420,26 +426,26 @@ impl WebSocket {
                 tcp_stream
                     .read_exact(&mut skip)
                     .await
-                    .map_err(|err| WebSocketError::protocol(err.to_string()))?;
+                    .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
             }
             0x03 => {
                 let mut len: [u8; 1] = [0u8; 1];
                 tcp_stream
                     .read_exact(&mut len)
                     .await
-                    .map_err(|err| WebSocketError::protocol(err.to_string()))?;
+                    .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
                 let mut skip: Vec<u8> = vec![0u8; len[0] as usize + 2];
                 tcp_stream
                     .read_exact(&mut skip)
                     .await
-                    .map_err(|err| WebSocketError::protocol(err.to_string()))?;
+                    .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
             }
             0x04 => {
                 let mut skip: [u8; 18] = [0u8; 18];
                 tcp_stream
                     .read_exact(&mut skip)
                     .await
-                    .map_err(|err| WebSocketError::protocol(err.to_string()))?;
+                    .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
             }
             _ => {
                 return Err(WebSocketError::protocol("Invalid SOCKS5 address type"));

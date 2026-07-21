@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 /// Implements the `ResponseTrait` trait for `HttpResponseText`.
 ///

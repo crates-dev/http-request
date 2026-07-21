@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 /// Builder pattern for constructing `HttpRequest` instances.
 ///

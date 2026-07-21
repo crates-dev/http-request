@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 /// Configuration for HTTP requests.
 ///

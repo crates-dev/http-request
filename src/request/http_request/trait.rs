@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 /// Combines AsyncRead and AsyncWrite traits with Unpin and Send bounds.
 ///

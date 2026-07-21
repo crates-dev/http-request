@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 /// A trait representing common behaviors for HTTP response types.
 ///

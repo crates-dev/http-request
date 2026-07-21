@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 impl RequestBuilder {
     /// Creates a new RequestBuilder instance.

@@ -9,3 +9,5 @@ mod tmp;
 pub use {http_request::*, request_builder::*, socket::*};
 
 pub(crate) use {config::*, proxy::*, shared::*, tmp::*};
+
+use super::*;

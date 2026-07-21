@@ -33,12 +33,13 @@ use std::{
     borrow::Cow,
     collections::{HashSet, VecDeque},
     fmt::{self, Debug, Display, Formatter},
-    io::{Read, Write},
+    io::{Error as IoError, Read, Write},
     net::{Ipv4Addr, Ipv6Addr, TcpStream},
     pin::Pin,
     str::from_utf8,
+    string::FromUtf8Error,
     sync::{
-        Arc, RwLock,
+        Arc, RwLock, RwLockReadGuard,
         atomic::{AtomicBool, Ordering},
     },
     task::{Context, Poll},
@@ -63,7 +64,10 @@ use {
             time::timeout,
         },
     },
-    rustls::{ClientConfig, ClientConnection, RootCertStore, StreamOwned, pki_types::ServerName},
+    rustls::{
+        ClientConfig, ClientConnection, Error as RustlsError, RootCertStore, StreamOwned,
+        pki_types::{InvalidDnsNameError, ServerName},
+    },
     serde::{Serialize, Serializer},
     tokio_rustls::{TlsConnector, client::TlsStream},
     tokio_tungstenite::{
@@ -72,3 +76,5 @@ use {
     },
     webpki_roots::TLS_SERVER_ROOTS,
 };
+
+use tungstenite::Error as TungsteniteError;

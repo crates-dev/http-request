@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 #[tokio::test]
 async fn test_async_http_get_request() {
@@ -47,10 +47,10 @@ fn test_http_post_request() {
         .build_sync();
     request_builder
         .send()
-        .map(|response| {
+        .map(|response: BoxResponseTrait| {
             println!("ResponseTrait => {:?}", response.text());
         })
-        .unwrap_or_else(|e| println!("Error => {e}"));
+        .unwrap_or_else(|error: RequestError| println!("Error => {error}"));
 }
 
 #[test]
@@ -70,10 +70,10 @@ fn test_http_get_request() {
         .build_sync();
     request_builder
         .send()
-        .map(|response| {
+        .map(|response: BoxResponseTrait| {
             println!("ResponseTrait => {:?}", response.text());
         })
-        .unwrap_or_else(|e| println!("Error => {e}"));
+        .unwrap_or_else(|error: RequestError| println!("Error => {error}"));
 }
 
 #[test]
@@ -100,10 +100,10 @@ fn test_https_post_request() {
         .build_sync();
     request_builder
         .send()
-        .map(|response| {
+        .map(|response: BoxResponseTrait| {
             println!("ResponseTrait => {:?}", response.text());
         })
-        .unwrap_or_else(|e| println!("Error => {e}"));
+        .unwrap_or_else(|error: RequestError| println!("Error => {error}"));
 }
 
 #[test]
@@ -123,10 +123,10 @@ fn test_https_get_request() {
         .build_sync();
     request_builder
         .send()
-        .map(|response| {
+        .map(|response: BoxResponseTrait| {
             println!("ResponseTrait => {:?}", response.text());
         })
-        .unwrap_or_else(|e| println!("Error => {e}"));
+        .unwrap_or_else(|error: RequestError| println!("Error => {error}"));
 }
 
 #[test]
@@ -146,10 +146,10 @@ fn test_http_post_text_request() {
         .build_sync();
     request_builder
         .send()
-        .map(|response| {
+        .map(|response: BoxResponseTrait| {
             println!("ResponseTrait => {:?}", response.text());
         })
-        .unwrap_or_else(|e| println!("Error => {e}"));
+        .unwrap_or_else(|error: RequestError| println!("Error => {error}"));
 }
 
 #[test]
@@ -169,10 +169,10 @@ fn test_http_post_binary_request() {
         .build_sync();
     request_builder
         .send()
-        .map(|response| {
+        .map(|response: BoxResponseTrait| {
             println!("ResponseTrait => {:?}", response.text());
         })
-        .unwrap_or_else(|e| println!("Error => {e}"));
+        .unwrap_or_else(|error: RequestError| println!("Error => {error}"));
 }
 
 #[test]
@@ -188,10 +188,10 @@ fn test_auto_gzip_get() {
         .build_sync();
     request_builder
         .send()
-        .map(|response| {
+        .map(|response: BoxResponseTrait| {
             println!("ResponseTrait => {:?}", response.text());
         })
-        .unwrap_or_else(|e| println!("Error => {e}"));
+        .unwrap_or_else(|error: RequestError| println!("Error => {error}"));
 }
 
 #[test]
@@ -206,10 +206,10 @@ fn test_gzip_get() {
         .build_sync();
     request_builder
         .send()
-        .map(|response| {
+        .map(|response: BoxResponseTrait| {
             println!("ResponseTrait => {:?}", response.decode(4096).text());
         })
-        .unwrap_or_else(|e| println!("Error => {e}"));
+        .unwrap_or_else(|error: RequestError| println!("Error => {error}"));
 }
 
 #[test]
@@ -224,10 +224,10 @@ fn test_unredirect_get() {
         .build_sync();
     request_builder
         .send()
-        .map(|response| {
+        .map(|response: BoxResponseTrait| {
             println!("ResponseTrait => {response:?}");
         })
-        .unwrap_or_else(|e| println!("Error => {e}"));
+        .unwrap_or_else(|error: RequestError| println!("Error => {error}"));
 }
 
 #[test]
@@ -333,10 +333,10 @@ fn test_readme_sync_get_request() {
         .build_sync();
     request_builder
         .send()
-        .map(|response| {
+        .map(|response: BoxResponseTrait| {
             println!("{:?}", response.text());
         })
-        .unwrap_or_else(|e| println!("Error => {e}"));
+        .unwrap_or_else(|error: RequestError| println!("Error => {error}"));
 }
 
 #[test]
@@ -358,10 +358,10 @@ fn test_readme_sync_post_json_request() {
         .build_sync();
     request_builder
         .send()
-        .map(|response| {
+        .map(|response: BoxResponseTrait| {
             println!("{:?}", response.decode(4096).text());
         })
-        .unwrap_or_else(|e| println!("Error => {e}"));
+        .unwrap_or_else(|error: RequestError| println!("Error => {error}"));
 }
 
 #[test]
@@ -381,10 +381,10 @@ fn test_readme_sync_post_text_request() {
         .build_sync();
     request_builder
         .send()
-        .map(|response| {
+        .map(|response: BoxResponseTrait| {
             println!("{:?}", response.text());
         })
-        .unwrap_or_else(|e| println!("Error => {e}"));
+        .unwrap_or_else(|error: RequestError| println!("Error => {error}"));
 }
 
 #[test]
@@ -403,10 +403,10 @@ fn test_readme_sync_post_binary_request() {
         .build_sync();
     request_builder
         .send()
-        .map(|response| {
+        .map(|response: BoxResponseTrait| {
             println!("{:?}", response.decode(4096).text());
         })
-        .unwrap_or_else(|e| println!("Error => {e}"));
+        .unwrap_or_else(|error: RequestError| println!("Error => {error}"));
 }
 
 #[tokio::test]
@@ -449,7 +449,7 @@ async fn test_async_websocket_connection() {
     websocket_builder
         .close_async_method()
         .await
-        .unwrap_or_else(|e| println!("Error closing: {e}"));
+        .unwrap_or_else(|error: WebSocketError| println!("Error closing: {error}"));
 }
 
 #[test]
@@ -484,7 +484,7 @@ fn test_sync_websocket_connection() {
             }
         })
         .and_then(|_| websocket_builder.close())
-        .unwrap_or_else(|e| println!("Error => {e}"));
+        .unwrap_or_else(|error: WebSocketError| println!("Error => {error}"));
 }
 
 #[test]

@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 /// Represents an HTTP request, encapsulating various components such as the method, URL, protocol,
 /// headers, body, and additional metadata.

@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 /// Asynchronous proxy tunnel stream wrapper.
 ///

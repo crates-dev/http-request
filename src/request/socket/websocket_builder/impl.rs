@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 impl WebSocketBuilder {
     pub fn new() -> Self {
@@ -55,7 +55,10 @@ impl WebSocketBuilder {
 
     pub fn protocols(&mut self, protocols: &[&str]) -> &mut Self {
         if let Ok(mut config) = self.websocket.config.write() {
-            config.protocols = protocols.iter().map(|s| s.to_string()).collect();
+            config.protocols = protocols
+                .iter()
+                .map(|protocol: &&str| protocol.to_string())
+                .collect();
         }
         self
     }

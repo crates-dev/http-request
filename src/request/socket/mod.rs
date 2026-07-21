@@ -8,3 +8,5 @@ mod websocket_builder;
 pub use {message::*, shared::*, websocket::*, websocket_builder::*};
 
 pub(crate) use {config::*, proxy::*};
+
+use super::*;

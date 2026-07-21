@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 /// A type alias for a boxed dynamic trait object implementing the `ResponseTrait` trait.
 ///

@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum WebSocketMessage {

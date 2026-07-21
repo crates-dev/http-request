@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 impl SharedRequestBuilder {
     /// Constructs an HTTP request byte vector.
@@ -289,11 +289,13 @@ impl SharedResponseHandler {
         let mut result: Vec<u8> = Vec::new();
         let mut pos: usize = 0;
         while pos < body_bytes.len() {
-            let chunk_size_end: usize =
-                match body_bytes[pos..].windows(2).position(|w| w == b"\r\n") {
-                    Some(p) => pos + p,
-                    None => break,
-                };
+            let chunk_size_end: usize = match body_bytes[pos..]
+                .windows(2)
+                .position(|window: &[u8]| window == b"\r\n")
+            {
+                Some(p) => pos + p,
+                None => break,
+            };
             let chunk_size_str: &[u8] = &body_bytes[pos..chunk_size_end];
             let chunk_size_str: &[u8] = match chunk_size_str.iter().position(|&b| b == b';') {
                 Some(p) => &chunk_size_str[..p],

@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 impl WebSocketMessage {
     pub fn text<T: ToString>(text: T) -> Self {

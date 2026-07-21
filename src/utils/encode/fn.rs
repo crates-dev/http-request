@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 /// Encodes binary data into a base64 string.
 ///
@@ -16,16 +16,16 @@ pub(crate) fn base64_encode(input: &[u8]) -> String {
         for (i, &byte) in chunk.iter().enumerate() {
             buf[i] = byte;
         }
-        let b: u32 = ((buf[0] as u32) << 16) | ((buf[1] as u32) << 8) | (buf[2] as u32);
-        result.push(CHARS[((b >> 18) & 63) as usize] as char);
-        result.push(CHARS[((b >> 12) & 63) as usize] as char);
+        let bits_value: u32 = ((buf[0] as u32) << 16) | ((buf[1] as u32) << 8) | (buf[2] as u32);
+        result.push(CHARS[((bits_value >> 18) & 63) as usize] as char);
+        result.push(CHARS[((bits_value >> 12) & 63) as usize] as char);
         result.push(if chunk.len() > 1 {
-            CHARS[((b >> 6) & 63) as usize] as char
+            CHARS[((bits_value >> 6) & 63) as usize] as char
         } else {
             '='
         });
         result.push(if chunk.len() > 2 {
-            CHARS[(b & 63) as usize] as char
+            CHARS[(bits_value & 63) as usize] as char
         } else {
             '='
         });

@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 impl WebSocketProxyTunnelStream {
     pub(crate) fn new(stream: BoxAsyncReadWrite) -> Self {

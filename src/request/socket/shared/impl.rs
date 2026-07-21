@@ -1,6 +1,4 @@
-use http_type::{HTTP_LOWERCASE, HTTP_UPPERCASE};
-
-use crate::*;
+use super::*;
 
 impl std::fmt::Display for WebSocketError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

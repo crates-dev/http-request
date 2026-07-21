@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 /// Result type for HTTP requests, containing either a response or error.
 pub type RequestResult = Result<BoxResponseTrait, RequestError>;

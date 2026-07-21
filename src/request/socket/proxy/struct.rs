@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 pub struct WebSocketProxyTunnelStream {
     pub(super) inner: BoxAsyncReadWrite,

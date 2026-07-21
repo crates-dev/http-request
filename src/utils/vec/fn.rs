@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 /// Splits byte slice into parts by whitespace (space or tab).
 ///

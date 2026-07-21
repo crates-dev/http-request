@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 /// Synchronous WebSocket operations trait.
 ///

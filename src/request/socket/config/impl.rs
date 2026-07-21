@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 impl Default for WebSocketConfig {
     #[inline(always)]

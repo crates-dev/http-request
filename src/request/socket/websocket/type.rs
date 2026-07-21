@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 /// Boxed synchronous WebSocket trait object.
 pub type BoxWebSocketTrait = Box<dyn WebSocketTrait>;

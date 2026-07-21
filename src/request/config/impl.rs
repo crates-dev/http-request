@@ -1,4 +1,4 @@
-use crate::*;
+use super::*;
 
 /// Provides default configuration values for HTTP requests.
 ///
