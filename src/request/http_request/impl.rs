@@ -385,7 +385,7 @@ impl HttpRequest {
         stream
             .write_all(&request)
             .and_then(|_| stream.flush())
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         self.read_response(stream)
     }
 
@@ -426,7 +426,7 @@ impl HttpRequest {
         stream
             .write_all(&request)
             .and_then(|_| stream.flush())
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         self.read_response(stream)
     }
 
@@ -668,13 +668,13 @@ impl HttpRequest {
         let host_port: (String, u16) = (host.clone(), port);
         let timeout: Duration = Duration::from_millis(config.timeout);
         let tcp_stream: TcpStream = TcpStream::connect(host_port.clone())
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         tcp_stream
             .set_read_timeout(Some(timeout))
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         tcp_stream
             .set_write_timeout(Some(timeout))
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         let stream: Result<Box<dyn ReadWrite>, RequestError> =
             if Self::get_protocol(&config) == HTTPS_LOWERCASE {
                 match self.tmp.clone().read() {
@@ -689,7 +689,7 @@ impl HttpRequest {
                         )?;
                         let session: ClientConnection =
                             ClientConnection::new(Arc::clone(&client_config), dns_name).map_err(
-                                |error: RustlsError| RequestError::Request(error.to_string()),
+                                |error: rustls::Error| RequestError::Request(error.to_string()),
                             )?;
                         let tls_stream: StreamOwned<ClientConnection, TcpStream> =
                             StreamOwned::new(session, tcp_stream);
@@ -734,13 +734,13 @@ impl HttpRequest {
     ) -> Result<Box<dyn ReadWrite>, RequestError> {
         let proxy_host_port: (String, u16) = (proxy_config.host.clone(), proxy_config.port);
         let tcp_stream: TcpStream = TcpStream::connect(proxy_host_port)
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         tcp_stream
             .set_read_timeout(Some(timeout))
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         tcp_stream
             .set_write_timeout(Some(timeout))
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         let mut proxy_stream: Box<dyn ReadWrite> = if proxy_config.proxy_type == ProxyType::Https {
             match self.tmp.clone().read() {
                 Ok(tmp) => {
@@ -755,7 +755,7 @@ impl HttpRequest {
                         })?;
                     let session: ClientConnection =
                         ClientConnection::new(Arc::clone(&client_config), dns_name).map_err(
-                            |error: RustlsError| RequestError::Request(error.to_string()),
+                            |error: rustls::Error| RequestError::Request(error.to_string()),
                         )?;
                     let tls_stream: StreamOwned<ClientConnection, TcpStream> =
                         StreamOwned::new(session, tcp_stream);
@@ -783,14 +783,14 @@ impl HttpRequest {
         };
         proxy_stream
             .write_all(connect_request.as_bytes())
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         proxy_stream
             .flush()
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         let mut response_buffer = [0u8; 1024];
         let bytes_read: usize = proxy_stream
             .read(&mut response_buffer)
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         let response_str: &str = std::str::from_utf8(&response_buffer[..bytes_read]).unwrap_or("");
         let headers_end_pos: Option<usize> = response_str.find("\r\n\r\n");
         let pre_read_data: Vec<u8> = if let Some(pos) = headers_end_pos {
@@ -826,7 +826,7 @@ impl HttpRequest {
                         })?;
                     let session: ClientConnection =
                         ClientConnection::new(Arc::clone(&client_config), dns_name).map_err(
-                            |error: RustlsError| RequestError::Request(error.to_string()),
+                            |error: rustls::Error| RequestError::Request(error.to_string()),
                         )?;
                     let tunnel_stream = SyncProxyTunnelStream::new(proxy_stream, pre_read_data);
                     let tls_stream: StreamOwned<ClientConnection, SyncProxyTunnelStream> =
@@ -853,13 +853,13 @@ impl HttpRequest {
     ) -> Result<Box<dyn ReadWrite>, RequestError> {
         let proxy_host_port: (String, u16) = (proxy_config.host.clone(), proxy_config.port);
         let mut tcp_stream: TcpStream = TcpStream::connect(proxy_host_port)
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         tcp_stream
             .set_read_timeout(Some(timeout))
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         tcp_stream
             .set_write_timeout(Some(timeout))
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         let auth_methods: Vec<u8> =
             if proxy_config.username.is_some() && proxy_config.password.is_some() {
                 vec![0x05, 0x02, 0x00, 0x02]
@@ -868,11 +868,11 @@ impl HttpRequest {
             };
         tcp_stream
             .write_all(&auth_methods)
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         let mut response = [0u8; 2];
         tcp_stream
             .read_exact(&mut response)
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         if response[0] != 0x05 {
             return Err(RequestError::Request("Internal Server Error".to_string()));
         }
@@ -889,11 +889,13 @@ impl HttpRequest {
                     auth_request.extend_from_slice(password.as_bytes());
                     tcp_stream
                         .write_all(&auth_request)
-                        .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                        .map_err(|error: std::io::Error| {
+                            RequestError::Request(error.to_string())
+                        })?;
                     let mut auth_response: [u8; 2] = [0u8; 2];
-                    tcp_stream
-                        .read_exact(&mut auth_response)
-                        .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                    tcp_stream.read_exact(&mut auth_response).map_err(
+                        |error: std::io::Error| RequestError::Request(error.to_string()),
+                    )?;
                     if auth_response[1] != 0x00 {
                         return Err(RequestError::Request("Internal Server Error".to_string()));
                     }
@@ -925,11 +927,11 @@ impl HttpRequest {
         connect_request.extend_from_slice(&target_port.to_be_bytes());
         tcp_stream
             .write_all(&connect_request)
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         let mut connect_response: [u8; 4] = [0u8; 4];
         tcp_stream
             .read_exact(&mut connect_response)
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         if connect_response[0] != 0x05 || connect_response[1] != 0x00 {
             return Err(RequestError::Request("Internal Server Error".to_string()));
         }
@@ -938,23 +940,23 @@ impl HttpRequest {
                 let mut skip = [0u8; 6];
                 tcp_stream
                     .read_exact(&mut skip)
-                    .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                    .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
             }
             0x03 => {
                 let mut len = [0u8; 1];
                 tcp_stream
                     .read_exact(&mut len)
-                    .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                    .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
                 let mut skip = vec![0u8; len[0] as usize + 2];
                 tcp_stream
                     .read_exact(&mut skip)
-                    .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                    .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
             }
             0x04 => {
                 let mut skip = [0u8; 18];
                 tcp_stream
                     .read_exact(&mut skip)
-                    .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                    .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
             }
             _ => {
                 return Err(RequestError::Request("Internal Server Error".to_string()));
@@ -979,7 +981,7 @@ impl HttpRequest {
                         })?;
                     let session: ClientConnection =
                         ClientConnection::new(Arc::clone(&client_config), dns_name).map_err(
-                            |error: RustlsError| RequestError::Request(error.to_string()),
+                            |error: rustls::Error| RequestError::Request(error.to_string()),
                         )?;
                     let tunnel_stream: SyncProxyTunnelStream =
                         SyncProxyTunnelStream::new(proxy_stream, vec![]);
@@ -1045,11 +1047,11 @@ impl HttpRequest {
         stream
             .write_all(&request)
             .await
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         stream
             .flush()
             .await
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         self.read_response_async(stream).await
     }
 
@@ -1082,11 +1084,11 @@ impl HttpRequest {
         stream
             .write_all(&request)
             .await
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         stream
             .flush()
             .await
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         self.read_response_async(stream).await
     }
 
@@ -1127,7 +1129,7 @@ impl HttpRequest {
             let bytes_read: usize = stream
                 .read(&mut buffer)
                 .await
-                .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
             if bytes_read == 0 {
                 break;
             }
@@ -1268,9 +1270,10 @@ impl HttpRequest {
                 .await;
         }
         let host_port: (String, u16) = (host.clone(), port);
-        let tcp_stream: AsyncTcpStream = AsyncTcpStream::connect(host_port.clone())
-            .await
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+        let tcp_stream: http_type::tokio::net::TcpStream =
+            http_type::tokio::net::TcpStream::connect(host_port.clone())
+                .await
+                .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         if Self::get_protocol(&config) == HTTPS_LOWERCASE {
             let roots: RootCertStore = {
                 match self.tmp.clone().read() {
@@ -1286,10 +1289,10 @@ impl HttpRequest {
             let connector: TlsConnector = TlsConnector::from(Arc::new(tls_config));
             let dns_name: ServerName<'_> = ServerName::try_from(host.clone())
                 .map_err(|error: InvalidDnsNameError| RequestError::Request(error.to_string()))?;
-            let tls_stream: TlsStream<AsyncTcpStream> = connector
+            let tls_stream: TlsStream<http_type::tokio::net::TcpStream> = connector
                 .connect(dns_name, tcp_stream)
                 .await
-                .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
             Ok(Box::new(tls_stream))
         } else {
             Ok(Box::new(tcp_stream))
@@ -1343,9 +1346,10 @@ impl HttpRequest {
         proxy_config: &ProxyConfig,
     ) -> Result<BoxAsyncReadWrite, RequestError> {
         let proxy_host_port: (String, u16) = (proxy_config.host.clone(), proxy_config.port);
-        let tcp_stream: AsyncTcpStream = AsyncTcpStream::connect(proxy_host_port)
-            .await
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+        let tcp_stream: http_type::tokio::net::TcpStream =
+            http_type::tokio::net::TcpStream::connect(proxy_host_port)
+                .await
+                .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         let mut proxy_stream: BoxAsyncReadWrite = if proxy_config.proxy_type == ProxyType::Https {
             let roots: RootCertStore = {
                 match self.tmp.clone().read() {
@@ -1361,10 +1365,10 @@ impl HttpRequest {
             let connector: TlsConnector = TlsConnector::from(Arc::new(tls_config));
             let dns_name: ServerName<'_> = ServerName::try_from(proxy_config.host.clone())
                 .map_err(|error: InvalidDnsNameError| RequestError::Request(error.to_string()))?;
-            let tls_stream: TlsStream<AsyncTcpStream> = connector
+            let tls_stream: TlsStream<http_type::tokio::net::TcpStream> = connector
                 .connect(dns_name, tcp_stream)
                 .await
-                .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
             Box::new(tls_stream)
         } else {
             Box::new(tcp_stream)
@@ -1385,16 +1389,16 @@ impl HttpRequest {
         proxy_stream
             .write_all(connect_request.as_bytes())
             .await
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         proxy_stream
             .flush()
             .await
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         let mut response_buffer: [u8; 1024] = [0u8; 1024];
         let bytes_read: usize = proxy_stream
             .read(&mut response_buffer)
             .await
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         let response_str: &str = std::str::from_utf8(&response_buffer[..bytes_read]).unwrap_or("");
         let headers_end_pos: Option<usize> = response_str.find("\r\n\r\n");
         let pre_read_data: Vec<u8> = if let Some(pos) = headers_end_pos {
@@ -1436,7 +1440,7 @@ impl HttpRequest {
             let tls_stream: TlsStream<ProxyTunnelStream> = connector
                 .connect(dns_name, tunnel_stream)
                 .await
-                .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
             return Ok(Box::new(tls_stream) as BoxAsyncReadWrite);
         }
         let tunnel_stream: ProxyTunnelStream = ProxyTunnelStream::new(proxy_stream, pre_read_data);
@@ -1461,9 +1465,10 @@ impl HttpRequest {
         proxy_config: &ProxyConfig,
     ) -> Result<BoxAsyncReadWrite, RequestError> {
         let proxy_host_port: (String, u16) = (proxy_config.host.clone(), proxy_config.port);
-        let mut tcp_stream: AsyncTcpStream = AsyncTcpStream::connect(proxy_host_port)
-            .await
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+        let mut tcp_stream: http_type::tokio::net::TcpStream =
+            http_type::tokio::net::TcpStream::connect(proxy_host_port)
+                .await
+                .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         let auth_methods: Vec<u8> =
             if proxy_config.username.is_some() && proxy_config.password.is_some() {
                 vec![0x05, 0x02, 0x00, 0x02]
@@ -1473,12 +1478,12 @@ impl HttpRequest {
         tcp_stream
             .write_all(&auth_methods)
             .await
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         let mut response: [u8; 2] = [0u8; 2];
         tcp_stream
             .read_exact(&mut response)
             .await
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
         if response[0] != 0x05 {
             return Err(RequestError::Request("Internal Server Error".to_string()));
         }
@@ -1494,16 +1499,14 @@ impl HttpRequest {
                     auth_request.push(password.len() as u8);
                     auth_request.extend_from_slice(password.as_bytes());
 
-                    tcp_stream
-                        .write_all(&auth_request)
-                        .await
-                        .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                    tcp_stream.write_all(&auth_request).await.map_err(
+                        |error: std::io::Error| RequestError::Request(error.to_string()),
+                    )?;
 
                     let mut auth_response = [0u8; 2];
-                    tcp_stream
-                        .read_exact(&mut auth_response)
-                        .await
-                        .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                    tcp_stream.read_exact(&mut auth_response).await.map_err(
+                        |error: std::io::Error| RequestError::Request(error.to_string()),
+                    )?;
 
                     if auth_response[1] != 0x00 {
                         return Err(RequestError::Request("Internal Server Error".to_string()));
@@ -1537,13 +1540,13 @@ impl HttpRequest {
         tcp_stream
             .write_all(&connect_request)
             .await
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
 
         let mut connect_response: [u8; 4] = [0u8; 4];
         tcp_stream
             .read_exact(&mut connect_response)
             .await
-            .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+            .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
 
         if connect_response[0] != 0x05 || connect_response[1] != 0x00 {
             return Err(RequestError::Request("Internal Server Error".to_string()));
@@ -1554,26 +1557,26 @@ impl HttpRequest {
                 tcp_stream
                     .read_exact(&mut skip)
                     .await
-                    .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                    .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
             }
             0x03 => {
                 let mut len: [u8; 1] = [0u8; 1];
                 tcp_stream
                     .read_exact(&mut len)
                     .await
-                    .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                    .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
                 let mut skip: Vec<u8> = vec![0u8; len[0] as usize + 2];
                 tcp_stream
                     .read_exact(&mut skip)
                     .await
-                    .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                    .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
             }
             0x04 => {
                 let mut skip: [u8; 18] = [0u8; 18];
                 tcp_stream
                     .read_exact(&mut skip)
                     .await
-                    .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                    .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
             }
             _ => {
                 return Err(RequestError::Request("Internal Server Error".to_string()));
@@ -1603,7 +1606,7 @@ impl HttpRequest {
             let tls_stream: TlsStream<ProxyTunnelStream> = connector
                 .connect(dns_name, tunnel_stream)
                 .await
-                .map_err(|error: IoError| RequestError::Request(error.to_string()))?;
+                .map_err(|error: std::io::Error| RequestError::Request(error.to_string()))?;
             return Ok(Box::new(tls_stream) as BoxAsyncReadWrite);
         }
         Ok(proxy_stream)

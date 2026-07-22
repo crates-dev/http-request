@@ -6,7 +6,7 @@ use super::*;
 /// providing a unified interface for WebSocket operations.
 #[derive(Debug)]
 pub enum WebSocketConnectionType {
-    Direct(WebSocketStream<MaybeTlsStream<AsyncTcpStream>>),
+    Direct(WebSocketStream<MaybeTlsStream<http_type::tokio::net::TcpStream>>),
     Proxy(WebSocketStream<WebSocketProxyTunnelStream>),
 }
 
@@ -42,7 +42,7 @@ impl Clone for WebSocket {
             header: self.header.clone(),
             config: self.config.clone(),
             connected: Arc::new(AtomicBool::new(false)),
-            connection: Arc::new(AsyncMutex::new(None)),
+            connection: Arc::new(http_type::tokio::sync::Mutex::new(None)),
         }
     }
 }
@@ -63,7 +63,7 @@ impl Default for WebSocket {
             header: Arc::new(hash_map_xx_hash3_64()),
             config: Arc::new(RwLock::new(WebSocketConfig::default())),
             connected: Arc::new(AtomicBool::new(false)),
-            connection: Arc::new(AsyncMutex::new(None)),
+            connection: Arc::new(http_type::tokio::sync::Mutex::new(None)),
         }
     }
 }

@@ -1,7 +1,5 @@
 use super::*;
 
-use crate::IoError;
-
 impl WebSocket {
     fn get_url(&self) -> String {
         self.url.as_ref().clone()
@@ -136,8 +134,10 @@ impl WebSocket {
                 })?;
             WebSocketConnectionType::Direct(ws_stream)
         };
-        let mut connection: AsyncMutexGuard<'_, Option<WebSocketConnectionType>> =
-            self.connection.lock().await;
+        let mut connection: http_type::tokio::sync::MutexGuard<
+            '_,
+            Option<WebSocketConnectionType>,
+        > = self.connection.lock().await;
         *connection = Some(ws_stream);
         self.connected.store(true, Ordering::Relaxed);
         Ok(())
@@ -147,13 +147,15 @@ impl WebSocket {
         if !self.connected.load(Ordering::Relaxed) {
             self.connect_async_internal().await?;
         }
-        let mut connection: AsyncMutexGuard<'_, Option<WebSocketConnectionType>> =
-            self.connection.lock().await;
+        let mut connection: http_type::tokio::sync::MutexGuard<
+            '_,
+            Option<WebSocketConnectionType>,
+        > = self.connection.lock().await;
         if let Some(ref mut ws_stream) = *connection {
             ws_stream
                 .send(message)
                 .await
-                .map_err(|error: TungsteniteError| WebSocketError::protocol(error.to_string()))?;
+                .map_err(|error: tungstenite::Error| WebSocketError::protocol(error.to_string()))?;
         } else {
             return Err(WebSocketError::connection("Not connected"));
         }
@@ -176,15 +178,17 @@ impl WebSocket {
                 .map(|config| config.timeout)
                 .unwrap_or(DEFAULT_HIGH_SECURITY_READ_TIMEOUT_MS),
         );
-        let mut connection: AsyncMutexGuard<'_, Option<WebSocketConnectionType>> =
-            self.connection.lock().await;
+        let mut connection: http_type::tokio::sync::MutexGuard<
+            '_,
+            Option<WebSocketConnectionType>,
+        > = self.connection.lock().await;
         if let Some(ref mut ws_stream) = *connection {
             let receive_future = ws_stream.next();
             if let Some(msg_result) = timeout(timeout_duration, receive_future)
                 .await
                 .map_err(|_| WebSocketError::timeout("Receive timeout"))?
             {
-                let message: Message = msg_result.map_err(|error: TungsteniteError| {
+                let message: Message = msg_result.map_err(|error: tungstenite::Error| {
                     WebSocketError::protocol(error.to_string())
                 })?;
                 return Ok(self.convert_message(message));
@@ -211,18 +215,20 @@ impl WebSocket {
     }
 
     async fn close_async_internal(&self) -> Result<(), WebSocketError> {
-        let mut connection: AsyncMutexGuard<'_, Option<WebSocketConnectionType>> =
-            self.connection.lock().await;
+        let mut connection: http_type::tokio::sync::MutexGuard<
+            '_,
+            Option<WebSocketConnectionType>,
+        > = self.connection.lock().await;
         if let Some(ref mut ws_stream) = *connection {
             ws_stream
                 .send(Message::Close(None))
                 .await
-                .map_err(|error: TungsteniteError| WebSocketError::protocol(error.to_string()))?;
+                .map_err(|error: tungstenite::Error| WebSocketError::protocol(error.to_string()))?;
             use futures::SinkExt;
             ws_stream
                 .close()
                 .await
-                .map_err(|error: TungsteniteError| WebSocketError::protocol(error.to_string()))?;
+                .map_err(|error: tungstenite::Error| WebSocketError::protocol(error.to_string()))?;
         }
         *connection = None;
         self.connected.store(false, Ordering::Relaxed);
@@ -260,9 +266,10 @@ impl WebSocket {
         proxy_config: &ProxyConfig,
     ) -> Result<BoxAsyncReadWrite, WebSocketError> {
         let proxy_host_port: (String, u16) = (proxy_config.host.clone(), proxy_config.port);
-        let tcp_stream: AsyncTcpStream = AsyncTcpStream::connect(proxy_host_port)
-            .await
-            .map_err(|err| WebSocketError::connection(err.to_string()))?;
+        let tcp_stream: http_type::tokio::net::TcpStream =
+            http_type::tokio::net::TcpStream::connect(proxy_host_port)
+                .await
+                .map_err(|err| WebSocketError::connection(err.to_string()))?;
         let mut proxy_stream: BoxAsyncReadWrite = if proxy_config.proxy_type == ProxyType::Https {
             let roots: RootCertStore = RootCertStore {
                 roots: TLS_SERVER_ROOTS.to_vec(),
@@ -273,7 +280,7 @@ impl WebSocket {
             let connector: TlsConnector = TlsConnector::from(Arc::new(tls_config));
             let dns_name: ServerName<'_> = ServerName::try_from(proxy_config.host.clone())
                 .map_err(|err| WebSocketError::tls(err.to_string()))?;
-            let tls_stream: TlsStream<AsyncTcpStream> = connector
+            let tls_stream: TlsStream<http_type::tokio::net::TcpStream> = connector
                 .connect(dns_name, tcp_stream)
                 .await
                 .map_err(|err| WebSocketError::tls(err.to_string()))?;
@@ -297,16 +304,16 @@ impl WebSocket {
         proxy_stream
             .write_all(connect_request.as_bytes())
             .await
-            .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
+            .map_err(|err: std::io::Error| WebSocketError::protocol(err.to_string()))?;
         proxy_stream
             .flush()
             .await
-            .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
+            .map_err(|err: std::io::Error| WebSocketError::protocol(err.to_string()))?;
         let mut response_buffer: [u8; 1024] = [0u8; 1024];
         let bytes_read: usize = proxy_stream
             .read(&mut response_buffer)
             .await
-            .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
+            .map_err(|err: std::io::Error| WebSocketError::protocol(err.to_string()))?;
         let response: Cow<'_, str> = String::from_utf8_lossy(&response_buffer[..bytes_read]);
         if !response.starts_with("HTTP/1.1 200") && !response.starts_with("HTTP/1.0 200") {
             return Err(WebSocketError::connection(format!(
@@ -324,9 +331,10 @@ impl WebSocket {
         proxy_config: &ProxyConfig,
     ) -> Result<BoxAsyncReadWrite, WebSocketError> {
         let proxy_host_port: (String, u16) = (proxy_config.host.clone(), proxy_config.port);
-        let mut tcp_stream: AsyncTcpStream = AsyncTcpStream::connect(proxy_host_port)
-            .await
-            .map_err(|err| WebSocketError::connection(err.to_string()))?;
+        let mut tcp_stream: http_type::tokio::net::TcpStream =
+            http_type::tokio::net::TcpStream::connect(proxy_host_port)
+                .await
+                .map_err(|err| WebSocketError::connection(err.to_string()))?;
         let auth_methods: Vec<u8> =
             if proxy_config.username.is_some() && proxy_config.password.is_some() {
                 vec![0x05, 0x02, 0x00, 0x02]
@@ -336,12 +344,12 @@ impl WebSocket {
         tcp_stream
             .write_all(&auth_methods)
             .await
-            .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
+            .map_err(|err: std::io::Error| WebSocketError::protocol(err.to_string()))?;
         let mut response: [u8; 2] = [0u8; 2];
         tcp_stream
             .read_exact(&mut response)
             .await
-            .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
+            .map_err(|err: std::io::Error| WebSocketError::protocol(err.to_string()))?;
         if response[0] != 0x05 {
             return Err(WebSocketError::protocol("Invalid SOCKS5 response"));
         }
@@ -360,13 +368,13 @@ impl WebSocket {
                     tcp_stream
                         .write_all(&auth_request)
                         .await
-                        .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
+                        .map_err(|err: std::io::Error| WebSocketError::protocol(err.to_string()))?;
 
                     let mut auth_response = [0u8; 2];
                     tcp_stream
                         .read_exact(&mut auth_response)
                         .await
-                        .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
+                        .map_err(|err: std::io::Error| WebSocketError::protocol(err.to_string()))?;
 
                     if auth_response[1] != 0x00 {
                         return Err(WebSocketError::protocol("SOCKS5 authentication failed"));
@@ -406,13 +414,13 @@ impl WebSocket {
         tcp_stream
             .write_all(&connect_request)
             .await
-            .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
+            .map_err(|err: std::io::Error| WebSocketError::protocol(err.to_string()))?;
 
         let mut connect_response: [u8; 4] = [0u8; 4];
         tcp_stream
             .read_exact(&mut connect_response)
             .await
-            .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
+            .map_err(|err: std::io::Error| WebSocketError::protocol(err.to_string()))?;
 
         if connect_response[0] != 0x05 || connect_response[1] != 0x00 {
             return Err(WebSocketError::protocol(format!(
@@ -426,26 +434,26 @@ impl WebSocket {
                 tcp_stream
                     .read_exact(&mut skip)
                     .await
-                    .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
+                    .map_err(|err: std::io::Error| WebSocketError::protocol(err.to_string()))?;
             }
             0x03 => {
                 let mut len: [u8; 1] = [0u8; 1];
                 tcp_stream
                     .read_exact(&mut len)
                     .await
-                    .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
+                    .map_err(|err: std::io::Error| WebSocketError::protocol(err.to_string()))?;
                 let mut skip: Vec<u8> = vec![0u8; len[0] as usize + 2];
                 tcp_stream
                     .read_exact(&mut skip)
                     .await
-                    .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
+                    .map_err(|err: std::io::Error| WebSocketError::protocol(err.to_string()))?;
             }
             0x04 => {
                 let mut skip: [u8; 18] = [0u8; 18];
                 tcp_stream
                     .read_exact(&mut skip)
                     .await
-                    .map_err(|err: IoError| WebSocketError::protocol(err.to_string()))?;
+                    .map_err(|err: std::io::Error| WebSocketError::protocol(err.to_string()))?;
             }
             _ => {
                 return Err(WebSocketError::protocol("Invalid SOCKS5 address type"));
